@@ -95,11 +95,7 @@
       <a class="btn btn-secondary" id="get-app" href="https://testflight.apple.com/join/STNazNrZ">Get the app</a>
     </div>
 
-    <p class="hint" id="hint" hidden>
-      Have the app already? Tap “Open in the app”, or type the code on the
-      Join screen. New here? Get the app first — the code will be waiting in
-      this message.
-    </p>
+    <p class="hint" id="hint" hidden></p>
 
     <p class="footer"><a href="https://bio.site/mahjong_alley">mahjong_alley</a></p>
   </main>
@@ -115,6 +111,9 @@
 
       document.getElementById('headline').textContent =
         kind === 'join' ? "You're invited to a table" : "You're invited to play";
+      if (kind === 'invite') {
+        document.getElementById('code-label').textContent = 'Friend code';
+      }
       document.getElementById('subline').textContent =
         kind === 'join'
           ? 'A friend saved you a seat on Mahjong Alley.'
@@ -122,7 +121,12 @@
 
       document.getElementById('code').textContent = code;
       document.getElementById('invite').hidden = false;
-      document.getElementById('hint').hidden = false;
+      var hint = document.getElementById('hint');
+      hint.textContent =
+        kind === 'join'
+          ? 'Have the app already? Tap \u201cOpen in the app\u201d, or type the code on the Join a table screen. New here? Get the app first \u2014 the code will be waiting in this message.'
+          : 'Have the app already? Tap \u201cOpen in the app\u201d and you\u2019ll be connected automatically. New here? Get the app first, then tap this link again \u2014 you\u2019ll be friends as soon as you\u2019re signed in.';
+      hint.hidden = false;
 
       var open = document.getElementById('open-app');
       open.href = 'mahjong://' + kind + '/' + code;
