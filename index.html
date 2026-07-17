@@ -38,17 +38,29 @@
       padding: 8px 0 24px;
     }
     .tile {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 84px;
-      height: 104px;
-      background: var(--card);
-      border-radius: 16px;
-      border: 1px solid rgba(26,26,46,0.12);
-      box-shadow: 0 6px 0 rgba(26,26,46,0.12);
-      font-size: 52px;
-      margin-bottom: 20px;
+      position: relative;
+      display: inline-block;
+      width: 150px;
+      height: 186px;
+      background: #F8F2E9;
+      border-radius: 18px;
+      box-shadow: 8px 10px 0 rgba(26,26,46,0.85);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .tile .disc {
+      position: absolute;
+      left: 50%; top: 54%;
+      width: 112px; height: 112px;
+      transform: translate(-50%, -50%);
+      background: #F7E3AE;
+      border-radius: 50%;
+    }
+    .tile img {
+      position: absolute;
+      left: 50%; top: 56%;
+      width: 118px;
+      transform: translate(-46%, -50%);
     }
     h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.3px; }
     .sub { color: var(--dim); font-size: 15px; line-height: 1.5; margin-top: 8px; }
@@ -89,7 +101,7 @@
 </head>
 <body>
   <main class="card">
-    <div class="tile" aria-hidden="true">🀄</div>
+    <div class="tile" aria-hidden="true"><div class="disc"></div><img src="/dragon-head.png" alt="" /></div>
     <h1 id="headline">Mahjong Alley</h1>
     <p class="sub" id="subline">American Mah Jongg with friends — on your phone.</p>
 
@@ -125,7 +137,7 @@
         kind === 'join' ? "You're invited to a table" : "You're invited to play";
       document.getElementById('subline').textContent =
         kind === 'join'
-          ? 'A friend saved you a seat for American Mah Jongg.'
+          ? 'A friend saved you a seat on Mahjong Alley.'
           : "Join a friend on Mahjong Alley — you'll be connected automatically.";
 
       document.getElementById('code').textContent = code;
