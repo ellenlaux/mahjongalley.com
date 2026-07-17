@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mahjong Alley</title>
+  <meta name="description" content="American Mah Jongg with friends — on your phone." />
+  <meta property="og:title" content="Mahjong Alley" />
+  <meta property="og:description" content="You're invited to play American Mah Jongg." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23536AFA%22/><text y=%2272%22 x=%2250%22 text-anchor=%22middle%22 font-size=%2260%22>🀄</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --cream: #F2E8D5;
+      --navy: #1A1A2E;
+      --cobalt: #536AFA;
+      --dim: #5A5F72;
+      --card: #FFFFFF;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--cream);
+      color: var(--navy);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      padding: 8px 0 24px;
+    }
+    .tile {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 84px;
+      height: 104px;
+      background: var(--card);
+      border-radius: 16px;
+      border: 1px solid rgba(26,26,46,0.12);
+      box-shadow: 0 6px 0 rgba(26,26,46,0.12);
+      font-size: 52px;
+      margin-bottom: 20px;
+    }
+    h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.3px; }
+    .sub { color: var(--dim); font-size: 15px; line-height: 1.5; margin-top: 8px; }
+    .code-label {
+      margin-top: 28px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+    .code {
+      font-size: 40px;
+      font-weight: 700;
+      letter-spacing: 8px;
+      margin-top: 6px;
+      padding-left: 8px; /* optically recenter the letterspaced text */
+      user-select: all;
+      -webkit-user-select: all;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      margin-top: 14px;
+    }
+    .btn-primary { background: var(--cobalt); color: #fff; }
+    .btn-secondary { background: rgba(83,106,250,0.18); color: var(--navy); }
+    .buttons { margin-top: 28px; }
+    .hint { color: var(--dim); font-size: 13px; line-height: 1.5; margin-top: 20px; }
+    .footer { margin-top: 36px; }
+    .footer a { color: var(--cobalt); font-size: 13px; font-weight: 600; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="tile" aria-hidden="true">🀄</div>
+    <h1 id="headline">Mahjong Alley</h1>
+    <p class="sub" id="subline">American Mah Jongg with friends — on your phone.</p>
+
+    <div id="invite" hidden>
+      <p class="code-label" id="code-label">Invite code</p>
+      <p class="code" id="code"></p>
+    </div>
+
+    <div class="buttons">
+      <a class="btn btn-primary" id="open-app" href="#" hidden>Open in the app</a>
+      <a class="btn btn-secondary" id="get-app" href="https://bio.site/mahjong_alley">Get the app</a>
+    </div>
+
+    <p class="hint" id="hint" hidden>
+      Have the app already? Tap “Open in the app”, or type the code on the
+      Join screen. New here? Get the app first — the code will be waiting in
+      this message.
+    </p>
+
+    <p class="footer"><a href="https://bio.site/mahjong_alley">mahjong_alley</a></p>
+  </main>
+
+  <script>
+    // /join/ABC123 (6-char table code) or /invite/ABCD2345 (8-char friend
+    // code). Served via GitHub Pages' 404 fallback, so parse the live path.
+    (function () {
+      var m = location.pathname.match(/^\/(join|invite)\/([A-Za-z0-9]{4,12})\/?$/);
+      if (!m) return;
+      var kind = m[1];
+      var code = m[2].toUpperCase();
+
+      document.getElementById('headline').textContent =
+        kind === 'join' ? "You're invited to a table" : "You're invited to play";
+      document.getElementById('subline').textContent =
+        kind === 'join'
+          ? 'A friend saved you a seat for American Mah Jongg.'
+          : "Join a friend on Mahjong Alley — you'll be connected automatically.";
+
+      document.getElementById('code').textContent = code;
+      document.getElementById('invite').hidden = false;
+      document.getElementById('hint').hidden = false;
+
+      var open = document.getElementById('open-app');
+      open.href = 'mahjong://' + kind + '/' + code;
+      open.hidden = false;
+    })();
+  </script>
+</body>
+</html>

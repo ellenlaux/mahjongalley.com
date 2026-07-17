@@ -1,0 +1,19 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["75U942X75Y.com.ellenlaux.mahjongalley"],
+        "appID": "75U942X75Y.com.ellenlaux.mahjongalley",
+        "paths": ["/join/*", "/invite/*"],
+        "components": [
+          { "/": "/join/*", "comment": "table invite codes" },
+          { "/": "/invite/*", "comment": "friend referral codes" }
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": ["75U942X75Y.com.ellenlaux.mahjongalley"]
+  }
+}
