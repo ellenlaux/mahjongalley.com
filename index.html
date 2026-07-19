@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Mahjong Alley</title>
-  <meta name="description" content="American Mah Jongg with friends — on your phone." />
+  <meta name="description" content="A serious game for serious players. Learn and play American Mahjong solo or with friends." />
   <meta property="og:title" content="Mahjong Alley" />
   <meta property="og:description" content="You're invited to play American Mah Jongg." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23536AFA%22/><text y=%2272%22 x=%2250%22 text-anchor=%22middle%22 font-size=%2260%22>🀄</text></svg>" />
@@ -44,6 +44,8 @@
     }
     h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.3px; }
     .sub { color: var(--dim); font-size: 15px; line-height: 1.5; margin-top: 8px; }
+    .sub .tagline { color: var(--navy); font-weight: 600; }
+    .sub .tagline s { text-decoration-thickness: 2px; }
     .code-label {
       margin-top: 28px;
       font-size: 12px;
@@ -77,13 +79,14 @@
     .hint { color: var(--dim); font-size: 13px; line-height: 1.5; margin-top: 20px; }
     .footer { margin-top: 36px; }
     .footer a { color: var(--cobalt); font-size: 13px; font-weight: 600; text-decoration: none; }
+    .footer-sep { color: var(--dim); font-size: 13px; margin: 0 6px; }
   </style>
 </head>
 <body>
   <main class="card">
     <img class="tile-img" src="/tile.png" alt="" aria-hidden="true" />
     <h1 id="headline">Mahjong Alley</h1>
-    <p class="sub" id="subline">American Mah Jongg with friends — on your phone.</p>
+    <p class="sub" id="subline"><span class="tagline">A <s>serious</s> game for serious players.</span><br />Learn and play American Mahjong solo or with friends.</p>
 
     <div id="invite" hidden>
       <p class="code-label" id="code-label">Invite code</p>
@@ -97,7 +100,13 @@
 
     <p class="hint" id="hint" hidden></p>
 
-    <p class="footer"><a href="https://bio.site/mahjong_alley">mahjong_alley</a></p>
+    <p class="footer">
+      <a href="/support/">Support</a>
+      <span class="footer-sep">·</span>
+      <a href="https://www.instagram.com/mahjongalley/">@mahjongalley</a>
+      <span class="footer-sep">·</span>
+      <a href="https://bio.site/mahjong_alley">mahjong_alley</a>
+    </p>
   </main>
 
   <script>
