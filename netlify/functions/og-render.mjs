@@ -98,7 +98,7 @@ function card({ title, subtitle }) {
           el(
             'div',
             { fontSize: 26, fontWeight: 600, color: DIM, marginTop: 44, display: 'flex', paddingRight: 12 },
-            'Mahjong Alley · American Mah Jongg, with friends.',
+            'Mahjong Alley · Come play American Mahjong, with friends',
           ),
         ],
       ),
