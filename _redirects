@@ -1,8 +1,11 @@
-# Invite links must answer 200, not 404 — iMessage/WhatsApp link-preview
-# crawlers refuse to render a card for a 404 response, which is why texted
-# table links showed no preview (Ellen 2026-07-22). These are REWRITES
-# (200), not redirects: the URL bar keeps /join/CODE, so the page's
-# pathname-parsing JS still reads the code. Every other unknown path still
-# falls through to 404.html with a real 404.
-/join/*    /404.html   200
-/invite/*  /404.html   200
+# Invite links route through the invite-preview function, which injects
+# PER-TABLE OG tags ("ElleBell's Table · 2/4 seated") into the static
+# invite page — and always answers 200 (crawlers refuse to card a 404).
+# These are REWRITES: the browser URL keeps /join/CODE, so the page's
+# pathname-parsing JS still reads the code. /og/* serves the per-table
+# card PNG (falls back to /assets/og-card.png for unknown codes).
+# Every other unknown path still falls through to 404.html with a 404.
+/join/*      /.netlify/functions/invite-preview?kind=join&code=:splat     200
+/invite/*    /.netlify/functions/invite-preview?kind=invite&code=:splat   200
+/og/join/*   /.netlify/functions/og-image?kind=join&code=:splat           200
+/og/invite/* /.netlify/functions/og-image?kind=invite&code=:splat         200
