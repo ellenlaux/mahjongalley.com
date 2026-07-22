@@ -1,0 +1,8 @@
+# Invite links must answer 200, not 404 — iMessage/WhatsApp link-preview
+# crawlers refuse to render a card for a 404 response, which is why texted
+# table links showed no preview (Ellen 2026-07-22). These are REWRITES
+# (200), not redirects: the URL bar keeps /join/CODE, so the page's
+# pathname-parsing JS still reads the code. Every other unknown path still
+# falls through to 404.html with a real 404.
+/join/*    /404.html   200
+/invite/*  /404.html   200
