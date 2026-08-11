@@ -8,8 +8,9 @@
  * from the function handler so scripts/test-og-local.mjs can render on a
  * dev machine without Netlify.
  *
- * Palette mirrors the site/app: cream #F2E8D5, ink-navy #1A1A2E,
- * dim #5A5F72, cobalt #536AFA.
+ * Palette: golden card bg #FBE5AC (Ellen 2026-08-10 — deliberately
+ * warmer than the site's cream #F2E8D5; keep scripts/gen-og-card.mjs in
+ * sync), ink-navy #1A1A2E, dim #5A5F72, cobalt #536AFA.
  */
 
 import satori from 'satori';
@@ -18,7 +19,7 @@ import { INTER_BOLD_B64, INTER_SEMIBOLD_B64, TILE_PNG_B64 } from './og-assets.mj
 
 const W = 1200;
 const H = 630;
-const CREAM = '#F2E8D5';
+const GOLD = '#FBE5AC';
 const NAVY = '#1A1A2E';
 const DIM = '#5A5F72';
 const COBALT = '#536AFA';
@@ -53,7 +54,7 @@ function card({ title, subtitle }) {
       display: 'flex',
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: CREAM,
+      backgroundColor: GOLD,
       padding: '60px 80px',
       fontFamily: 'Inter',
     },
