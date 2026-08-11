@@ -1,6 +1,8 @@
 /**
  * og-image — the per-table / per-invite preview card PNG
- * (/og/join/CODE.png, /og/invite/CODE.png via _redirects → ?kind=&code=).
+ * (/og/join/CODE.png, /og/invite/CODE.png — _redirects rewrites; kind +
+ * code are parsed from the preserved original pathname, see
+ * parsePreviewRequest).
  *
  * Data comes ONLY from the anon-callable Supabase peeks (0084) — never
  * from query text, so nobody can mint official-looking cards with
@@ -10,12 +12,11 @@
  */
 
 import { renderCardPng } from './og-render.mjs';
-import { fetchPeek, paceLabel } from './peeks.mjs';
+import { fetchPeek, paceLabel, parsePreviewRequest } from './peeks.mjs';
 
 export default async (req) => {
   const url = new URL(req.url);
-  const kind = url.searchParams.get('kind');
-  const code = (url.searchParams.get('code') ?? '').replace(/\.png$/i, '');
+  const { kind, code } = parsePreviewRequest(url);
 
   const fallback = () =>
     Response.redirect(new URL('/assets/og-card.png', url.origin), 302);

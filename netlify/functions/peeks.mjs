@@ -38,6 +38,26 @@ async function rpc(fn, args) {
   }
 }
 
+/**
+ * kind + code from the ORIGINAL request URL. Netlify DISCARDS query
+ * params written in a _redirects destination (only the client's own
+ * query string is forwarded), so `?kind=&code=` never reaches the
+ * function on a rewritten request — the preserved pathname is the
+ * reliable carrier: /join/CODE, /invite/CODE, /og/join/CODE.png,
+ * /og/invite/CODE.png. Query params remain as a fallback so direct
+ * function invocation (testing) still works.
+ */
+export function parsePreviewRequest(url) {
+  const m = url.pathname.match(
+    /^\/(?:og\/)?(join|invite)\/([A-Za-z0-9]{4,12})(?:\.png)?\/?$/,
+  );
+  if (m) return { kind: m[1], code: m[2] };
+  return {
+    kind: url.searchParams.get('kind'),
+    code: (url.searchParams.get('code') ?? '').replace(/\.png$/i, ''),
+  };
+}
+
 export function paceLabel(mode) {
   if (mode === 'async') return 'Async';
   if (mode === 'live_scheduled') return 'Scheduled';

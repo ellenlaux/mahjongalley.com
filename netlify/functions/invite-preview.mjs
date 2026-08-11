@@ -1,7 +1,8 @@
 /**
- * invite-preview — serves /join/CODE and /invite/CODE (via _redirects →
- * ?kind=&code=) with PER-TABLE Open Graph tags injected into the static
- * invite page (Ellen 2026-07-22: the iMessage card should read
+ * invite-preview — serves /join/CODE and /invite/CODE (a _redirects
+ * rewrite; kind + code are parsed from the preserved original pathname —
+ * see parsePreviewRequest) with PER-TABLE Open Graph tags injected into
+ * the static invite page (Ellen 2026-07-22: the iMessage card should read
  * "ElleBell's Table · 2/4 seated", not the generic brand card).
  *
  * The human experience is untouched: we fetch the deployed 404.html (the
@@ -14,7 +15,7 @@
  * content and land inside attribute values.
  */
 
-import { fetchPeek, paceLabel } from './peeks.mjs';
+import { fetchPeek, paceLabel, parsePreviewRequest } from './peeks.mjs';
 
 const esc = (s) =>
   String(s)
@@ -42,8 +43,7 @@ function metaSwap(html, { title, description, image }) {
 
 export default async (req) => {
   const url = new URL(req.url);
-  const kind = url.searchParams.get('kind');
-  const code = url.searchParams.get('code') ?? '';
+  const { kind, code } = parsePreviewRequest(url);
 
   // The static invite page is the base (and the graceful answer to
   // everything unexpected).
