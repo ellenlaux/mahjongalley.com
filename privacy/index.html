@@ -51,7 +51,7 @@
     }
     .card {
       width: 100%;
-      max-width: 560px;
+      max-width: 680px;
       padding: 8px 0 24px;
     }
     .top { text-align: center; }
@@ -62,21 +62,53 @@
     }
     h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.3px; }
     .updated { color: var(--dim); font-size: 13px; margin-top: 6px; }
-    .notice {
+    .intro {
       margin-top: 24px;
-      padding: 14px 16px;
+      padding: 16px 18px;
       border-radius: 12px;
       background: rgba(83,106,250,0.12);
       color: var(--navy);
       font-size: 14px;
-      line-height: 1.5;
+      line-height: 1.6;
       text-align: left;
     }
-    .notice a { color: var(--cobalt); text-decoration: none; font-weight: 600; }
-    h2 { font-size: 17px; font-weight: 700; margin-top: 32px; }
-    p.body { color: var(--dim); font-size: 15px; line-height: 1.6; margin-top: 10px; }
+    .intro p + p { margin-top: 10px; }
+    .intro a { color: var(--cobalt); text-decoration: none; font-weight: 600; }
+    h2 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-top: 34px;
+      scroll-margin-top: 24px;
+    }
+    h3 { font-size: 15px; font-weight: 600; margin-top: 20px; color: var(--navy); }
+    p.body { color: var(--dim); font-size: 15px; line-height: 1.65; margin-top: 10px; }
     p.body a { color: var(--cobalt); text-decoration: none; font-weight: 600; }
-    .footer { margin-top: 40px; text-align: center; }
+    ul.body {
+      color: var(--dim);
+      font-size: 15px;
+      line-height: 1.65;
+      margin-top: 10px;
+      padding-left: 22px;
+    }
+    ul.body li { margin-top: 8px; }
+    ul.body li strong { color: var(--navy); font-weight: 600; }
+    ul.body a { color: var(--cobalt); text-decoration: none; font-weight: 600; }
+    p.caps {
+      color: var(--dim);
+      font-size: 13.5px;
+      line-height: 1.6;
+      margin-top: 10px;
+      letter-spacing: 0.1px;
+    }
+    address.contact {
+      font-style: normal;
+      color: var(--dim);
+      font-size: 15px;
+      line-height: 1.65;
+      margin-top: 10px;
+    }
+    address.contact a { color: var(--cobalt); text-decoration: none; font-weight: 600; }
+    .footer { margin-top: 44px; text-align: center; }
     .footer a { color: var(--cobalt); font-size: 13px; font-weight: 600; text-decoration: none; }
     .footer-sep { color: var(--dim); font-size: 13px; margin: 0 6px; }
   </style>
@@ -86,45 +118,257 @@
     <div class="top">
       <img class="tile-img" src="/assets/tile.png" alt="" aria-hidden="true" />
       <h1>Privacy Policy</h1>
-      <p class="updated">Draft — last updated July 19, 2026</p>
+      <p class="updated">Mahjong Alley · Effective date: August 17, 2026</p>
     </div>
 
-    <div class="notice">
-      We're putting the finishing touches on our full privacy policy. This page is a
-      plain-English summary of how we approach your data in the meantime — the complete
-      policy will live here soon. Questions? Email
-      <a href="mailto:hey@mahjongalley.com">hey@mahjongalley.com</a>.
+    <div class="intro">
+      <p>Mahjong Alley is operated by Elevate Games, LLC (“Elevate Games,” “we,” “us,” or
+      “our”). This Privacy Policy explains what information we collect through the Mahjong
+      Alley mobile application (the “App”), how we use it, and the choices you have.</p>
+      <p>Mahjong Alley is offered in the United States and is intended only for adults aged
+      18 and older. By using the App you confirm that you are at least 18 years old and
+      located in the United States.</p>
+      <p>If you have questions about this Policy or your information, contact us at
+      <a href="mailto:hey@mahjongalley.com">hey@mahjongalley.com</a> or by mail at Elevate
+      Games, LLC, 4539 N 22nd St #6711, Phoenix, AZ 85016.</p>
     </div>
 
-    <h2>What we collect</h2>
-    <p class="body">When you create an account, we collect basic information like your
-    email address and display name so you can play with friends. Gameplay data (like
-    match results) is stored so your games work across devices.</p>
+    <h2>1. A quick summary</h2>
+    <p class="body">We built Mahjong Alley to be a place to play mahjong, not a data
+    business. In plain terms:</p>
+    <ul class="body">
+      <li>You can start playing immediately without creating an account or giving us your
+      name or email.</li>
+      <li>We do not sell or share your personal information, and we do not currently show
+      you advertising.</li>
+      <li>We do not use your gameplay to train artificial intelligence.</li>
+      <li>We use a small number of service providers to run the App, understand how it is
+      used, and diagnose crashes.</li>
+      <li>You can delete your account and associated data from within the App at any
+      time.</li>
+    </ul>
+    <p class="body">The sections below give the detail. This summary is for convenience and
+    does not replace the full Policy.</p>
 
-    <h2>How we use it</h2>
-    <p class="body">We use your information to run the game — playing with friends,
-    keeping score, and improving the app. We use privacy-focused analytics to understand
-    how the app is used so we can make it better.</p>
+    <h2>2. Information we collect</h2>
 
-    <h2>What we don't do</h2>
-    <p class="body">We don't sell your personal information, and we don't show
-    third-party ads.</p>
+    <h3>2.1 Information you provide</h3>
+    <ul class="body">
+      <li><strong>Your name (handle).</strong> A name you choose that other players can see
+      during multiplayer games and that friends can use to find and invite you. You choose
+      what this is; please do not use your full legal name if you would rather other players
+      not see it. You can change it in the App, though changes are limited to once every 30
+      days.</li>
+      <li><strong>Apple Sign-In information.</strong> If you choose to create a persistent
+      account, you sign in with Apple. Apple provides us with a unique account identifier.
+      Depending on your Apple settings, Apple may share a name; we do not receive your Apple
+      ID password or your Apple email unless you choose to share it, and we do not use a
+      shared email for marketing unless you separately opt in.</li>
+      <li><strong>Bug reports and support messages.</strong> If you submit a bug report in
+      the App or email us, we receive what you send, which may include a description of the
+      problem, your device and app version, and a record of the screens you visited before
+      reporting, to help us reproduce the issue.</li>
+      <li><strong>Marketing preference.</strong> Marketing emails are off by default. If you
+      turn on the updates option in the App’s settings, we record that you agreed to receive
+      occasional product updates by email, and when you agreed.</li>
+    </ul>
 
-    <h2>Your choices</h2>
-    <p class="body">You can request a copy of your data or ask us to delete your account
-    and its data at any time by emailing
+    <h3>2.2 Information created when you play</h3>
+    <ul class="body">
+      <li><strong>Account and profile data.</strong> When you first open the App, we
+      automatically create an anonymous account so you can play and so your settings and
+      progress are saved on our servers. This anonymous account is identified only by a
+      randomly generated identifier, not by your name or contact information. If you later
+      sign in with Apple, your anonymous account becomes a persistent account.</li>
+      <li><strong>Gameplay records.</strong> Records of games you play — including solo games
+      and multiplayer games — such as results, statistics, achievements, and progress.
+      Multiplayer games are shared records: a completed multiplayer game is part of the game
+      history of every player who was at the table.</li>
+      <li><strong>Multiplayer and social data.</strong> If you play multiplayer, we process
+      the information needed to run a table: who is seated, whose turn it is, the state of
+      the game, and reactions you send. If you add friends, we store your friend connections
+      and any block or report actions you take. Your accepted friends can also see your name,
+      avatar, and gameplay information — such as games played, points, your solo record, the
+      difficulty you play most, when you were last active, and where you rank among your
+      friends on a friends leaderboard. Players you have shared a table with can see your
+      name, that you have played together, and recent activity status. This information is
+      not public and is not shown to players you have never played with or friended.</li>
+      <li><strong>Reports you submit about other players.</strong> If you report another
+      player for an inappropriate name or for their conduct, we store the report so our team
+      can review it. A report includes your identifier as the reporter, the reported player’s
+      identifier and name, the reason category you select, and any short note you write
+      describing the problem. Reports are readable only by us, not by other users, and are
+      used to review and act on conduct in the App. If you are reported, the report is not
+      shown to you.</li>
+    </ul>
+
+    <h3>2.3 Information collected automatically</h3>
+    <ul class="body">
+      <li><strong>Analytics data.</strong> We use a third-party analytics provider to
+      understand how the App is used — for example, which screens are viewed, which features
+      are used, and how players move through the App. Analytics events describe actions and
+      outcomes; they do not include the contents of your messages, your friends list, or
+      invitation codes. For guests, analytics data is tied only to a random device
+      identifier. If you sign in, analytics data is linked to your account identifier.</li>
+      <li><strong>Approximate location.</strong> Our analytics provider derives an
+      approximate, city-level location from the IP address your device uses to connect. We do
+      not collect precise or GPS location, and the IP address itself is not stored on
+      analytics events.</li>
+      <li><strong>Device and diagnostic data.</strong> For analytics and crash reporting we
+      collect standard technical information such as device model, operating system version,
+      app version, language, and time zone. If the App encounters an error, our
+      crash-reporting provider records diagnostic information to help us fix it. These
+      diagnostic reports may include your account identifier so we can correlate an error to
+      an affected account; we remove other identifying details, such as identifiers embedded
+      in web addresses, before they are stored.</li>
+      <li><strong>Notifications.</strong> If you join a multiplayer table, we ask whether you
+      want to allow push notifications (for example, to tell you it is your turn). If you
+      allow them, we store a notification token so we can send them. You can turn
+      notifications off at any time in your device settings.</li>
+    </ul>
+
+    <h3>2.4 What we do not collect</h3>
+    <p class="body">We do not collect your precise location, your contacts or address book,
+    health or financial information, your browsing history in other apps, or advertising
+    identifiers (such as the IDFA). We do not track you across other companies’ apps or
+    websites.</p>
+
+    <h2>3. How we use information</h2>
+    <p class="body">We use the information above to:</p>
+    <ul class="body">
+      <li>operate the App and provide its features, including solo and multiplayer play;</li>
+      <li>create and maintain your account and save your settings, progress, and game
+      history;</li>
+      <li>run multiplayer tables and social features such as friends, invitations, blocking,
+      and reporting;</li>
+      <li>understand how the App is used so we can improve it;</li>
+      <li>diagnose crashes and fix problems;</li>
+      <li>send push notifications you have enabled;</li>
+      <li>respond to your bug reports and support requests;</li>
+      <li>send you product-update emails if — and only if — you have opted in;</li>
+      <li>maintain the safety and integrity of the App, including reviewing reports of
+      inappropriate names or conduct; and</li>
+      <li>comply with law and enforce our Terms of Service.</li>
+    </ul>
+    <p class="body">We do not use your gameplay or other personal information to train
+    artificial intelligence. The computer opponents in the App play using fixed logic, not
+    models trained on your play.</p>
+
+    <h2>4. How information is shared</h2>
+    <p class="body">We do not sell your personal information, and we do not share it for
+    cross-context behavioral advertising. We share information only as follows:</p>
+    <ul class="body">
+      <li><strong>Service providers.</strong> We use vendors to operate the App on our behalf
+      — including our hosting and database provider, our multiplayer game server host, our
+      analytics provider, our crash-reporting provider, the service that generates link
+      previews for invites, and Apple’s notification service. These providers process
+      information only to provide services to us, under contract terms that restrict their
+      use of the information. Push notification content — which can include another player’s
+      name and, for reports you submit to us, a preview of what you wrote — is delivered
+      through a notification relay service to reach the recipient’s device.</li>
+      <li><strong>Other players.</strong> Information you make visible in multiplayer — your
+      name, reactions you send, and the fact that you participated in a shared game — is
+      visible to other players you play with or invite. After a shared game ends, your name
+      remains part of the other players’ game records and score histories.</li>
+      <li><strong>Invite links.</strong> When you share an invite link to your table, anyone
+      with the link — including messaging apps and services that generate link previews — can
+      see the table name and the host’s name before joining. Share invite links only with
+      people you want at your table.</li>
+      <li><strong>Legal and safety.</strong> We may disclose information if required by law,
+      to respond to legal process, to protect the rights, safety, or property of Elevate
+      Games or others, or in connection with a merger, acquisition, or sale of assets (in
+      which case we will require the recipient to honor this Policy).</li>
+    </ul>
+
+    <h2>5. Advertising</h2>
+    <p class="body">The App is currently free and ad-free. We may introduce advertising in
+    the future to help keep the App free. If we do, we will update this Policy and provide
+    notice before any advertising-related data collection begins, and any such change will
+    apply only going forward — it will not be applied to information collected before the
+    change without an appropriate legal basis. We will describe at that time what advertising
+    involves and what choices you have.</p>
+
+    <h2>6. Retention</h2>
+    <p class="body">We keep your account and gameplay information for as long as your account
+    exists, so your progress and history remain available to you. Because multiplayer games
+    are shared records, a completed multiplayer game remains part of the other players’
+    history even after you delete your account. When you delete your account, your identity
+    is removed from those shared records — your account and profile are deleted, and you are
+    shown in the shared game only in de-identified form — but the record of the game itself
+    is not deleted from the other players’ history.</p>
+    <p class="body">We keep bug reports for as long as needed to diagnose and fix problems.
+    Bug reports, and reports submitted about players, may be retained after you delete your
+    account, because they are used to identify and repair errors and to maintain the safety
+    and integrity of the App.</p>
+    <p class="body">Analytics and diagnostic data are retained for limited periods set with
+    our providers and then deleted or aggregated.</p>
+
+    <h2>7. Your choices and rights</h2>
+    <p class="body">You have control over your information, primarily through the App
+    itself:</p>
+    <ul class="body">
+      <li><strong>Delete your account.</strong> You can permanently delete your account and
+      associated personal data at any time from within the App (Settings → Your profile →
+      Delete Account). Deletion is immediate and cannot be undone. See Section 6 for what
+      happens to shared multiplayer records and bug reports.</li>
+      <li><strong>Edit your information.</strong> You can change your name (handle) in the
+      App, subject to a limit on how often.</li>
+      <li><strong>Notifications.</strong> You can turn push notifications on or off in your
+      device settings.</li>
+      <li><strong>Marketing email.</strong> Marketing emails are off unless you turn them on
+      in the App’s settings. You can turn them off again at any time; if we ever send
+      marketing emails, every message will include a way to unsubscribe.</li>
+    </ul>
+    <p class="body">Depending on where you live, you may have additional rights under state
+    privacy laws, including the right to know what personal information we hold about you,
+    the right to delete it, the right to correct it, and the right not to be discriminated
+    against for exercising these rights. Because we do not sell or share personal information
+    or use it for targeted advertising, there is no “Do Not Sell or Share” process to opt out
+    of; if that ever changes, we will provide one.</p>
+    <p class="body">To exercise a right that is not covered by the in-App controls above,
+    email us at <a href="mailto:hey@mahjongalley.com">hey@mahjongalley.com</a>. We will verify
+    your request (typically by confirming control of your account) and respond within the
+    time required by law. You may use an authorized agent where the law allows.</p>
+
+    <h2>8. Security</h2>
+    <p class="body">We use reasonable administrative and technical measures to protect your
+    information, including access controls that limit production data access to the company’s
+    founders. No method of transmission or storage is completely secure, and we cannot
+    guarantee absolute security.</p>
+
+    <h2>9. Children</h2>
+    <p class="body">The App is intended only for adults aged 18 and older. We do not knowingly
+    collect personal information from anyone under 18. If we learn that we have collected
+    personal information from someone under 18, we will delete it. If you believe a minor has
+    provided us information, contact us at
     <a href="mailto:hey@mahjongalley.com">hey@mahjongalley.com</a>.</p>
 
-    <h2>Contact</h2>
-    <p class="body">For any privacy question, reach us at
-    <a href="mailto:hey@mahjongalley.com">hey@mahjongalley.com</a>.</p>
+    <h2>10. United States only</h2>
+    <p class="body">The App is offered only in the United States and is intended only for
+    users located in the United States. We do not direct the App to, or knowingly provide it
+    to, users outside the United States.</p>
+
+    <h2>11. Changes to this Policy</h2>
+    <p class="body">We may update this Policy from time to time. If we make material changes,
+    we will provide notice through the App before the changes take effect, and we will update
+    the effective date above. Changes apply going forward and will not be applied
+    retroactively to information already collected without an appropriate legal basis or your
+    consent where required.</p>
+
+    <h2>12. Contact</h2>
+    <address class="contact">
+      Elevate Games, LLC<br />
+      4539 N 22nd St #6711<br />
+      Phoenix, AZ 85016<br />
+      <a href="mailto:hey@mahjongalley.com">hey@mahjongalley.com</a>
+    </address>
 
     <p class="footer">
       <a href="/">mahjongalley.com</a>
       <span class="footer-sep">·</span>
       <a href="/support/">Support</a>
       <span class="footer-sep">·</span>
-      <a href="/terms/">Terms &amp; Conditions</a>
+      <a href="/terms/">Terms of Service</a>
     </p>
   </main>
 </body>
