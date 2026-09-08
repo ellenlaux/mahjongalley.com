@@ -3,6 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Smart App Banner. Safari on iOS draws a native strip above the page
+       that installs from the App Store, or opens the app if it is already
+       installed. The id matches APP_STORE_ID in the app repo
+       (src/config/appStore.ts); keep the two in sync if the listing moves. -->
+  <meta name="apple-itunes-app" content="app-id=6769199909" />
   <title>Mahjong Alley</title>
   <meta name="description" content="A serious game for serious players. Learn and play American Mahjong solo or with friends." />
   <meta property="og:title" content="Mahjong Alley" />
@@ -168,7 +173,7 @@
 
     <div class="buttons">
       <a class="btn btn-primary" id="open-app" href="#" hidden>Open in the app</a>
-      <a class="btn btn-secondary" id="get-app" href="https://testflight.apple.com/join/STNazNrZ">Get the app</a>
+      <a class="btn btn-secondary" id="get-app" href="https://apps.apple.com/app/id6769199909">Get the app</a>
     </div>
 
     <p class="hint" id="hint" hidden></p>
