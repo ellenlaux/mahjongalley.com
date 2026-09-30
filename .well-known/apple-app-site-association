@@ -5,10 +5,11 @@
       {
         "appIDs": ["75U942X75Y.com.ellenlaux.mahjongalley"],
         "appID": "75U942X75Y.com.ellenlaux.mahjongalley",
-        "paths": ["/join/*", "/invite/*"],
+        "paths": ["/join/*", "/invite/*", "/daily-deal/*"],
         "components": [
           { "/": "/join/*", "comment": "table invite codes" },
-          { "/": "/invite/*", "comment": "friend referral codes" }
+          { "/": "/invite/*", "comment": "friend referral codes" },
+          { "/": "/daily-deal/*", "comment": "a Daily Deal, by date" }
         ]
       }
     ]
