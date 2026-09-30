@@ -11,7 +11,14 @@
 # /og/* serves the per-table card PNG (falls back to /assets/og-card.png
 # for unknown codes). Every other unknown path still falls through to
 # 404.html with a 404.
+#
+# /daily-deal/DATE is a shared Daily Deal result. It needs no function:
+# the card a message app draws is the same for every date, so the page is
+# a static file and only its JS reads the date from the preserved path.
+# It answers 200 for ANY date on purpose — a crawler refuses to card a
+# 404, and the app, not this site, knows which deals exist.
 /join/*      /.netlify/functions/invite-preview   200
 /invite/*    /.netlify/functions/invite-preview   200
 /og/join/*   /.netlify/functions/og-image         200
 /og/invite/* /.netlify/functions/og-image         200
+/daily-deal/*  /daily-deal/index.html              200
