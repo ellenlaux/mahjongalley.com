@@ -179,11 +179,15 @@
     </div>
 
     <div class="buttons">
-      <a class="btn btn-primary" id="open-app" href="#" hidden>Open in the app</a>
-      <a class="btn btn-secondary" id="get-app" href="https://apps.apple.com/app/id6769199909">Get the app</a>
+      <!-- "Get the app" leads. Someone who HAS the app and scans or taps
+           the link never sees this page: the universal link opens the app
+           directly. So the person reading this is almost always the one
+           without it, and the big button should be theirs. -->
+      <a class="btn btn-primary" id="get-app" href="https://apps.apple.com/app/id6769199909">Get the app</a>
+      <a class="btn btn-secondary" id="open-app" href="#" hidden>Open in the app</a>
     </div>
 
-    <p class="hint" id="hint" hidden>Have the app already? Tap “Open in the app” to play this deal. New here? Get the app first, then tap this link again.</p>
+    <p class="hint" id="hint" hidden>New here? Get the app, then tap this link again. Have the app already? Tap “Open in the app” to play this deal.</p>
 
     <p class="footer">
       <a href="/support/">Support</a>
@@ -244,6 +248,23 @@
       // is analytics only.
       open.href = 'mahjong://daily-deal/' + date + '?via=share';
       open.hidden = false;
+
+      // A custom-scheme link with no app to answer it is a dead end: iOS
+      // Safari puts up "cannot open the page" and stops there. So the tap
+      // is handled here instead. Try the scheme; if this page is still
+      // the one on screen a moment later, the app did not take over, and
+      // the store is where this person needs to go. `document.hidden`
+      // (or the timer firing late, after a suspended tab wakes) means the
+      // app DID open, and the store must not replace it when they return.
+      open.addEventListener('click', function (e) {
+        e.preventDefault();
+        var started = Date.now();
+        location.href = open.href;
+        setTimeout(function () {
+          if (document.hidden || Date.now() - started > 2500) return;
+          location.href = document.getElementById('get-app').href;
+        }, 1200);
+      });
     })();
   </script>
 </body>
