@@ -173,8 +173,12 @@
     </div>
 
     <div class="buttons">
-      <a class="btn btn-primary" id="open-app" href="#" hidden>Open in the app</a>
-      <a class="btn btn-secondary" id="get-app" href="https://apps.apple.com/app/id6769199909">Get the app</a>
+      <!-- "Get the app" leads. Someone who HAS the app and scans or taps
+           the link never sees this page: the universal link opens the app
+           directly. So the person reading this is almost always the one
+           without it, and the big button should be theirs. -->
+      <a class="btn btn-primary" id="get-app" href="https://apps.apple.com/app/id6769199909">Get the app</a>
+      <a class="btn btn-secondary" id="open-app" href="#" hidden>Open in the app</a>
     </div>
 
     <p class="hint" id="hint" hidden></p>
@@ -216,13 +220,30 @@
       var hint = document.getElementById('hint');
       hint.textContent =
         kind === 'join'
-          ? 'Have the app already? Tap “Open in the app”, or type the code on the Join a table screen. New here? Get the app first — the code will be waiting in this message.'
-          : 'Have the app already? Tap “Open in the app” and you’ll be connected automatically. New here? Get the app first, then tap this link again — you’ll be friends as soon as you’re signed in.';
+          ? 'New here? Get the app first — the code will be waiting in this message. Have the app already? Tap “Open in the app”, or type the code on the Join a table screen.'
+          : 'New here? Get the app, then tap this link again — you’ll be friends as soon as you’re signed in. Have the app already? Tap “Open in the app” and you’ll be connected automatically.';
       hint.hidden = false;
 
       var open = document.getElementById('open-app');
       open.href = 'mahjong://' + kind + '/' + code;
       open.hidden = false;
+
+      // A custom-scheme link with no app to answer it is a dead end: iOS
+      // Safari puts up "cannot open the page" and stops there. So the tap
+      // is handled here instead. Try the scheme; if this page is still
+      // the one on screen a moment later, the app did not take over, and
+      // the store is where this person needs to go. `document.hidden`
+      // (or the timer firing late, after a suspended tab wakes) means the
+      // app DID open, and the store must not replace it when they return.
+      open.addEventListener('click', function (e) {
+        e.preventDefault();
+        var started = Date.now();
+        location.href = open.href;
+        setTimeout(function () {
+          if (document.hidden || Date.now() - started > 2500) return;
+          location.href = document.getElementById('get-app').href;
+        }, 1200);
+      });
     })();
   </script>
 </body>
