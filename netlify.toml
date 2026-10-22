@@ -1,6 +1,8 @@
-# Static site + two functions:
+# Static site + four functions:
 #   invite-preview — serves /join/* and /invite/* with per-table OG tags
 #   og-image       — renders the per-table 1200x630 preview card PNG
+#   receipt-preview — serves /receipt/* (a shared game, as a receipt) with its OG tags
+#   og-receipt      — renders the receipt's 1200x630 card PNG
 # Routing to the functions lives in _redirects (rewrites take precedence
 # over function URLs, so the pretty paths map there explicitly).
 
@@ -14,4 +16,7 @@
 [functions.og-image]
   # Native napi module — keep out of the esbuild bundle; Netlify packages
   # it (and its platform binary) from node_modules instead.
+  external_node_modules = ["@resvg/resvg-js"]
+
+[functions.og-receipt]
   external_node_modules = ["@resvg/resvg-js"]

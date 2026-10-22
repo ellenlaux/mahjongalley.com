@@ -22,3 +22,11 @@
 /og/join/*   /.netlify/functions/og-image         200
 /og/invite/* /.netlify/functions/og-image         200
 /daily-deal/*  /daily-deal/index.html              200
+#
+# /receipt/<moment>?… is a shared GAME — a win, a loss, a wall game — as a
+# printed receipt. receipt-preview injects its OG tags (and og:video, the
+# moment's clip, when one exists) into the static receipt page; the query
+# string is the client's own, so it survives the rewrite.
+# /og/receipt/<moment>.png?… renders the card for that same query.
+/receipt/*     /.netlify/functions/receipt-preview  200
+/og/receipt/*  /.netlify/functions/og-receipt       200
