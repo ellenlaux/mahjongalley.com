@@ -22,3 +22,10 @@
 /og/join/*   /.netlify/functions/og-image         200
 /og/invite/* /.netlify/functions/og-image         200
 /daily-deal/*  /daily-deal/index.html              200
+#
+# /win/<beat>?… is a shared SOLO WIN. win-preview injects the win's OG
+# tags (and og:video — the moment's clip) into the static win page; the
+# query string is the client's own, so it survives the rewrite.
+# /og/win/<beat>.png?… renders the card for that same query.
+/win/*       /.netlify/functions/win-preview      200
+/og/win/*    /.netlify/functions/og-win           200
