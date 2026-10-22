@@ -175,11 +175,12 @@
        the button is the printer. */
     .win { width: 100%; max-width: 420px; text-align: center; padding: 8px 0 24px; }
     .win .logo { width: 150px; margin: 0 auto 2px; }
-    .moment { display: block; width: 230px; height: 230px; margin: 0 auto; }
+    /* The moment is the slip's header art — the shop logo on a receipt. */
+    .moment { display: block; width: 170px; height: 170px; margin: -14px auto -6px; }
     /* The feed: the slip is laid out at its final size, then slid down out
        of sight (behind the button) and fed back up in printer steps. The
        wrap clips at the button's top edge so it emerges from the pill. */
-    .feed { width: 320px; margin: 0 auto; padding: 10px 10px 0; overflow: hidden; }
+    .feed { width: 320px; margin: 0 auto; padding: 16px 10px 0; overflow: hidden; }
     .receipt {
       background: #fff; color: var(--navy);
       font-family: 'Courier Prime', 'Courier New', monospace;
@@ -247,12 +248,12 @@
         <path d="M44.0559 53.28L44.2959 52.608C47.6079 52.176 49.5279 49.584 51.3519 44.736L64.4079 10.032L64.3599 9.98401L46.6959 33.984C42.5679 49.776 31.2879 65.28 16.9839 65.28C-6.72813 65.28 -4.18413 30.96 15.7839 30.96C20.6799 30.96 25.3839 33.984 25.3839 36.864C25.3839 37.584 24.9999 38.16 24.3279 38.16C21.7359 38.16 23.4159 32.304 16.9359 32.304C8.53587 32.304 3.11187 41.28 3.11187 49.632C3.11187 57.12 6.99987 64.08 16.6479 64.08C33.8799 64.08 43.4799 39.312 44.2479 22.32C44.4879 16.8 43.8159 11.904 42.1839 8.92801C39.6879 15.36 38.5839 18.96 36.0399 25.44C30.3279 39.792 26.2479 54.24 13.5759 54.24C9.73587 54.24 7.81587 51.936 7.81587 50.112C7.81587 49.344 8.34387 48.864 8.91987 48.864C10.9359 48.864 10.1199 53.04 12.7119 53.04C23.5599 53.04 36.5199 19.056 41.4159 7.82401C40.2159 6.28801 38.5839 5.47201 36.5679 5.47201C27.9279 5.47201 22.2639 18 22.2639 24C22.2639 27.888 23.3199 30.432 25.5759 30.432C26.5839 30.432 26.9199 29.28 26.9199 28.608C26.9199 28.176 27.0639 27.552 27.7839 27.552C28.5519 27.552 28.6479 28.368 28.6479 28.608C28.6479 30 27.4959 31.536 25.5759 31.536C21.7839 31.536 18.9039 27.696 18.9039 22.608C18.9039 14.064 26.8719 4.32001 37.0479 4.32001C45.3519 4.32001 47.9919 13.728 47.9919 21.696C47.9919 25.008 47.6559 28.32 47.0319 31.632L66.1359 5.28001H73.7679L73.5279 5.95201C70.5999 6.24001 69.5439 8.06401 66.5199 15.984L55.4799 44.784C53.8479 49.056 53.8479 52.224 57.3999 52.608L57.1599 53.28H44.0559Z" fill="currentColor"/>
       </svg>
     </h1>
-    <!-- The moment, keyed transparent (animated WebP with alpha). Then the
-         slip, which feeds UP out of the button below it. win-preview points
-         the moment at the beat and fills the slip. -->
-    <img class="moment" id="moment" src="/assets/win/pouch-fill.webp" alt="" aria-hidden="true" />
+    <!-- The slip, which feeds UP out of the button below it. Its header art
+         is the moment, keyed transparent (animated WebP with alpha).
+         win-preview points the moment at the beat and fills the slip. -->
     <div class="feed">
       <div class="receipt" id="receipt" aria-label="Your win, as a receipt">
+        <img class="moment" id="moment" src="/assets/win/pouch-fill.webp" alt="" aria-hidden="true" />
         <div class="c shop">MAHJONG ALLEY</div>
         <div class="c kind">AMERICAN MAHJONG</div>
         <hr />
@@ -271,8 +272,10 @@
 
     <!-- One button, and it is the printer. It tries the app first; if
          nothing answers, the App Store. With a code on the link the app
-         opens into the friend ceremony, and the button names the friend. -->
-    <a class="play" id="play" href="https://apps.apple.com/app/id6769199909">Play</a>
+         opens into the friend ceremony, and the button names the friend.
+         Never "Play" (Ellen 2026-10-22: next to an animation it reads as
+         a media control). -->
+    <a class="play" id="play" href="https://apps.apple.com/app/id6769199909">Get Mahjong Alley</a>
 
     <p class="footer">
       <a href="/support/">Support</a>
@@ -343,6 +346,7 @@
         if (pts) document.getElementById('total').textContent = pts;
 
         if (win.name) play.textContent = 'Play with ' + win.name;
+        // (no name: the default "Get Mahjong Alley" stays)
         // A referral code on the link: open the app INTO the friend
         // ceremony (the same route a texted invite link takes).
         if (win.code) scheme = 'mahjong://invite/' + win.code;
