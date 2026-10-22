@@ -57,7 +57,7 @@ export function receiptLines(win, name) {
   return lines;
 }
 
-function slip(lines) {
+function slip(lines, art) {
   const rows = lines.map((line) => {
     if (line === '---') {
       return el('div', { display: 'flex', borderBottom: `2px dashed ${INK}`, opacity: 0.35, marginTop: 10, marginBottom: 10 });
@@ -95,22 +95,28 @@ function slip(lines) {
   }
   rows.push(el('div', { display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: 14 }, bars));
   rows.push(el('div', { display: 'flex', justifyContent: 'center', fontSize: 18, marginTop: 8, opacity: 0.7 }, 'mahjongalley.com'));
+  // The header art: the moment, the way a shop logo tops a receipt.
+  rows.unshift(
+    el('div', { display: 'flex', justifyContent: 'center', marginTop: -16, marginBottom: -8 }, [
+      { type: 'img', props: { src: art, width: 250, height: 250 } },
+    ]),
+  );
   return el(
     'div',
-    { display: 'flex', flexDirection: 'column', width: 460, backgroundColor: PAPER, color: INK, padding: '26px 28px 22px', fontFamily: 'Courier Prime', boxShadow: '0 12px 30px rgba(26,26,46,0.18)', transform: 'rotate(-2deg)' },
+    { display: 'flex', flexDirection: 'column', width: 520, backgroundColor: PAPER, color: INK, padding: '26px 30px 22px', fontFamily: 'Courier Prime', boxShadow: '0 12px 30px rgba(26,26,46,0.18)', transform: 'rotate(-1.5deg)' },
     rows,
   );
 }
 
 function card(win, name) {
   const art = `data:image/png;base64,${WIN_ART_B64[win.beat]}`;
+  // The slip stands in the middle of the card and runs off its bottom
+  // edge — still printing. What fits: the dragon, the shop, the date and
+  // player, MAHJONG!, the first items.
   return el(
     'div',
-    { width: W, height: H, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: CREAM, padding: '30px 60px', overflow: 'hidden' },
-    [
-      { type: 'img', props: { src: art, width: 520, height: 520, style: { flexShrink: 0, marginRight: 24 } } },
-      slip(receiptLines(win, name)),
-    ],
+    { width: W, height: H, display: 'flex', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'center', backgroundColor: CREAM, paddingTop: 34, overflow: 'hidden' },
+    [slip(receiptLines(win, name), art)],
   );
 }
 
