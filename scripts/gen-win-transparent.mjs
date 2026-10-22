@@ -15,7 +15,7 @@ const KEY = 'crop=720:720:180:560,scale=480:480,colorkey=0xFFFFFF:0.10:0.08';
 // clip, and a length that is a whole number of the beat's cycles so the
 // seam is quiet. Beats not listed loop the whole clip.
 const LOOP = {
-  'heart-eyes': { start: 2.4, dur: 3.2 }, // four hearts, 400 ms apart, 1.6 s a lap — two laps
+  'heart-eyes': { start: 2.6, dur: 1.6 }, // four hearts, 400 ms apart, 1.6 s a lap — one lap, inside the 4.9 s clip
 };
 for (const beat of BEATS) {
   const src = `assets/win/${beat}.mp4`;
