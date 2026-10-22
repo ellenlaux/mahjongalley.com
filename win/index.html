@@ -174,7 +174,9 @@
        askew, and itemizes the win). One voice on the slip (Courier Prime);
        the button is the printer. */
     .win { width: 100%; max-width: 420px; text-align: center; padding: 8px 0 24px; }
-    .win .logo { width: 150px; margin: 0 auto 2px; }
+    /* The wordmark prints on the slip, under the moment — the shop's logo
+       on a receipt (Ellen 2026-10-22). */
+    .receipt .logo { display: block; width: 190px; height: auto; margin: 0 auto 6px; color: var(--navy); }
     /* The moment is the slip's header art — the shop logo on a receipt. */
     .moment { display: block; width: 170px; height: 170px; margin: -14px auto -6px; }
     /* The feed: the slip is laid out at its final size, then slid down out
@@ -194,8 +196,6 @@
     @keyframes print { to { transform: translateY(0) rotate(-1.5deg); } }
     @media (prefers-reduced-motion: reduce) { .receipt { animation: none; transform: rotate(-1.5deg); } }
     .receipt .c { text-align: center; }
-    .receipt .shop { font-weight: 700; font-size: 16px; letter-spacing: 3px; }
-    .receipt .kind { font-size: 11px; letter-spacing: 1px; opacity: 0.7; }
     .receipt .big { font-size: 24px; font-weight: 700; line-height: 1.2; margin: 6px 0 4px; letter-spacing: 1px; }
     .receipt .b { font-weight: 700; }
     .receipt .row { display: flex; justify-content: space-between; gap: 10px; }
@@ -220,20 +220,47 @@
       filter: drop-shadow(0 2px 0 #fff);
     }
     .receipt .tear { background-color: var(--cream); }
-    /* The printer: a dark pill, the one button on the page. */
-    .play {
-      display: block; width: 300px; margin: -4px auto 0; padding: 17px; border-radius: 999px;
-      font-size: 17px; font-weight: 700; text-decoration: none;
-      background: var(--navy); color: #fff; position: relative; z-index: 2;
-      box-shadow: 0 10px 24px rgba(26,26,46,0.22);
+    /* The link to the app is a line ON the slip, where a receipt would
+       print its web address — not a button (Ellen 2026-10-22). */
+    .receipt .go {
+      display: block; margin: 12px 0 4px; padding: 10px 8px;
+      border: 2px solid var(--navy); border-radius: 4px;
+      color: var(--navy); font-weight: 700; font-size: 15px; letter-spacing: 1px;
+      text-align: center; text-decoration: none;
+    }
+    .receipt .go:active { background: var(--navy); color: #fff; }
+    /* The machine the slip comes out of: a receipt printer, seen from the
+       front — a lip with the paper slot, a body, a ready light. */
+    .machine { width: 340px; margin: -8px auto 0; position: relative; z-index: 2; }
+    .machine .lip {
+      height: 30px; border-radius: 16px 16px 6px 6px; background: #30304A; position: relative;
+      box-shadow: 0 -2px 0 rgba(255,255,255,0.08) inset;
+    }
+    .machine .slot {
+      position: absolute; left: 22px; right: 22px; top: 9px; height: 7px;
+      border-radius: 4px; background: #0B0B14;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.10);
+    }
+    .machine .body {
+      height: 64px; border-radius: 0 0 26px 26px; background: var(--navy); position: relative;
+      box-shadow: 0 14px 28px rgba(26,26,46,0.24);
+    }
+    .machine .light {
+      position: absolute; right: 30px; top: 26px; width: 10px; height: 10px; border-radius: 50%;
+      background: #5BE49B; box-shadow: 0 0 10px #5BE49B;
     }
     .footer { margin-top: 36px; }
   </style>
 </head>
 <body>
   <main class="win">
-    <h1 aria-label="Mahjong Alley">
-      <svg class="logo" viewBox="0 0 334 70" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+    <!-- The slip, which feeds UP out of the button below it. Its header art
+         is the moment, keyed transparent (animated WebP with alpha).
+         win-preview points the moment at the beat and fills the slip. -->
+    <div class="feed">
+      <div class="receipt" id="receipt" aria-label="Your win, as a receipt">
+        <img class="moment" id="moment" src="/assets/win/pouch-fill.webp" alt="" aria-hidden="true" />
+      <svg class="logo" viewBox="0 0 334 70" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mahjong Alley">
         <path d="M327.619 36C320.899 50.304 315.283 54.24 310.387 54.24C306.355 54.24 304.483 50.496 304.483 46.56C304.483 35.856 315.907 25.872 319.411 22.032C318.115 23.328 316.579 23.712 315.523 23.712C313.171 23.712 311.635 22.224 309.763 22.224C308.515 22.224 307.459 22.992 307.459 24.336C307.459 26.352 310.291 26.448 310.291 27.456C310.291 27.936 309.907 28.272 309.427 28.272C308.563 28.272 306.547 27.552 306.547 24.528C306.547 23.808 307.171 18.72 311.875 18.72C314.323 18.72 315.667 20.256 318.595 20.16C320.227 20.112 321.475 19.632 322.963 18.72L323.395 19.296C314.995 27.888 308.371 36.144 308.371 45.456C308.371 48.384 309.091 51.312 312.835 51.312C320.083 51.312 329.923 33.744 329.923 21.216C329.923 14.304 328.051 8.92802 321.955 8.92802C319.555 8.92802 318.547 10.464 317.395 10.464C316.723 10.464 316.291 9.98402 316.291 9.31202C316.291 8.16002 317.971 7.29602 320.563 7.29602C327.715 7.29602 333.091 13.824 333.091 24.384C333.091 39.744 319.843 69.36 301.939 69.36C298.867 69.36 294.883 68.592 294.883 66C294.883 65.04 295.651 64.224 296.563 64.224C299.059 64.224 300.691 67.872 304.387 67.872C314.419 67.872 322.339 49.296 327.619 36Z" fill="currentColor"/>
         <path d="M286.392 50.88C290.808 50.88 294.936 47.52 297.48 42.624H298.2C295.464 48.72 291.336 54.24 284.28 54.24C279.912 54.24 276.648 50.496 276.648 45.12C276.648 33.216 289.416 18.72 299.256 18.72C302.664 18.72 304.584 21.024 304.584 24.192C304.584 32.784 293.832 40.08 283.896 42.912C282.696 43.296 280.68 43.248 280.68 45.408C280.68 47.808 282.168 50.88 286.392 50.88ZM283.224 41.712C287.4 41.712 300.648 33.072 300.648 24.912C300.648 21.84 298.872 20.592 296.52 20.592C289.752 20.592 281.352 33.936 281.352 39.648C281.352 40.944 282.12 41.712 283.224 41.712Z" fill="currentColor"/>
         <path d="M266.961 46.896L270.753 36.864L282.081 6.38402C280.641 7.87202 278.481 9.79202 276.657 9.79202C275.697 9.79202 275.073 9.02402 275.073 7.96801C275.073 7.15202 275.457 6.38402 275.985 5.95201C276.417 6.33602 277.089 6.52802 277.857 6.52802C280.929 6.52802 286.209 3.26402 287.265 2.30402H287.745L270.657 48.144C270.033 49.872 269.697 51.6 271.713 51.6C273.537 51.6 275.649 48.72 276.705 46.8H277.425C276.225 49.104 273.585 54.24 269.841 54.24C267.441 54.24 265.185 51.552 266.961 46.896Z" fill="currentColor"/>
@@ -247,15 +274,6 @@
         <path d="M82.4761 29.184C82.9081 28.08 83.2921 26.928 83.7721 25.776H87.4201C84.6841 33.12 81.5641 41.472 79.3081 47.568C78.5881 49.488 78.3001 51.6 80.5081 51.6C82.1881 51.6 84.1081 48.72 85.1641 46.8H85.8841C84.6841 49.104 82.0441 54.24 78.3001 54.24C75.9001 54.24 74.2201 51.312 75.9481 46.656C77.1001 43.584 78.0121 41.088 78.8281 38.88C75.7081 45.168 70.5721 54.24 65.8681 54.24C62.6521 54.24 61.1641 50.448 61.1641 47.088C61.1641 35.424 73.1641 18.72 82.9561 18.72C86.8441 18.72 89.6281 19.872 91.3561 21.312L90.0121 24.768C86.3161 22.848 82.8121 21.888 78.7801 21.888C75.9001 21.888 74.0761 23.808 72.9721 25.488C69.2281 31.2 65.2441 41.472 65.2441 46.656C65.2441 49.296 66.3001 50.976 67.9801 50.976C71.5801 50.976 79.8841 36.096 82.4761 29.184Z" fill="currentColor"/>
         <path d="M44.0559 53.28L44.2959 52.608C47.6079 52.176 49.5279 49.584 51.3519 44.736L64.4079 10.032L64.3599 9.98401L46.6959 33.984C42.5679 49.776 31.2879 65.28 16.9839 65.28C-6.72813 65.28 -4.18413 30.96 15.7839 30.96C20.6799 30.96 25.3839 33.984 25.3839 36.864C25.3839 37.584 24.9999 38.16 24.3279 38.16C21.7359 38.16 23.4159 32.304 16.9359 32.304C8.53587 32.304 3.11187 41.28 3.11187 49.632C3.11187 57.12 6.99987 64.08 16.6479 64.08C33.8799 64.08 43.4799 39.312 44.2479 22.32C44.4879 16.8 43.8159 11.904 42.1839 8.92801C39.6879 15.36 38.5839 18.96 36.0399 25.44C30.3279 39.792 26.2479 54.24 13.5759 54.24C9.73587 54.24 7.81587 51.936 7.81587 50.112C7.81587 49.344 8.34387 48.864 8.91987 48.864C10.9359 48.864 10.1199 53.04 12.7119 53.04C23.5599 53.04 36.5199 19.056 41.4159 7.82401C40.2159 6.28801 38.5839 5.47201 36.5679 5.47201C27.9279 5.47201 22.2639 18 22.2639 24C22.2639 27.888 23.3199 30.432 25.5759 30.432C26.5839 30.432 26.9199 29.28 26.9199 28.608C26.9199 28.176 27.0639 27.552 27.7839 27.552C28.5519 27.552 28.6479 28.368 28.6479 28.608C28.6479 30 27.4959 31.536 25.5759 31.536C21.7839 31.536 18.9039 27.696 18.9039 22.608C18.9039 14.064 26.8719 4.32001 37.0479 4.32001C45.3519 4.32001 47.9919 13.728 47.9919 21.696C47.9919 25.008 47.6559 28.32 47.0319 31.632L66.1359 5.28001H73.7679L73.5279 5.95201C70.5999 6.24001 69.5439 8.06401 66.5199 15.984L55.4799 44.784C53.8479 49.056 53.8479 52.224 57.3999 52.608L57.1599 53.28H44.0559Z" fill="currentColor"/>
       </svg>
-    </h1>
-    <!-- The slip, which feeds UP out of the button below it. Its header art
-         is the moment, keyed transparent (animated WebP with alpha).
-         win-preview points the moment at the beat and fills the slip. -->
-    <div class="feed">
-      <div class="receipt" id="receipt" aria-label="Your win, as a receipt">
-        <img class="moment" id="moment" src="/assets/win/pouch-fill.webp" alt="" aria-hidden="true" />
-        <div class="c shop">MAHJONG ALLEY</div>
-        <div class="c kind">AMERICAN MAHJONG</div>
         <hr />
         <div id="meta"></div>
         <div class="c big">MAHJONG!</div>
@@ -264,18 +282,21 @@
         <div class="row b"><span>TOTAL</span><span id="total">—</span></div>
         <hr />
         <div class="c">THANK YOU · PLAY AGAIN SOON</div>
+        <!-- The one link, printed on the slip. It tries the app first; if
+             nothing answers, the App Store. With a code on the link the app
+             opens into the friend ceremony, and the line names the friend. -->
+        <a class="go" id="play" href="https://apps.apple.com/app/id6769199909">GET MAHJONG ALLEY ›</a>
         <div class="barcode" aria-hidden="true"></div>
         <div class="c site">mahjongalley.com</div>
         <div class="tear" aria-hidden="true"></div>
       </div>
     </div>
 
-    <!-- One button, and it is the printer. It tries the app first; if
-         nothing answers, the App Store. With a code on the link the app
-         opens into the friend ceremony, and the button names the friend.
-         Never "Play" (Ellen 2026-10-22: next to an animation it reads as
-         a media control). -->
-    <a class="play" id="play" href="https://apps.apple.com/app/id6769199909">Get Mahjong Alley</a>
+    <!-- The machine the slip printed out of. -->
+    <div class="machine" aria-hidden="true">
+      <div class="lip"><div class="slot"></div></div>
+      <div class="body"><div class="light"></div></div>
+    </div>
 
     <p class="footer">
       <a href="/support/">Support</a>
@@ -345,8 +366,8 @@
         }
         if (pts) document.getElementById('total').textContent = pts;
 
-        if (win.name) play.textContent = 'Play with ' + win.name;
-        // (no name: the default "Get Mahjong Alley" stays)
+        if (win.name) play.textContent = 'PLAY WITH ' + win.name.toUpperCase() + ' \u203a';
+        // (no name: the default "GET MAHJONG ALLEY ›" stays)
         // A referral code on the link: open the app INTO the friend
         // ceremony (the same route a texted invite link takes).
         if (win.code) scheme = 'mahjong://invite/' + win.code;

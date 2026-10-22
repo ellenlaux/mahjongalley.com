@@ -10,7 +10,7 @@
 
 import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
-import { COURIER_BOLD_B64, COURIER_REGULAR_B64, WIN_ART_B64 } from './og-win-assets.mjs';
+import { COURIER_BOLD_B64, COURIER_REGULAR_B64, WIN_ART_B64, WORDMARK_B64 } from './og-win-assets.mjs';
 import { fetchPeek } from './peeks.mjs';
 import { parseWin, receiptDate } from './win.mjs';
 
@@ -32,11 +32,8 @@ const el = (type, style, children) => ({ type, props: { style, ...(children !== 
  *  builds its own from the same data. */
 export function receiptLines(win, name) {
   const pts = win.points ? `${win.points} PTS` : null;
-  const lines = [
-    { c: 'MAHJONG ALLEY', bold: true, spaced: true },
-    { c: 'AMERICAN MAHJONG', small: true },
-    '---',
-  ];
+  // The header is art: the moment, then the wordmark (slip()).
+  const lines = ['---'];
   if (win.date) lines.push({ l: 'DATE', r: receiptDate(win.date) });
   if (name) lines.push({ l: 'PLAYER', r: name.toUpperCase() });
   if (win.date || name) lines.push('---');
@@ -95,10 +92,14 @@ function slip(lines, art) {
   }
   rows.push(el('div', { display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: 14 }, bars));
   rows.push(el('div', { display: 'flex', justifyContent: 'center', fontSize: 18, marginTop: 8, opacity: 0.7 }, 'mahjongalley.com'));
-  // The header art: the moment, the way a shop logo tops a receipt.
+  // The header art: the moment, then the wordmark — the way a shop's
+  // logo tops a receipt (Ellen 2026-10-22).
   rows.unshift(
-    el('div', { display: 'flex', justifyContent: 'center', marginTop: -16, marginBottom: -8 }, [
+    el('div', { display: 'flex', justifyContent: 'center', marginTop: -16, marginBottom: -10 }, [
       { type: 'img', props: { src: art, width: 250, height: 250 } },
+    ]),
+    el('div', { display: 'flex', justifyContent: 'center', marginBottom: 6 }, [
+      { type: 'img', props: { src: `data:image/png;base64,${WORDMARK_B64}`, width: 334, height: 70 } },
     ]),
   );
   return el(
