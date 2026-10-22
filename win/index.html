@@ -130,45 +130,22 @@
       background-color: var(--cream);
     }
 
-    /* The machine the slip comes out of: an old thermal receipt printer,
-       seen from the front — beige plastic with a seam, a dark slot under
-       a serrated tear bar, vents, a red FEED button, a ready light, a
-       model plate, rubber feet. */
-    .machine { width: 350px; margin: -10px auto 0; position: relative; z-index: 2; filter: drop-shadow(0 18px 18px rgba(26,26,46,0.22)); }
-    .machine .hood {
-      height: 46px; position: relative;
-      background: linear-gradient(#F3EBDA, #DCD0B8);
-      border: 2px solid #B6A689; border-bottom: 0; border-radius: 22px 22px 3px 3px;
-      box-shadow: inset 0 2px 0 rgba(255,255,255,0.7);
-    }
-    .machine .slot { position: absolute; left: 22px; right: 22px; top: 12px; height: 11px; border-radius: 3px; background: #26263A; box-shadow: inset 0 2px 3px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.5); }
-    .machine .teeth {
-      position: absolute; left: 22px; right: 22px; top: 24px; height: 7px;
-      background: linear-gradient(135deg, #9C8C6E 50%, transparent 50%) 0 0/8px 7px repeat-x,
-                  linear-gradient(-135deg, #9C8C6E 50%, transparent 50%) 0 0/8px 7px repeat-x;
-    }
-    .machine .body {
-      height: 96px; position: relative;
-      background: linear-gradient(#DDD1B9, #C7B99C);
-      border: 2px solid #B6A689; border-top: 0; border-radius: 0 0 18px 18px;
-    }
-    .machine .seam { position: absolute; left: 0; right: 0; top: 12px; height: 2px; background: rgba(90,75,50,0.28); box-shadow: 0 1px 0 rgba(255,255,255,0.45); }
-    .machine .vents { position: absolute; left: 26px; top: 32px; width: 96px; height: 40px; background: repeating-linear-gradient(90deg, rgba(70,58,38,0.42) 0 3px, transparent 3px 9px); border-radius: 2px; }
+    /* The machine the slip comes out of, edited down (Ellen 2026-10-22:
+       "something Dieter Rams would make"): one plate, the slot, the tear
+       bar. Nothing else. */
+    .machine { width: 350px; margin: -10px auto 0; position: relative; z-index: 2; }
     .machine .plate {
-      position: absolute; left: 50%; top: 36px; transform: translateX(-50%); padding: 0 10px; height: 24px;
-      background: #26263A; color: #EFE6D2; border-radius: 3px;
-      font-family: 'Courier Prime', monospace; font-size: 10px; line-height: 24px; letter-spacing: 2px; white-space: nowrap;
-      box-shadow: 0 1px 0 rgba(255,255,255,0.4);
+      height: 38px; position: relative;
+      background: #E9DFC9;
+      border-radius: 10px;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 10px 24px rgba(26,26,46,0.12);
     }
-    .machine .feed {
-      position: absolute; right: 30px; top: 26px; width: 42px; height: 42px; border-radius: 50%;
-      background: radial-gradient(circle at 38% 32%, #F47A7A, #B23A3A 70%);
-      box-shadow: inset 0 -4px 0 rgba(0,0,0,0.28), 0 3px 0 #7E2828, 0 5px 6px rgba(0,0,0,0.25);
+    .machine .slot { position: absolute; left: 14px; right: 14px; top: 9px; height: 11px; border-radius: 3px; background: #26263A; box-shadow: inset 0 2px 3px rgba(0,0,0,0.5); }
+    .machine .teeth {
+      position: absolute; left: 14px; right: 14px; top: 21px; height: 7px;
+      background: linear-gradient(135deg, #B9AA8C 50%, transparent 50%) 0 0/8px 7px repeat-x,
+                  linear-gradient(-135deg, #B9AA8C 50%, transparent 50%) 0 0/8px 7px repeat-x;
     }
-    .machine .feed-label { position: absolute; right: 26px; top: 74px; width: 50px; text-align: center; font-family: 'Courier Prime', monospace; font-size: 9px; letter-spacing: 2px; color: rgba(60,50,30,0.75); }
-    .machine .light { position: absolute; right: 86px; top: 38px; width: 9px; height: 9px; border-radius: 50%; background: #5BE49B; box-shadow: 0 0 8px #5BE49B, inset 0 1px 1px rgba(255,255,255,0.7); }
-    .machine .feet { display: flex; justify-content: space-between; padding: 0 28px; }
-    .machine .feet span { width: 36px; height: 9px; background: #4A4034; border-radius: 0 0 6px 6px; }
 
     .footer { margin-top: 36px; }
     .footer a { color: var(--cobalt); font-size: 13px; font-weight: 600; text-decoration: none; }
@@ -217,16 +194,7 @@
 
     <!-- The machine the slip printed out of. -->
     <div class="machine" aria-hidden="true">
-      <div class="hood"><div class="slot"></div><div class="teeth"></div></div>
-      <div class="body">
-        <div class="seam"></div>
-        <div class="vents"></div>
-        <div class="plate">MA-2026</div>
-        <div class="light"></div>
-        <div class="feed"></div>
-        <div class="feed-label">FEED</div>
-      </div>
-      <div class="feet"><span></span><span></span></div>
+      <div class="plate"><div class="slot"></div><div class="teeth"></div></div>
     </div>
 
     <p class="footer">
