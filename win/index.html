@@ -36,6 +36,8 @@
   <link rel="icon" type="image/png" sizes="180x180" href="/assets/favicon-180.png" />
   <link rel="apple-touch-icon" href="/assets/favicon-180.png" />
   <link rel="preload" href="/assets/fonts/TAYBarro.otf" as="font" type="font/otf" crossorigin />
+  <link rel="preload" href="/assets/fonts/CourierPrime-Regular.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/assets/fonts/CourierPrime-Bold.woff2" as="font" type="font/woff2" crossorigin />
   <style>
     @font-face {
       font-family: 'TAY Barro';
@@ -157,39 +159,72 @@
     .footer { margin-top: 36px; }
     .footer a { color: var(--cobalt); font-size: 13px; font-weight: 600; text-decoration: none; }
     .footer-sep { color: var(--dim); font-size: 13px; margin: 0 6px; }
-    /* The win page: one voice (Inter), one display word (TAY Barro), one
-       accent (the button). Ellen 2026-10-22. */
+    @font-face {
+      font-family: 'Courier Prime';
+      src: url('/assets/fonts/CourierPrime-Regular.woff2') format('woff2'), url('/assets/fonts/CourierPrime-Regular.woff') format('woff');
+      font-weight: 400; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Courier Prime';
+      src: url('/assets/fonts/CourierPrime-Bold.woff2') format('woff2'), url('/assets/fonts/CourierPrime-Bold.woff') format('woff');
+      font-weight: 700; font-style: normal; font-display: swap;
+    }
+    /* The win page prints a RECEIPT (Ellen 2026-10-22, after her riff:
+       the slip rises out of the button like a thermal printer, a little
+       askew, and itemizes the win). One voice on the slip (Courier Prime);
+       the button is the printer. */
     .win { width: 100%; max-width: 420px; text-align: center; padding: 8px 0 24px; }
-    .win .logo { width: 150px; margin: 0 auto 6px; }
-    .moment {
-      display: block;
-      width: 260px;
-      height: 260px;
-      margin: 0 auto;
+    .win .logo { width: 150px; margin: 0 auto 2px; }
+    .moment { display: block; width: 230px; height: 230px; margin: 0 auto; }
+    /* The feed: the slip is laid out at its final size, then slid down out
+       of sight (behind the button) and fed back up in printer steps. The
+       wrap clips at the button's top edge so it emerges from the pill. */
+    .feed { width: 320px; margin: 0 auto; padding: 10px 10px 0; overflow: hidden; }
+    .receipt {
+      background: #fff; color: var(--navy);
+      font-family: 'Courier Prime', 'Courier New', monospace;
+      font-size: 13px; line-height: 1.5; text-align: left;
+      padding: 18px 18px 6px;
+      box-shadow: 0 14px 28px rgba(26,26,46,0.16);
+      transform: translateY(110%) rotate(-1.5deg);
+      transform-origin: 50% 100%;
+      animation: print 2.4s steps(32, end) 1.0s forwards;
     }
-    .mahjong {
-      font-family: 'TAY Barro', 'Inter', -apple-system, sans-serif;
-      font-weight: normal;
-      font-size: 44px;
-      line-height: 1.1;
-      text-transform: uppercase;
-      margin-top: 4px;
+    @keyframes print { to { transform: translateY(0) rotate(-1.5deg); } }
+    @media (prefers-reduced-motion: reduce) { .receipt { animation: none; transform: rotate(-1.5deg); } }
+    .receipt .c { text-align: center; }
+    .receipt .shop { font-weight: 700; font-size: 16px; letter-spacing: 3px; }
+    .receipt .kind { font-size: 11px; letter-spacing: 1px; opacity: 0.7; }
+    .receipt .big { font-size: 24px; font-weight: 700; line-height: 1.2; margin: 6px 0 4px; letter-spacing: 1px; }
+    .receipt .b { font-weight: 700; }
+    .receipt .row { display: flex; justify-content: space-between; gap: 10px; }
+    .receipt .row span:last-child { flex-shrink: 0; }
+    .receipt .qty { display: inline-block; width: 2.2em; }
+    .receipt hr { border: 0; border-top: 1px dashed rgba(26,26,46,0.45); margin: 8px 0; }
+    .receipt .pattern { letter-spacing: 1px; padding-left: 2.2em; opacity: 0.85; }
+    .barcode {
+      height: 36px; margin: 12px 16px 4px;
+      background: repeating-linear-gradient(90deg,
+        var(--navy) 0 3px, transparent 3px 5px, var(--navy) 5px 7px, transparent 7px 11px,
+        var(--navy) 11px 16px, transparent 16px 18px, var(--navy) 18px 20px, transparent 20px 24px,
+        var(--navy) 24px 28px, transparent 28px 30px, var(--navy) 30px 32px, transparent 32px 37px);
     }
-    .stat { font-size: 20px; font-weight: 700; margin-top: 10px; }
-    .pattern { font-size: 22px; font-weight: 600; letter-spacing: 2px; margin-top: 6px; }
-    .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
-    .chip { background: rgba(26,26,46,0.08); color: var(--navy); font-size: 13px; font-weight: 600; border-radius: 999px; padding: 6px 12px; }
+    .receipt .site { font-size: 11px; letter-spacing: 1px; opacity: 0.7; }
+    /* The torn bottom edge, part of the slip so it rides the feed. */
+    .receipt .tear {
+      height: 10px; margin: 10px -18px -6px;
+      background: linear-gradient(135deg, #fff 50%, transparent 50%) 0 0/14px 10px repeat-x,
+                  linear-gradient(-135deg, #fff 50%, transparent 50%) 0 0/14px 10px repeat-x;
+      /* the slip's own white, cut into the cream below */
+      filter: drop-shadow(0 2px 0 #fff);
+    }
+    .receipt .tear { background-color: var(--cream); }
+    /* The printer: a dark pill, the one button on the page. */
     .play {
-      display: block;
-      width: 100%;
-      padding: 16px;
-      border-radius: 999px;
-      font-size: 17px;
-      font-weight: 700;
-      text-decoration: none;
-      background: var(--cobalt);
-      color: #fff;
-      margin-top: 28px;
+      display: block; width: 300px; margin: -4px auto 0; padding: 17px; border-radius: 999px;
+      font-size: 17px; font-weight: 700; text-decoration: none;
+      background: var(--navy); color: #fff; position: relative; z-index: 2;
+      box-shadow: 0 10px 24px rgba(26,26,46,0.22);
     }
     .footer { margin-top: 36px; }
   </style>
@@ -212,18 +247,31 @@
         <path d="M44.0559 53.28L44.2959 52.608C47.6079 52.176 49.5279 49.584 51.3519 44.736L64.4079 10.032L64.3599 9.98401L46.6959 33.984C42.5679 49.776 31.2879 65.28 16.9839 65.28C-6.72813 65.28 -4.18413 30.96 15.7839 30.96C20.6799 30.96 25.3839 33.984 25.3839 36.864C25.3839 37.584 24.9999 38.16 24.3279 38.16C21.7359 38.16 23.4159 32.304 16.9359 32.304C8.53587 32.304 3.11187 41.28 3.11187 49.632C3.11187 57.12 6.99987 64.08 16.6479 64.08C33.8799 64.08 43.4799 39.312 44.2479 22.32C44.4879 16.8 43.8159 11.904 42.1839 8.92801C39.6879 15.36 38.5839 18.96 36.0399 25.44C30.3279 39.792 26.2479 54.24 13.5759 54.24C9.73587 54.24 7.81587 51.936 7.81587 50.112C7.81587 49.344 8.34387 48.864 8.91987 48.864C10.9359 48.864 10.1199 53.04 12.7119 53.04C23.5599 53.04 36.5199 19.056 41.4159 7.82401C40.2159 6.28801 38.5839 5.47201 36.5679 5.47201C27.9279 5.47201 22.2639 18 22.2639 24C22.2639 27.888 23.3199 30.432 25.5759 30.432C26.5839 30.432 26.9199 29.28 26.9199 28.608C26.9199 28.176 27.0639 27.552 27.7839 27.552C28.5519 27.552 28.6479 28.368 28.6479 28.608C28.6479 30 27.4959 31.536 25.5759 31.536C21.7839 31.536 18.9039 27.696 18.9039 22.608C18.9039 14.064 26.8719 4.32001 37.0479 4.32001C45.3519 4.32001 47.9919 13.728 47.9919 21.696C47.9919 25.008 47.6559 28.32 47.0319 31.632L66.1359 5.28001H73.7679L73.5279 5.95201C70.5999 6.24001 69.5439 8.06401 66.5199 15.984L55.4799 44.784C53.8479 49.056 53.8479 52.224 57.3999 52.608L57.1599 53.28H44.0559Z" fill="currentColor"/>
       </svg>
     </h1>
-    <!-- The moment, keyed transparent so it sits on the page (an animated
-         WebP with alpha; the poster is its payoff frame). win-preview
-         points both at the beat. -->
+    <!-- The moment, keyed transparent (animated WebP with alpha). Then the
+         slip, which feeds UP out of the button below it. win-preview points
+         the moment at the beat and fills the slip. -->
     <img class="moment" id="moment" src="/assets/win/pouch-fill.webp" alt="" aria-hidden="true" />
-    <p class="mahjong" id="headline">Mahjong!</p>
-    <p class="stat" id="stat" hidden></p>
-    <p class="pattern" id="pattern" hidden></p>
-    <div class="chips" id="chips" hidden></div>
+    <div class="feed">
+      <div class="receipt" id="receipt" aria-label="Your win, as a receipt">
+        <div class="c shop">MAHJONG ALLEY</div>
+        <div class="c kind">AMERICAN MAHJONG</div>
+        <hr />
+        <div id="meta"></div>
+        <div class="c big">MAHJONG!</div>
+        <div id="items"></div>
+        <hr />
+        <div class="row b"><span>TOTAL</span><span id="total">—</span></div>
+        <hr />
+        <div class="c">THANK YOU · PLAY AGAIN SOON</div>
+        <div class="barcode" aria-hidden="true"></div>
+        <div class="c site">mahjongalley.com</div>
+        <div class="tear" aria-hidden="true"></div>
+      </div>
+    </div>
 
-    <!-- One button. It tries the app first; if nothing answers, the App
-         Store. With a code on the link the app opens into the friend
-         ceremony, and the button names the friend. -->
+    <!-- One button, and it is the printer. It tries the app first; if
+         nothing answers, the App Store. With a code on the link the app
+         opens into the friend ceremony, and the button names the friend. -->
     <a class="play" id="play" href="https://apps.apple.com/app/id6769199909">Play</a>
 
     <p class="footer">
@@ -242,38 +290,58 @@
        peek; nothing here is raw query text). -->
   <script id="win-data" type="application/json">null</script>
   <script>
-    // /win/<beat>?… — a shared solo win. The function above injects the
-    // validated win; with none (a bare /win, or a damaged link) the page
-    // stays the generic "Mahjong!".
+    // /win/<beat>?… — a shared solo win, printed as a receipt. The function
+    // above injects the validated win; with none (a bare /win, or a
+    // damaged link) the slip prints the generic "MAHJONG!".
     (function () {
       var win = null;
       try { win = JSON.parse(document.getElementById('win-data').textContent); } catch (e) {}
+
+      function row(parent, left, right, bold) {
+        var r = document.createElement('div');
+        r.className = 'row' + (bold ? ' b' : '');
+        var a = document.createElement('span'); a.textContent = left;
+        var b = document.createElement('span'); b.textContent = right;
+        r.appendChild(a); r.appendChild(b); parent.appendChild(r);
+      }
+      function rule(parent) { parent.appendChild(document.createElement('hr')); }
+      function item(parent, qty, name, price) {
+        var r = document.createElement('div');
+        r.className = 'row';
+        var a = document.createElement('span');
+        var q = document.createElement('span'); q.className = 'qty'; q.textContent = qty + '\u00d7';
+        a.appendChild(q); a.appendChild(document.createTextNode(name));
+        var b = document.createElement('span'); b.textContent = price;
+        r.appendChild(a); r.appendChild(b); parent.appendChild(r);
+      }
 
       var STORE = 'https://apps.apple.com/app/id6769199909';
       var scheme = 'mahjong://';
       var play = document.getElementById('play');
       if (win) {
         if (win.motion) document.getElementById('moment').src = win.motion;
-        if (win.stat) {
-          var stat = document.getElementById('stat');
-          stat.textContent = win.stat;
-          stat.hidden = false;
-        }
+        var meta = document.getElementById('meta');
+        if (win.receiptDate) row(meta, 'DATE', win.receiptDate);
+        if (win.name) row(meta, 'PLAYER', win.name.toUpperCase());
+        if (meta.childNodes.length) rule(meta);
+
+        var items = document.getElementById('items');
+        var pts = win.points ? win.points + ' PTS' : '';
+        // Line items, receipt-style: a quantity, the thing, the price.
+        if (win.handLine) item(items, 1, win.handLine.toUpperCase(), pts);
+        else if (pts) item(items, 1, 'HAND', pts);
         if (win.pattern) {
-          var pat = document.getElementById('pattern');
-          pat.textContent = win.pattern;
-          pat.hidden = false;
+          var p = document.createElement('div'); p.className = 'pattern'; p.textContent = win.pattern; items.appendChild(p);
         }
         if (win.chips && win.chips.length) {
-          var chips = document.getElementById('chips');
           win.chips.forEach(function (c) {
-            var el = document.createElement('span');
-            el.className = 'chip';
-            el.textContent = c;
-            chips.appendChild(el);
+            var streak = /^(\d+)-win streak$/i.exec(c);
+            if (streak) item(items, +streak[1], 'WIN STREAK', '');
+            else item(items, 1, c.toUpperCase().replace('!', ''), '');
           });
-          chips.hidden = false;
         }
+        if (pts) document.getElementById('total').textContent = pts;
+
         if (win.name) play.textContent = 'Play with ' + win.name;
         // A referral code on the link: open the app INTO the friend
         // ceremony (the same route a texted invite link takes).

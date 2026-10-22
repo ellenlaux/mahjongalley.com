@@ -79,7 +79,23 @@ export function parseWin(url) {
   const codeRaw = (q.get('i') ?? '').toUpperCase();
   const code = /^[A-Z2-9]{8}$/.test(codeRaw) ? codeRaw : null;
 
-  return { beat, handLine, points, pattern, chips, code };
+  // The day of the win, for the receipt. A real calendar date or nothing.
+  const dRaw = q.get('d') ?? '';
+  const dm = dRaw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  let date = null;
+  if (dm) {
+    const t = new Date(Date.UTC(+dm[1], +dm[2] - 1, +dm[3]));
+    if (t.getUTCFullYear() === +dm[1] && t.getUTCMonth() === +dm[2] - 1 && t.getUTCDate() === +dm[3]) date = dRaw;
+  }
+
+  return { beat, handLine, points, pattern, chips, code, date };
+}
+
+/** "10/22/26" — the receipt's date line. */
+export function receiptDate(date) {
+  if (!date) return null;
+  const [y, m, d] = date.split('-');
+  return `${m}/${d}/${y.slice(2)}`;
 }
 
 /** The words, from a parsed win + the (server-verified) sender name. */

@@ -5,7 +5,7 @@ import { renderWinCardPng } from '../netlify/functions/og-win.mjs';
 import { parseWin } from '../netlify/functions/win.mjs';
 
 const out = process.argv[2] ?? '/tmp';
-const named = parseWin(new URL('https://mahjongalley.com/win/heart-eyes?cat=2026&line=3&pts=30&pat=FFF+2026+222+6666&chips=self-pick,jokerless,streak-4&i=ABCD2345'));
+const named = parseWin(new URL('https://mahjongalley.com/win/heart-eyes?cat=2026&line=3&pts=30&pat=FFF+2026+222+6666&chips=self-pick,jokerless,streak-4&i=ABCD2345&d=2026-10-22'));
 writeFileSync(`${out}/og-win-named.png`, await renderWinCardPng(named, 'DayRay'));
 const guest = parseWin(new URL('https://mahjongalley.com/win/big-money?cat=consecutive-run&line=5&pts=75&pat=11+222+3333+44444&chips=50-points'));
 writeFileSync(`${out}/og-win-guest.png`, await renderWinCardPng(guest, null));

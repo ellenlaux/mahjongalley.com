@@ -12,7 +12,7 @@
  */
 
 import { fetchPeek } from './peeks.mjs';
-import { parseWin, winCopy, winMedia } from './win.mjs';
+import { parseWin, receiptDate, winCopy, winMedia } from './win.mjs';
 
 const esc = (s) =>
   String(s)
@@ -61,7 +61,7 @@ export default async (req) => {
   // The query lands inside an attribute value, so its & must be &amp;.
   const image = esc(`${url.origin}/og/win/${win.beat}.png${url.search}`);
 
-  const data = JSON.stringify({ ...win, name, who: copy.who, stat: copy.stat, motion: media.motion, art: media.art, video: media.video })
+  const data = JSON.stringify({ ...win, name, who: copy.who, stat: copy.stat, receiptDate: receiptDate(win.date), motion: media.motion, art: media.art, video: media.video })
     // A closing script tag inside a JSON string would end the data block early.
     .replace(/</g, '\\u003c');
   const html = metaSwap(baseHtml, { title: copy.title, description: copy.description, image, video: media.video }).replace(
