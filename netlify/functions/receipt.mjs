@@ -101,6 +101,11 @@ export function parseReceipt(url) {
     }
   }
 
+  // How the win was paid (wins only): no joker doubles the hand's value,
+  // a self-pick is paid double by everyone.
+  const jokerless = outcome === 'win' && q.get('jl') === '1';
+  const selfPick = outcome === 'win' && q.get('sp') === '1';
+
   const awayRaw = q.get('away') ?? '';
   const away = outcome !== 'win' && /^\d{1,2}$/.test(awayRaw) && Number(awayRaw) <= 14 ? Number(awayRaw) : null;
 
@@ -118,7 +123,20 @@ export function parseReceipt(url) {
     if (t.getUTCFullYear() === +dm[1] && t.getUTCMonth() === +dm[2] - 1 && t.getUTCDate() === +dm[3]) date = dRaw;
   }
 
-  return { moment, outcome, handLine, points, pattern, chips, away, winnerSeat, code, date };
+  return { moment, outcome, handLine, points, pattern, chips, jokerless, selfPick, away, winnerSeat, code, date };
+}
+
+/**
+ * The payout math on a win, in points, the way the app's
+ * src/lib/resultShare.ts receiptMath computes it (and engine/scoring
+ * pays it): card value, ×2 jokerless, per player ×2 on self-pick; a
+ * self-pick is paid by all three players, a called mahjong by the
+ * thrower at 2× and the two others at 1× — four shares.
+ */
+export function receiptMath(points, { jokerless, selfPick }) {
+  const perPlayer = points * (jokerless ? 2 : 1) * (selfPick ? 2 : 1);
+  const shares = selfPick ? 3 : 4;
+  return { perPlayer, shares, total: perPlayer * shares };
 }
 
 /** "10/22/26" — the receipt's date line. */
@@ -162,11 +180,26 @@ export function receiptLines(r, name) {
   if (r.date || name) lines.push('---');
   lines.push({ c: headline(r), big: true });
 
+  let total = pts;
   if (r.outcome === 'win') {
     if (r.handLine) lines.push({ q: 1, l: r.handLine.toUpperCase(), r: pts ?? '' });
     else if (pts) lines.push({ q: 1, l: 'HAND', r: pts });
     if (r.pattern) lines.push({ l: r.pattern, r: '', indent: true, dim: true });
+    // The math (Ellen 2026-10-22): how the total was reached, never who
+    // paid it. Multipliers, the per-player figure when one applied, then
+    // the shares that made the total.
+    if (r.points) {
+      const math = receiptMath(r.points, r);
+      if (r.jokerless) lines.push({ l: 'JOKERLESS', r: '×2', indent: true });
+      if (r.selfPick) lines.push({ l: 'SELF-PICK', r: '×2', indent: true });
+      if (math.perPlayer !== r.points) lines.push({ l: 'PER PLAYER', r: `${math.perPlayer} PTS`, indent: true });
+      if (r.selfPick) lines.push({ l: '3 PLAYERS PAY', r: '×3', indent: true });
+      else lines.push({ l: 'THROWER ×2 · 2 OTHERS ×1', r: '×4', indent: true });
+      total = `${math.total} PTS`;
+    }
     for (const chip of r.chips) {
+      // Jokerless and self-pick already printed as multipliers.
+      if ((r.jokerless && chip === 'Jokerless') || (r.selfPick && chip === 'Self-pick')) continue;
       const streak = /^(\d+)-win streak$/i.exec(chip);
       if (streak) lines.push({ q: Number(streak[1]), l: 'WIN STREAK', r: '' });
       else lines.push({ q: 1, l: chip.toUpperCase().replace('!', ''), r: '' });
@@ -189,7 +222,7 @@ export function receiptLines(r, name) {
   }
 
   lines.push('---');
-  lines.push({ l: 'TOTAL', r: r.outcome === 'win' ? pts ?? '—' : '0 PTS', bold: true });
+  lines.push({ l: 'TOTAL', r: r.outcome === 'win' ? total ?? '—' : '0 PTS', bold: true });
   lines.push('---');
   lines.push({ c: 'THANK YOU · PLAY AGAIN SOON' });
   return lines;
@@ -223,7 +256,12 @@ export function receiptCopy(r, name) {
   if (r.outcome === 'win') {
     if (stat) details.push(stat);
     if (r.pattern) details.push(r.pattern);
-    if (r.chips.length) details.push(r.chips.join(' · '));
+    if (r.points) {
+      const math = receiptMath(r.points, r);
+      details.push([r.jokerless ? 'Jokerless ×2' : null, r.selfPick ? 'Self-pick ×2' : null, `${math.total} pts total`].filter(Boolean).join(' · '));
+    }
+    const chips = r.chips.filter((c) => !((r.jokerless && c === 'Jokerless') || (r.selfPick && c === 'Self-pick')));
+    if (chips.length) details.push(chips.join(' · '));
   } else {
     if (r.handLine && r.away !== null) details.push(`${r.away} tile${r.away === 1 ? '' : 's'} from ${r.handLine}`);
     else if (stat) details.push(stat);
