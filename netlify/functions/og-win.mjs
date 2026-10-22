@@ -15,15 +15,13 @@ import { parseWin, winCopy } from './win.mjs';
 
 const W = 1200;
 const H = 630;
-// The results sheet's own surface: white card, navy ink, cobalt accent,
-// the moment art as the picture. (The table / invite cards are gold with
-// the tile — a different family on purpose: this card is a result, not
-// an invitation.)
+// One voice: white card, navy ink, the moment art as the picture (Ellen
+// 2026-10-22: fewer fonts and colors). The table / invite cards are gold
+// with the tile — a different family on purpose: this is a result, not
+// an invitation.
 const BG = '#FFFFFF';
 const NAVY = '#1A1A2E';
 const DIM = '#5A5F72';
-const COBALT = '#536AFA';
-const PINK = '#FB79B9';
 
 const fontBuf = (b64) => Uint8Array.from(atob(b64), (ch) => ch.charCodeAt(0)).buffer;
 const FONTS = [
@@ -40,7 +38,7 @@ function card(win, copy) {
     el('div', { fontSize: titleSize, fontWeight: 700, color: NAVY, lineHeight: 1.1, display: 'flex' }, title),
   ];
   if (copy.stat) {
-    rows.push(el('div', { fontSize: 46, fontWeight: 700, color: COBALT, marginTop: 18, display: 'flex' }, copy.stat));
+    rows.push(el('div', { fontSize: 46, fontWeight: 700, color: NAVY, marginTop: 18, display: 'flex' }, copy.stat));
   }
   if (win.pattern) {
     rows.push(
@@ -59,7 +57,7 @@ function card(win, copy) {
               fontSize: 26,
               fontWeight: 600,
               color: NAVY,
-              backgroundColor: '#FDE4F0',
+              backgroundColor: '#ECECEF',
               borderRadius: 999,
               padding: '8px 18px',
               marginRight: 12,

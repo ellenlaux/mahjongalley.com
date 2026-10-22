@@ -96,10 +96,12 @@ export function winCopy(win, name) {
   return { who, stat, title, description };
 }
 
-/** The clip + its poster, for og:video / the page's inline video. */
+/** The beat's media: the mp4 for og:video (link previews), the keyed
+ *  transparent WebP the page plays, and its payoff frame. */
 export function winMedia(origin, beat) {
   return {
     video: `${origin}/assets/win/${beat}.mp4`,
-    art: `${origin}/assets/win/${beat}.png`,
+    motion: `${origin}/assets/win/${beat}.webp`,
+    art: `${origin}/assets/win/${beat}-poster.png`,
   };
 }

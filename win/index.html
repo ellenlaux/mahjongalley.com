@@ -157,28 +157,45 @@
     .footer { margin-top: 36px; }
     .footer a { color: var(--cobalt); font-size: 13px; font-weight: 600; text-decoration: none; }
     .footer-sep { color: var(--dim); font-size: 13px; margin: 0 6px; }
+    /* The win page: one voice (Inter), one display word (TAY Barro), one
+       accent (the button). Ellen 2026-10-22. */
+    .win { width: 100%; max-width: 420px; text-align: center; padding: 8px 0 24px; }
+    .win .logo { width: 150px; margin: 0 auto 6px; }
     .moment {
       display: block;
-      width: 240px;
-      height: 240px;
-      margin: 0 auto 8px;
-      object-fit: cover;
-      background: transparent;
+      width: 260px;
+      height: 260px;
+      margin: 0 auto;
     }
-    .stat { color: var(--cobalt); font-size: 20px; font-weight: 700; margin-top: 10px; }
-    .pattern { font-size: 22px; font-weight: 600; letter-spacing: 2px; margin-top: 8px; }
+    .mahjong {
+      font-family: 'TAY Barro', 'Inter', -apple-system, sans-serif;
+      font-weight: normal;
+      font-size: 44px;
+      line-height: 1.1;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+    .stat { font-size: 20px; font-weight: 700; margin-top: 10px; }
+    .pattern { font-size: 22px; font-weight: 600; letter-spacing: 2px; margin-top: 6px; }
     .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
-    .chip { background: rgba(251,121,185,0.22); color: var(--navy); font-size: 13px; font-weight: 600; border-radius: 999px; padding: 6px 12px; }
+    .chip { background: rgba(26,26,46,0.08); color: var(--navy); font-size: 13px; font-weight: 600; border-radius: 999px; padding: 6px 12px; }
+    .play {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      border-radius: 999px;
+      font-size: 17px;
+      font-weight: 700;
+      text-decoration: none;
+      background: var(--cobalt);
+      color: #fff;
+      margin-top: 28px;
+    }
+    .footer { margin-top: 36px; }
   </style>
 </head>
 <body>
-  <main class="card">
-    <!-- The moment: the clip when it can play inline, its payoff frame
-         otherwise (poster). win-preview points both at the beat. -->
-    <video class="moment" id="moment" autoplay muted loop playsinline
-      poster="/assets/win/pouch-fill.png" aria-hidden="true">
-      <source id="moment-src" src="/assets/win/pouch-fill.mp4" type="video/mp4" />
-    </video>
+  <main class="win">
     <h1 aria-label="Mahjong Alley">
       <svg class="logo" viewBox="0 0 334 70" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
         <path d="M327.619 36C320.899 50.304 315.283 54.24 310.387 54.24C306.355 54.24 304.483 50.496 304.483 46.56C304.483 35.856 315.907 25.872 319.411 22.032C318.115 23.328 316.579 23.712 315.523 23.712C313.171 23.712 311.635 22.224 309.763 22.224C308.515 22.224 307.459 22.992 307.459 24.336C307.459 26.352 310.291 26.448 310.291 27.456C310.291 27.936 309.907 28.272 309.427 28.272C308.563 28.272 306.547 27.552 306.547 24.528C306.547 23.808 307.171 18.72 311.875 18.72C314.323 18.72 315.667 20.256 318.595 20.16C320.227 20.112 321.475 19.632 322.963 18.72L323.395 19.296C314.995 27.888 308.371 36.144 308.371 45.456C308.371 48.384 309.091 51.312 312.835 51.312C320.083 51.312 329.923 33.744 329.923 21.216C329.923 14.304 328.051 8.92802 321.955 8.92802C319.555 8.92802 318.547 10.464 317.395 10.464C316.723 10.464 316.291 9.98402 316.291 9.31202C316.291 8.16002 317.971 7.29602 320.563 7.29602C327.715 7.29602 333.091 13.824 333.091 24.384C333.091 39.744 319.843 69.36 301.939 69.36C298.867 69.36 294.883 68.592 294.883 66C294.883 65.04 295.651 64.224 296.563 64.224C299.059 64.224 300.691 67.872 304.387 67.872C314.419 67.872 322.339 49.296 327.619 36Z" fill="currentColor"/>
@@ -195,21 +212,19 @@
         <path d="M44.0559 53.28L44.2959 52.608C47.6079 52.176 49.5279 49.584 51.3519 44.736L64.4079 10.032L64.3599 9.98401L46.6959 33.984C42.5679 49.776 31.2879 65.28 16.9839 65.28C-6.72813 65.28 -4.18413 30.96 15.7839 30.96C20.6799 30.96 25.3839 33.984 25.3839 36.864C25.3839 37.584 24.9999 38.16 24.3279 38.16C21.7359 38.16 23.4159 32.304 16.9359 32.304C8.53587 32.304 3.11187 41.28 3.11187 49.632C3.11187 57.12 6.99987 64.08 16.6479 64.08C33.8799 64.08 43.4799 39.312 44.2479 22.32C44.4879 16.8 43.8159 11.904 42.1839 8.92801C39.6879 15.36 38.5839 18.96 36.0399 25.44C30.3279 39.792 26.2479 54.24 13.5759 54.24C9.73587 54.24 7.81587 51.936 7.81587 50.112C7.81587 49.344 8.34387 48.864 8.91987 48.864C10.9359 48.864 10.1199 53.04 12.7119 53.04C23.5599 53.04 36.5199 19.056 41.4159 7.82401C40.2159 6.28801 38.5839 5.47201 36.5679 5.47201C27.9279 5.47201 22.2639 18 22.2639 24C22.2639 27.888 23.3199 30.432 25.5759 30.432C26.5839 30.432 26.9199 29.28 26.9199 28.608C26.9199 28.176 27.0639 27.552 27.7839 27.552C28.5519 27.552 28.6479 28.368 28.6479 28.608C28.6479 30 27.4959 31.536 25.5759 31.536C21.7839 31.536 18.9039 27.696 18.9039 22.608C18.9039 14.064 26.8719 4.32001 37.0479 4.32001C45.3519 4.32001 47.9919 13.728 47.9919 21.696C47.9919 25.008 47.6559 28.32 47.0319 31.632L66.1359 5.28001H73.7679L73.5279 5.95201C70.5999 6.24001 69.5439 8.06401 66.5199 15.984L55.4799 44.784C53.8479 49.056 53.8479 52.224 57.3999 52.608L57.1599 53.28H44.0559Z" fill="currentColor"/>
       </svg>
     </h1>
-    <p class="invite-headline" id="headline">Mahjong!</p>
+    <!-- The moment, keyed transparent so it sits on the page (an animated
+         WebP with alpha; the poster is its payoff frame). win-preview
+         points both at the beat. -->
+    <img class="moment" id="moment" src="/assets/win/pouch-fill.webp" alt="" aria-hidden="true" />
+    <p class="mahjong" id="headline">Mahjong!</p>
     <p class="stat" id="stat" hidden></p>
     <p class="pattern" id="pattern" hidden></p>
     <div class="chips" id="chips" hidden></div>
-    <p class="sub" id="subline"><span class="tagline">Come play American Mahjong</span>Learn and play solo or with friends on Mahjong Alley.</p>
 
-    <div class="buttons">
-      <!-- "Get the app" leads: this page is not a universal link, so the
-           person reading it may well have the app — but the one without
-           it is the one the share is for. -->
-      <a class="btn btn-primary" id="get-app" href="https://apps.apple.com/app/id6769199909">Get the app</a>
-      <a class="btn btn-secondary" id="open-app" href="#">Open in the app</a>
-    </div>
-
-    <p class="hint" id="hint">Have the app already? Tap “Open in the app”. New here? Get the app, then come back to this message.</p>
+    <!-- One button. It tries the app first; if nothing answers, the App
+         Store. With a code on the link the app opens into the friend
+         ceremony, and the button names the friend. -->
+    <a class="play" id="play" href="https://apps.apple.com/app/id6769199909">Play</a>
 
     <p class="footer">
       <a href="/support/">Support</a>
@@ -229,21 +244,16 @@
   <script>
     // /win/<beat>?… — a shared solo win. The function above injects the
     // validated win; with none (a bare /win, or a damaged link) the page
-    // stays the generic "Mahjong!" invitation.
+    // stays the generic "Mahjong!".
     (function () {
       var win = null;
       try { win = JSON.parse(document.getElementById('win-data').textContent); } catch (e) {}
 
-      var open = document.getElementById('open-app');
+      var STORE = 'https://apps.apple.com/app/id6769199909';
       var scheme = 'mahjong://';
+      var play = document.getElementById('play');
       if (win) {
-        if (win.art) document.getElementById('moment').poster = win.art;
-        if (win.video) {
-          var srcEl = document.getElementById('moment-src');
-          srcEl.src = win.video;
-          document.getElementById('moment').load();
-        }
-        document.getElementById('headline').textContent = win.who || 'Mahjong!';
+        if (win.motion) document.getElementById('moment').src = win.motion;
         if (win.stat) {
           var stat = document.getElementById('stat');
           stat.textContent = win.stat;
@@ -264,30 +274,23 @@
           });
           chips.hidden = false;
         }
-        if (win.name) {
-          document.getElementById('subline').innerHTML =
-            '<span class="tagline">Play with ' + win.name.replace(/[&<>"]/g, function (ch) {
-              return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch];
-            }) + '</span>They sent you this win. Get the app and you’ll be friends as soon as you’re signed in.';
-        }
+        if (win.name) play.textContent = 'Play with ' + win.name;
         // A referral code on the link: open the app INTO the friend
         // ceremony (the same route a texted invite link takes).
         if (win.code) scheme = 'mahjong://invite/' + win.code;
       }
-      open.href = scheme;
 
-      // A custom-scheme link with no app to answer it is a dead end: iOS
-      // Safari puts up "cannot open the page" and stops there. So the tap
-      // is handled here instead. Try the scheme; if this page is still
-      // the one on screen a moment later, the app did not take over, and
-      // the store is where this person needs to go.
-      open.addEventListener('click', function (e) {
+      // Try the app; if this page is still the one on screen a moment
+      // later, nothing answered the scheme and the store is where this
+      // person needs to go. `document.hidden` (or the timer firing late,
+      // after a suspended tab wakes) means the app DID open.
+      play.addEventListener('click', function (e) {
         e.preventDefault();
         var started = Date.now();
-        location.href = open.href;
+        location.href = scheme;
         setTimeout(function () {
           if (document.hidden || Date.now() - started > 2500) return;
-          location.href = document.getElementById('get-app').href;
+          location.href = STORE;
         }, 1200);
       });
     })();
