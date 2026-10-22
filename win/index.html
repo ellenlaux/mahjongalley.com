@@ -35,45 +35,29 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="180x180" href="/assets/favicon-180.png" />
   <link rel="apple-touch-icon" href="/assets/favicon-180.png" />
-  <link rel="preload" href="/assets/fonts/TAYBarro.otf" as="font" type="font/otf" crossorigin />
   <link rel="preload" href="/assets/fonts/CourierPrime-Regular.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/assets/fonts/CourierPrime-Bold.woff2" as="font" type="font/woff2" crossorigin />
   <style>
     @font-face {
-      font-family: 'TAY Barro';
-      src: url('/assets/fonts/TAYBarro.otf') format('opentype');
-      font-weight: normal;
-      font-style: normal;
-      font-display: swap;
-    }
-    @font-face {
-      font-family: 'Inter';
-      src: url('/assets/fonts/Inter-Regular.ttf') format('truetype');
-      font-weight: 400;
-      font-style: normal;
-      font-display: swap;
-    }
-    @font-face {
       font-family: 'Inter';
       src: url('/assets/fonts/Inter-SemiBold.ttf') format('truetype');
-      font-weight: 600;
-      font-style: normal;
-      font-display: swap;
+      font-weight: 600; font-style: normal; font-display: swap;
     }
     @font-face {
-      font-family: 'Inter';
-      src: url('/assets/fonts/Inter-Bold.ttf') format('truetype');
-      font-weight: 700;
-      font-style: normal;
-      font-display: swap;
+      font-family: 'Courier Prime';
+      src: url('/assets/fonts/CourierPrime-Regular.woff2') format('woff2'), url('/assets/fonts/CourierPrime-Regular.woff') format('woff');
+      font-weight: 400; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Courier Prime';
+      src: url('/assets/fonts/CourierPrime-Bold.woff2') format('woff2'), url('/assets/fonts/CourierPrime-Bold.woff') format('woff');
+      font-weight: 700; font-style: normal; font-display: swap;
     }
     :root {
       --cream: #F2E8D5;
       --navy: #1A1A2E;
       --cobalt: #536AFA;
-      --pink: #FB79B9;
       --dim: #5A5F72;
-      --card: #FFFFFF;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     [hidden] { display: none !important; }
@@ -87,101 +71,17 @@
       justify-content: center;
       padding: 24px;
     }
-    .card {
-      width: 100%;
-      max-width: 420px;
-      text-align: center;
-      padding: 8px 0 24px;
-    }
-    .tile-img {
-      width: 168px;
-      height: auto;
-      margin-bottom: 20px;
-    }
-    .logo {
-      display: block;
-      width: 250px;
-      max-width: 85%;
-      height: auto;
-      margin: 0 auto;
-      color: var(--navy);
-    }
-    .invite-headline { font-size: 26px; font-weight: 700; letter-spacing: -0.3px; margin-top: 16px; }
-    .sub { color: var(--dim); font-size: 15px; line-height: 1.5; margin-top: 40px; }
-    .sub .tagline {
-      display: block;
-      font-family: 'TAY Barro', 'Inter', -apple-system, sans-serif;
-      font-weight: normal;
-      font-size: 21px;
-      line-height: 1.25;
-      color: var(--navy);
-      margin-bottom: 6px;
-    }
-    /* Pink strike, navy word — the line is the joke, so it gets the color. */
-    .sub .tagline s { text-decoration-thickness: 2px; text-decoration-color: var(--pink); }
-    .code-label {
-      margin-top: 28px;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--dim);
-    }
-    .code {
-      font-size: 40px;
-      font-weight: 700;
-      letter-spacing: 8px;
-      margin-top: 6px;
-      padding-left: 8px; /* optically recenter the letterspaced text */
-      user-select: all;
-      -webkit-user-select: all;
-    }
-    .deal-date {
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: -0.2px;
-      margin-top: 6px;
-    }
-    .btn {
-      display: block;
-      width: 100%;
-      padding: 16px;
-      border-radius: 999px;
-      font-size: 16px;
-      font-weight: 700;
-      text-decoration: none;
-      margin-top: 14px;
-    }
-    .btn-primary { background: var(--cobalt); color: #fff; }
-    .btn-secondary { background: rgba(83,106,250,0.18); color: var(--navy); }
-    .buttons { margin-top: 28px; }
-    .hint { color: var(--dim); font-size: 13px; line-height: 1.5; margin-top: 20px; }
-    .footer { margin-top: 36px; }
-    .footer a { color: var(--cobalt); font-size: 13px; font-weight: 600; text-decoration: none; }
-    .footer-sep { color: var(--dim); font-size: 13px; margin: 0 6px; }
-    @font-face {
-      font-family: 'Courier Prime';
-      src: url('/assets/fonts/CourierPrime-Regular.woff2') format('woff2'), url('/assets/fonts/CourierPrime-Regular.woff') format('woff');
-      font-weight: 400; font-style: normal; font-display: swap;
-    }
-    @font-face {
-      font-family: 'Courier Prime';
-      src: url('/assets/fonts/CourierPrime-Bold.woff2') format('woff2'), url('/assets/fonts/CourierPrime-Bold.woff') format('woff');
-      font-weight: 700; font-style: normal; font-display: swap;
-    }
-    /* The win page prints a RECEIPT (Ellen 2026-10-22, after her riff:
-       the slip rises out of the button like a thermal printer, a little
-       askew, and itemizes the win). One voice on the slip (Courier Prime);
-       the button is the printer. */
+
+    /* The win page prints a RECEIPT (Ellen 2026-10-22, after her riff):
+       the slip feeds up out of a printer, a little askew, and itemizes the
+       win. One voice on the slip (Courier Prime); the dragon and the
+       wordmark are its header, the way a shop's logo tops a receipt; the
+       one link to the app is a line on the slip. */
     .win { width: 100%; max-width: 420px; text-align: center; padding: 8px 0 24px; }
-    /* The wordmark prints on the slip, under the moment — the shop's logo
-       on a receipt (Ellen 2026-10-22). */
-    .receipt .logo { display: block; width: 190px; height: auto; margin: 0 auto 6px; color: var(--navy); }
-    /* The moment is the slip's header art — the shop logo on a receipt. */
-    .moment { display: block; width: 170px; height: 170px; margin: -14px auto -6px; }
+
     /* The feed: the slip is laid out at its final size, then slid down out
-       of sight (behind the button) and fed back up in printer steps. The
-       wrap clips at the button's top edge so it emerges from the pill. */
+       of sight (behind the machine) and fed back up in printer steps. The
+       wrap clips at the machine's top edge so it emerges from the slot. */
     .feed { width: 320px; margin: 0 auto; padding: 16px 10px 0; overflow: hidden; }
     .receipt {
       background: #fff; color: var(--navy);
@@ -195,6 +95,8 @@
     }
     @keyframes print { to { transform: translateY(0) rotate(-1.5deg); } }
     @media (prefers-reduced-motion: reduce) { .receipt { animation: none; transform: rotate(-1.5deg); } }
+    .moment { display: block; width: 170px; height: 170px; margin: -14px auto -6px; }
+    .receipt .logo { display: block; width: 190px; height: auto; margin: 0 auto 6px; color: var(--navy); }
     .receipt .c { text-align: center; }
     .receipt .big { font-size: 24px; font-weight: 700; line-height: 1.2; margin: 6px 0 4px; letter-spacing: 1px; }
     .receipt .b { font-weight: 700; }
@@ -203,6 +105,15 @@
     .receipt .qty { display: inline-block; width: 2.2em; }
     .receipt hr { border: 0; border-top: 1px dashed rgba(26,26,46,0.45); margin: 8px 0; }
     .receipt .pattern { letter-spacing: 1px; padding-left: 2.2em; opacity: 0.85; }
+    /* The one link, printed on the slip where a receipt prints its web
+       address — not a button. */
+    .receipt .go {
+      display: block; margin: 12px 0 4px; padding: 10px 8px;
+      border: 2px solid var(--navy); border-radius: 4px;
+      color: var(--navy); font-weight: 700; font-size: 15px; letter-spacing: 1px;
+      text-align: center; text-decoration: none;
+    }
+    .receipt .go:active { background: var(--navy); color: #fff; }
     .barcode {
       height: 36px; margin: 12px 16px 4px;
       background: repeating-linear-gradient(90deg,
@@ -216,40 +127,52 @@
       height: 10px; margin: 10px -18px -6px;
       background: linear-gradient(135deg, #fff 50%, transparent 50%) 0 0/14px 10px repeat-x,
                   linear-gradient(-135deg, #fff 50%, transparent 50%) 0 0/14px 10px repeat-x;
-      /* the slip's own white, cut into the cream below */
-      filter: drop-shadow(0 2px 0 #fff);
+      background-color: var(--cream);
     }
-    .receipt .tear { background-color: var(--cream); }
-    /* The link to the app is a line ON the slip, where a receipt would
-       print its web address — not a button (Ellen 2026-10-22). */
-    .receipt .go {
-      display: block; margin: 12px 0 4px; padding: 10px 8px;
-      border: 2px solid var(--navy); border-radius: 4px;
-      color: var(--navy); font-weight: 700; font-size: 15px; letter-spacing: 1px;
-      text-align: center; text-decoration: none;
+
+    /* The machine the slip comes out of: an old thermal receipt printer,
+       seen from the front — beige plastic with a seam, a dark slot under
+       a serrated tear bar, vents, a red FEED button, a ready light, a
+       model plate, rubber feet. */
+    .machine { width: 350px; margin: -10px auto 0; position: relative; z-index: 2; filter: drop-shadow(0 18px 18px rgba(26,26,46,0.22)); }
+    .machine .hood {
+      height: 46px; position: relative;
+      background: linear-gradient(#F3EBDA, #DCD0B8);
+      border: 2px solid #B6A689; border-bottom: 0; border-radius: 22px 22px 3px 3px;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.7);
     }
-    .receipt .go:active { background: var(--navy); color: #fff; }
-    /* The machine the slip comes out of: a receipt printer, seen from the
-       front — a lip with the paper slot, a body, a ready light. */
-    .machine { width: 340px; margin: -8px auto 0; position: relative; z-index: 2; }
-    .machine .lip {
-      height: 30px; border-radius: 16px 16px 6px 6px; background: #30304A; position: relative;
-      box-shadow: 0 -2px 0 rgba(255,255,255,0.08) inset;
-    }
-    .machine .slot {
-      position: absolute; left: 22px; right: 22px; top: 9px; height: 7px;
-      border-radius: 4px; background: #0B0B14;
-      box-shadow: 0 1px 0 rgba(255,255,255,0.10);
+    .machine .slot { position: absolute; left: 22px; right: 22px; top: 12px; height: 11px; border-radius: 3px; background: #26263A; box-shadow: inset 0 2px 3px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.5); }
+    .machine .teeth {
+      position: absolute; left: 22px; right: 22px; top: 24px; height: 7px;
+      background: linear-gradient(135deg, #9C8C6E 50%, transparent 50%) 0 0/8px 7px repeat-x,
+                  linear-gradient(-135deg, #9C8C6E 50%, transparent 50%) 0 0/8px 7px repeat-x;
     }
     .machine .body {
-      height: 64px; border-radius: 0 0 26px 26px; background: var(--navy); position: relative;
-      box-shadow: 0 14px 28px rgba(26,26,46,0.24);
+      height: 96px; position: relative;
+      background: linear-gradient(#DDD1B9, #C7B99C);
+      border: 2px solid #B6A689; border-top: 0; border-radius: 0 0 18px 18px;
     }
-    .machine .light {
-      position: absolute; right: 30px; top: 26px; width: 10px; height: 10px; border-radius: 50%;
-      background: #5BE49B; box-shadow: 0 0 10px #5BE49B;
+    .machine .seam { position: absolute; left: 0; right: 0; top: 12px; height: 2px; background: rgba(90,75,50,0.28); box-shadow: 0 1px 0 rgba(255,255,255,0.45); }
+    .machine .vents { position: absolute; left: 26px; top: 32px; width: 96px; height: 40px; background: repeating-linear-gradient(90deg, rgba(70,58,38,0.42) 0 3px, transparent 3px 9px); border-radius: 2px; }
+    .machine .plate {
+      position: absolute; left: 50%; top: 36px; transform: translateX(-50%); padding: 0 10px; height: 24px;
+      background: #26263A; color: #EFE6D2; border-radius: 3px;
+      font-family: 'Courier Prime', monospace; font-size: 10px; line-height: 24px; letter-spacing: 2px; white-space: nowrap;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.4);
     }
+    .machine .feed {
+      position: absolute; right: 30px; top: 26px; width: 42px; height: 42px; border-radius: 50%;
+      background: radial-gradient(circle at 38% 32%, #F47A7A, #B23A3A 70%);
+      box-shadow: inset 0 -4px 0 rgba(0,0,0,0.28), 0 3px 0 #7E2828, 0 5px 6px rgba(0,0,0,0.25);
+    }
+    .machine .feed-label { position: absolute; right: 26px; top: 74px; width: 50px; text-align: center; font-family: 'Courier Prime', monospace; font-size: 9px; letter-spacing: 2px; color: rgba(60,50,30,0.75); }
+    .machine .light { position: absolute; right: 86px; top: 38px; width: 9px; height: 9px; border-radius: 50%; background: #5BE49B; box-shadow: 0 0 8px #5BE49B, inset 0 1px 1px rgba(255,255,255,0.7); }
+    .machine .feet { display: flex; justify-content: space-between; padding: 0 28px; }
+    .machine .feet span { width: 36px; height: 9px; background: #4A4034; border-radius: 0 0 6px 6px; }
+
     .footer { margin-top: 36px; }
+    .footer a { color: var(--cobalt); font-size: 13px; font-weight: 600; text-decoration: none; }
+    .footer-sep { color: var(--dim); font-size: 13px; margin: 0 6px; }
   </style>
 </head>
 <body>
@@ -294,8 +217,16 @@
 
     <!-- The machine the slip printed out of. -->
     <div class="machine" aria-hidden="true">
-      <div class="lip"><div class="slot"></div></div>
-      <div class="body"><div class="light"></div></div>
+      <div class="hood"><div class="slot"></div><div class="teeth"></div></div>
+      <div class="body">
+        <div class="seam"></div>
+        <div class="vents"></div>
+        <div class="plate">MA-2026</div>
+        <div class="light"></div>
+        <div class="feed"></div>
+        <div class="feed-label">FEED</div>
+      </div>
+      <div class="feet"><span></span><span></span></div>
     </div>
 
     <p class="footer">
