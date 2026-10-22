@@ -11,19 +11,33 @@ const BEATS = ['pouch-fill', 'big-money', 'burnt-joker', 'heart-eyes'];
 const KEY = 'crop=720:720:180:560,scale=480:480,colorkey=0xFFFFFF:0.10:0.08';
 // What the page LOOPS. A moment with an entrance and then a steady beat
 // loops only the beat (Ellen 2026-10-22: "the heart eyes just keep
-// popping", not the dragon arriving over and over). Seconds into the
-// clip, and a length that is a whole number of the beat's cycles so the
-// seam is quiet. Beats not listed loop the whole clip.
+// popping", not the dragon arriving over and over). `start`/`dur` are
+// seconds into the source, `dur` a whole number of the beat's cycles so
+// the seam is quiet. `src` names a longer take when the share clip is
+// too short to hold a full cycle (assets/win/src/). `once` plays the
+// whole clip one time and holds its last frame — for an arrival that
+// settles rather than a beat.
 const LOOP = {
-  'heart-eyes': { start: 2.6, dur: 1.6 }, // four hearts, 400 ms apart, 1.6 s a lap — one lap, inside the 4.9 s clip
+  // four hearts, 400 ms apart: 1.6 s a lap — one lap
+  'heart-eyes': { start: 2.6, dur: 1.6 },
+  // six dollars, 250 ms apart on a 1.5 s lap; all six in flight from
+  // 3.5 s after mount (clip starts ~0.4 s after mount) — one lap
+  'big-money': { start: 3.1, dur: 1.5 },
+  // smoke forever from 3.4 s after mount, a 3.2 s cycle — one cycle,
+  // from the longer take (the 5 s share clip holds only 2 s of smoke);
+  // the window starts a cycle in, once the smoke is already going
+  'burnt-joker': { src: 'assets/win/src/burnt-joker-take.mp4', start: 4.45, dur: 3.2 },
+  // coins rain in and the big pouch takes over at 1.95 s: an arrival, so
+  // it plays once and holds the full pouch
+  'pouch-fill': { once: true },
 };
 for (const beat of BEATS) {
-  const src = `assets/win/${beat}.mp4`;
-  const loop = LOOP[beat];
-  const window = loop ? ['-ss', String(loop.start), '-t', String(loop.dur)] : [];
+  const loop = LOOP[beat] ?? {};
+  const src = loop.src ?? `assets/win/${beat}.mp4`;
+  const window = loop.start !== undefined ? ['-ss', String(loop.start), '-t', String(loop.dur)] : [];
   execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', ...window, '-i', src, '-vf', `${KEY},format=yuva420p`,
-    '-c:v', 'libwebp_anim', '-lossless', '0', '-q:v', '80', '-loop', '0', '-an', `assets/win/${beat}.webp`]);
-  execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-ss', '2.6', '-i', src, '-frames:v', '1',
+    '-c:v', 'libwebp_anim', '-lossless', '0', '-q:v', '80', '-loop', loop.once ? '1' : '0', '-an', `assets/win/${beat}.webp`]);
+  execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-ss', '2.6', '-i', `assets/win/${beat}.mp4`, '-frames:v', '1',
     '-vf', `${KEY},format=rgba`, `assets/win/${beat}-poster.png`]);
   console.log('wrote', beat);
 }
