@@ -90,3 +90,11 @@ export async function fetchPeek(kind, code) {
     handle: row.handle ?? null,
   };
 }
+
+/** A promo / teacher code (app migration 0113): true when an ACTIVE code
+ *  exists. The peek returns only yes/no (0121) — never the owner or the
+ *  count — so a crawler can card a real code and nothing else. */
+export async function fetchCodeExists(code) {
+  const ok = await rpc('peek_redeem_code', { p_code: code.toUpperCase() });
+  return ok === true;
+}

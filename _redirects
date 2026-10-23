@@ -30,3 +30,12 @@
 # /og/receipt/<moment>.png?… renders the card for that same query.
 /receipt/*     /.netlify/functions/receipt-preview  200
 /og/receipt/*  /.netlify/functions/og-receipt       200
+#
+# /code/CODE is a PROMO CODE (a teacher's; app migration 0113) — the page
+# shows the code and where to enter it; code-preview injects the gift's
+# card ("A rare joker is waiting") for real codes. /og/code/CODE.png
+# renders that card. It IS in the app-links file: with the app installed
+# the link opens the app's /code route, which redeems on open; this page
+# is for everyone else (and its "Open it" link carries the code by scheme).
+/code/*        /.netlify/functions/code-preview     200
+/og/code/*     /.netlify/functions/og-code          200

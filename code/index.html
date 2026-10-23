@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Smart App Banner. Safari on iOS draws a native strip above the page
+       that installs from the App Store, or opens the app if it is already
+       installed. The id matches APP_STORE_ID in the app repo
+       (src/config/appStore.ts); keep the two in sync if the listing moves. -->
+  <meta name="apple-itunes-app" content="app-id=6769199909" />
+  <title>A rare joker is waiting</title>
+  <meta name="description" content="Open the link in Mahjong Alley to unlock a rare joker, or enter the code." />
+  <meta property="og:title" content="A rare joker is waiting" />
+  <meta property="og:description" content="Open in Mahjong Alley to unlock it, or enter the code." />
+  <!-- og:image is what makes iMessage/WhatsApp render a rich card at all —
+       without it a texted invite link shows as bare text. Absolute URL
+       required (crawlers don't resolve relative paths). -->
+  <meta property="og:image" content="https://mahjongalley.com/assets/og-card.png?v=2" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Mahjong Alley" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="A rare joker is waiting" />
+  <meta name="twitter:description" content="Open in Mahjong Alley to unlock it, or enter the code." />
+  <meta name="twitter:image" content="https://mahjongalley.com/assets/og-card.png?v=2" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="180x180" href="/assets/favicon-180.png" />
+  <link rel="apple-touch-icon" href="/assets/favicon-180.png" />
+  <link rel="preload" href="/assets/fonts/TAYBarro.otf" as="font" type="font/otf" crossorigin />
+  <style>
+    @font-face {
+      font-family: 'TAY Barro';
+      src: url('/assets/fonts/TAYBarro.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Inter';
+      src: url('/assets/fonts/Inter-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Inter';
+      src: url('/assets/fonts/Inter-SemiBold.ttf') format('truetype');
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Inter';
+      src: url('/assets/fonts/Inter-Bold.ttf') format('truetype');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+    :root {
+      --cream: #F2E8D5;
+      --navy: #1A1A2E;
+      --cobalt: #536AFA;
+      --pink: #FB79B9;
+      --dim: #5A5F72;
+      --card: #FFFFFF;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--cream);
+      color: var(--navy);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      padding: 8px 0 24px;
+    }
+    /* The dragon tile WITH the wordmark on it (Ellen, 2026-10-23) — one
+       object instead of a tile over a logo; the app icon handoff stays. */
+    .tile-img {
+      width: 200px;
+      height: auto;
+      margin-bottom: 4px;
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+    .logo {
+      display: block;
+      width: 250px;
+      max-width: 85%;
+      height: auto;
+      margin: 0 auto;
+      color: var(--navy);
+    }
+    .invite-headline { font-size: 26px; font-weight: 500; letter-spacing: -0.3px; margin-top: 16px; }
+    .sub { color: var(--dim); font-size: 15px; line-height: 1.5; margin-top: 40px; }
+    .sub .tagline {
+      display: block;
+      font-family: 'TAY Barro', 'Inter', -apple-system, sans-serif;
+      font-weight: normal;
+      font-size: 21px;
+      line-height: 1.25;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+    /* Pink strike, navy word — the line is the joke, so it gets the color. */
+    .sub .tagline s { text-decoration-thickness: 2px; text-decoration-color: var(--pink); }
+    .code-label {
+      margin-top: 28px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      color: var(--dim);
+    }
+    .code {
+      font-size: 40px;
+      font-weight: 700;
+      letter-spacing: 8px;
+      margin-top: 6px;
+      padding-left: 8px; /* optically recenter the letterspaced text */
+      user-select: all;
+      -webkit-user-select: all;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      margin-top: 14px;
+    }
+    .btn-primary { background: var(--cobalt); color: #fff; }
+    .btn-secondary { background: rgba(83,106,250,0.18); color: var(--navy); }
+    .buttons { margin-top: 28px; }
+    .hint { color: var(--dim); font-size: 13px; line-height: 1.5; margin-top: 20px; }
+    .footer { margin-top: 36px; }
+    .footer a { color: var(--cobalt); font-size: 13px; font-weight: 600; text-decoration: none; }
+    .footer-sep { color: var(--dim); font-size: 13px; margin: 0 6px; }
+    /* Promo page tuning (Ellen, 2026-10-23): the joker and the code were
+       competing. Smaller tile, calmer code, one pill and a text action. */
+    .tile-img { width: 148px; margin-bottom: 12px; }
+    .sub { margin-top: 12px; font-size: 16px; }
+    .code { font-size: 30px; letter-spacing: 6px; padding-left: 6px; }
+    .code-label { margin-top: 22px; }
+    .btn-text {
+      display: block;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--cobalt);
+      text-decoration: none;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <img class="tile-img" src="/assets/joker-exchange.svg" alt="" aria-hidden="true" />
+    <h1 class="sr-only">Your Mahjong Alley code</h1>
+    <!-- No headline: the code is the only big text on the page (Ellen,
+         2026-10-23). The claim folds into the one line under the tile. -->
+    <p class="sub" id="subline">A rare joker is waiting on Mahjong Alley — one you can only get from The Joker Exchange.</p>
+
+    <div id="invite" hidden>
+      <p class="code-label" id="code-label">Your code</p>
+      <p class="code" id="code"></p>
+    </div>
+
+    <div class="buttons">
+      <!-- "Get the app" leads. Someone who HAS the app and taps the link
+           usually never sees this page: the universal link opens the app,
+           which redeems the code on open. So the person reading this is
+           almost always the one without it, and the big button is theirs.
+           The text link covers the rest (an install whose app-links cache
+           predates /code/*): it opens the app BY SCHEME, code attached. -->
+      <a class="btn btn-primary" id="get-app" href="https://apps.apple.com/app/id6769199909">Get the app</a>
+      <a class="btn-text" id="open-app" href="#">Already have the app? Open it</a>
+    </div>
+
+    <p class="hint" id="hint">Open it in the app and the joker unlocks. New here? Get the app, then tap your link again — or enter the code in the app: Shop → Have a code?</p>
+
+    <p class="footer">
+      <a href="/support/">Support</a>
+      <span class="footer-sep">·</span>
+      <a href="/privacy/">Privacy</a>
+      <span class="footer-sep">·</span>
+      <a href="/terms/">Terms</a>
+      <span class="footer-sep">·</span>
+      <a href="https://www.instagram.com/mahjongalley/">@mahjongalley</a>
+    </p>
+  </main>
+
+  <script>
+    // /code/JOKERX — a promo code (a teacher's; app migration 0113). Served
+    // via the code-preview rewrite, which keeps the pathname. The code is
+    // the only thing that varies; the words are static so a crawler's copy
+    // and a person's copy never disagree.
+    (function () {
+      var m = location.pathname.match(/^\/code\/([A-Za-z0-9]{4,16})\/?$/);
+      var invite = document.getElementById('invite');
+      if (!m) { invite.hidden = true; return; }
+      var code = m[1].toUpperCase();
+      document.getElementById('code').textContent = code;
+      invite.hidden = false;
+
+      // "Open it" opens the app's /code route by scheme, code attached:
+      // the app redeems on open and plays the reveal. The `redeem` host
+      // is deliberate — a custom-scheme URL parses its first segment as
+      // the host, so `mahjong://code/X` would reach the app as a bare
+      // "/X", which the app's link normalizer reads as a table code.
+      // Same no-dead-end handling as the invite page: scheme first,
+      // store if the page is still here a moment later.
+      var open = document.getElementById('open-app');
+      open.href = 'mahjong://redeem/code/' + code;
+      open.addEventListener('click', function (e) {
+        e.preventDefault();
+        var started = Date.now();
+        location.href = open.href;
+        setTimeout(function () {
+          if (document.hidden || Date.now() - started > 2500) return;
+          location.href = document.getElementById('get-app').href;
+        }, 1200);
+      });
+    })();
+  </script>
+</body>
+</html>

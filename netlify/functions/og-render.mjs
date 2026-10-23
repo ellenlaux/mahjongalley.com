@@ -15,7 +15,7 @@
 
 import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
-import { INTER_BOLD_B64, INTER_SEMIBOLD_B64, TILE_PNG_B64 } from './og-assets.mjs';
+import { INTER_BOLD_B64, INTER_SEMIBOLD_B64, TILE_PNG_B64, JOKER_PNG_B64 } from './og-assets.mjs';
 
 const W = 1200;
 const H = 630;
@@ -25,6 +25,7 @@ const DIM = '#5A5F72';
 const COBALT = '#536AFA';
 
 const TILE_DATA_URL = `data:image/png;base64,${TILE_PNG_B64}`;
+const JOKER_DATA_URL = `data:image/png;base64,${JOKER_PNG_B64}`;
 
 const fontBuf = (b64) => Uint8Array.from(atob(b64), (ch) => ch.charCodeAt(0)).buffer;
 
@@ -42,7 +43,7 @@ const el = (type, style, children) => ({ type, props: { style, ...(children !== 
  *   subtitle — cobalt status line: "2/4 seated · Live" / "wants to be friends"
  *   footer   — dim brand line.
  */
-function card({ title, subtitle }) {
+function card({ title, subtitle, art = TILE_DATA_URL, footer = 'On Mahjong Alley' }) {
   // Length-aware title size so long table names wrap inside the column
   // instead of clipping at the card edge.
   const titleSize = title.length > 40 ? 50 : title.length > 22 ? 60 : 76;
@@ -61,7 +62,7 @@ function card({ title, subtitle }) {
     [
       {
         type: 'img',
-        props: { src: TILE_DATA_URL, width: 312, height: 400, style: { flexShrink: 0 } },
+        props: { src: art, width: 312, height: 400, style: { flexShrink: 0 } },
       },
       el(
         'div',
@@ -99,7 +100,7 @@ function card({ title, subtitle }) {
           el(
             'div',
             { fontSize: 26, fontWeight: 600, color: DIM, marginTop: 44, display: 'flex', paddingRight: 12 },
-            'On Mahjong Alley',
+            footer,
           ),
         ],
       ),
@@ -117,4 +118,22 @@ export async function renderCardPng({ title, subtitle }) {
   });
   const png = new Resvg(svg, { fitTo: { mode: 'width', value: W } }).render().asPng();
   return png;
+}
+
+/**
+ * The promo-code card (/og/code/CODE.png): the Joker Exchange tile art
+ * with the code as the cobalt line. Same frame as the table/friend cards
+ * so a teacher's text looks like it came from the same place.
+ */
+export async function renderCodeCardPng({ code }) {
+  const svg = await satori(
+    card({
+      title: 'A rare joker is waiting',
+      subtitle: `Code: ${code}`,
+      art: JOKER_DATA_URL,
+      footer: 'Shop → Have a code? · Mahjong Alley',
+    }),
+    { width: W, height: H, fonts: FONTS },
+  );
+  return new Resvg(svg, { fitTo: { mode: 'width', value: W } }).render().asPng();
 }
