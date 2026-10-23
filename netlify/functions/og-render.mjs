@@ -204,9 +204,16 @@ function inviteCard({ name }) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'flex-start',
+          // Centred on the card's height, not pinned to a top: a long
+          // handle shrinks the chip and the block with it, and a pinned
+          // block then sat high (Ellen 2026-10-23). The 8px keeps the
+          // extra air above "Hey!" she asked for.
           position: 'absolute',
           left: 660,
-          top: 158, // 150 + 8 of air above "Hey!" (Ellen 2026-10-23)
+          top: 0,
+          height: H,
+          justifyContent: 'center',
+          paddingTop: 8,
           width: 500,
         },
         [
