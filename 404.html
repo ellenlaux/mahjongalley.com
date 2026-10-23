@@ -219,7 +219,7 @@
       subline.textContent =
         kind === 'join'
           ? 'There’s a table waiting for you on Mahjong Alley.'
-          : 'Say yes on Mahjong Alley — it takes a tap.';
+          : 'Join them on Mahjong Alley.';
 
       document.getElementById('code').textContent = code;
       document.getElementById('invite').hidden = false;
@@ -283,7 +283,7 @@
           } else {
             var name = row.display_name || 'A friend';
             headline.textContent = name + ' wants to be friends';
-            subline.textContent = 'Say yes on Mahjong Alley — it takes a tap.';
+            subline.textContent = 'Join them on Mahjong Alley.';
           }
         })
         .catch(function () { /* generic copy stays */ });
