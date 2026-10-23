@@ -13,8 +13,10 @@ export const INTER_BOLD_B64 = '${b64('assets/fonts/Inter-Bold.ttf')}';
 export const INTER_SEMIBOLD_B64 = '${b64('assets/fonts/Inter-SemiBold.ttf')}';
 export const INTER_REGULAR_B64 = '${b64('assets/fonts/Inter-Regular.ttf')}';
 export const TILE_PNG_B64 = '${b64('assets/tile.png')}';
-export const JOKER_PNG_B64 = '${b64('assets/joker-exchange.png')}';
 export const INVITE_PILE_PNG_B64 = '${b64('assets/invite-pile.png')}';
+// The promo-code card's art layer: Ellen's tile-with-swirls, already laid
+// out at card size (1200×630) with a transparent right half for the text.
+export const CODE_ART_PNG_B64 = '${b64('assets/joker-exchange-card-art.png')}';
 `;
 writeFileSync('netlify/functions/og-assets.mjs', out);
 console.log('wrote netlify/functions/og-assets.mjs');

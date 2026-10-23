@@ -20,7 +20,7 @@ import {
   INTER_SEMIBOLD_B64,
   INTER_REGULAR_B64,
   TILE_PNG_B64,
-  JOKER_PNG_B64,
+  CODE_ART_PNG_B64,
   INVITE_PILE_PNG_B64,
 } from './og-assets.mjs';
 
@@ -32,8 +32,12 @@ const DIM = '#5A5F72';
 const COBALT = '#536AFA';
 
 const TILE_DATA_URL = `data:image/png;base64,${TILE_PNG_B64}`;
-const JOKER_DATA_URL = `data:image/png;base64,${JOKER_PNG_B64}`;
 const INVITE_PILE_DATA_URL = `data:image/png;base64,${INVITE_PILE_PNG_B64}`;
+const CODE_ART_DATA_URL = `data:image/png;base64,${CODE_ART_PNG_B64}`;
+// The promo card's own colours (Ellen's mockup, 2026-10-23): the same
+// gold, a pink highlight behind the code, near-black ink.
+const CODE_PINK = '#FCAAD5';
+const CODE_INK = '#141414';
 
 const fontBuf = (b64) => Uint8Array.from(atob(b64), (ch) => ch.charCodeAt(0)).buffer;
 
@@ -130,20 +134,55 @@ export async function renderCardPng({ title, subtitle }) {
 }
 
 /**
- * The promo-code card (/og/code/CODE.png): the Joker Exchange tile art
- * with the code as the cobalt line. Same frame as the table/friend cards
- * so a teacher's text looks like it came from the same place.
+ * The promo-code card (/og/code/CODE.png) — Ellen's layout (2026-10-23):
+ * her art layer full-bleed (the Joker Exchange tile in pink swirls, left),
+ * and on the right three plain lines with the code in a pink box:
+ *   Lucky, lucky. / This is a rare joker in Mahjong Alley.
+ *   [ JOKERX ]
+ *   tap through to unlock, or add the code in the shop →
+ * Not the table/friend frame on purpose — the gift gets its own card.
  */
 export async function renderCodeCardPng({ code }) {
-  const svg = await satori(
-    card({
-      title: 'A rare joker is waiting',
-      subtitle: `Code: ${code}`,
-      art: JOKER_DATA_URL,
-      footer: 'Shop → Have a code? · Mahjong Alley',
-    }),
-    { width: W, height: H, fonts: FONTS },
+  const line = (text, extra = {}) =>
+    el('div', { fontSize: 37, fontWeight: 400, color: CODE_INK, lineHeight: 1.38, display: 'flex', ...extra }, text);
+  const tree = el(
+    'div',
+    { width: W, height: H, display: 'flex', backgroundColor: GOLD, fontFamily: 'Inter', position: 'relative' },
+    [
+      { type: 'img', props: { src: CODE_ART_DATA_URL, width: W, height: H, style: { position: 'absolute', top: 0, left: 0 } } },
+      el(
+        'div',
+        { position: 'absolute', left: 675, top: 92, width: 460, display: 'flex', flexDirection: 'column' },
+        [
+          // Explicit breaks, as in the mockup — satori would otherwise
+          // orphan the arrow on a line of its own.
+          line('Lucky, lucky.'),
+          line('This is a rare joker in'),
+          line('Mahjong Alley.'),
+          el(
+            'div',
+            {
+              display: 'flex',
+              alignSelf: 'flex-start',
+              backgroundColor: CODE_PINK,
+              color: CODE_INK,
+              fontSize: 60,
+              fontWeight: 700,
+              letterSpacing: 1,
+              lineHeight: 1,
+              padding: '14px 20px',
+              marginTop: 36,
+            },
+            code,
+          ),
+          line('tap through to unlock,', { marginTop: 36 }),
+          line('or add the code in the'),
+          line('shop \u27F6'),
+        ],
+      ),
+    ],
   );
+  const svg = await satori(tree, { width: W, height: H, fonts: FONTS });
   return new Resvg(svg, { fitTo: { mode: 'width', value: W } }).render().asPng();
 }
 
