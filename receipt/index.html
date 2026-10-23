@@ -273,9 +273,9 @@
         lines.textContent = '';
         (data.lines || []).forEach(function (line) { render(lines, line); });
         if (data.linkLabel) play.textContent = data.linkLabel;
-        // A referral code on the link: open the app INTO the friend
-        // ceremony (the same route a texted invite link takes).
-        if (data.code) scheme = 'mahjong://invite/' + data.code;
+        // Where the link opens the app: the function decides (receiptLink)
+        // — the friend ceremony for a code, the same deal for a Daily Deal.
+        if (data.scheme) scheme = data.scheme;
       }
 
       // Try the app; if this page is still the one on screen a moment

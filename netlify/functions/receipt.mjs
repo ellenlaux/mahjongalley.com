@@ -111,6 +111,27 @@ export function parseReceipt(url) {
 
   const winnerSeat = moment === 'match-lit' ? SEATS[(q.get('w') ?? '').toLowerCase()] ?? null : null;
 
+  // A ranked Daily Deal (the app's kind 'table'): the day and the score's
+  // parts — TABLE (what the hand paid, signed), the closeness bonus (the
+  // ladder: 20/15/10/5), the fed count (−5 each, floor −20), the pace
+  // (wall draws). The score is re-added here; the link never carries it.
+  let table = null;
+  const dd = q.get('dd') ?? '';
+  const ddm = dd.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (ddm) {
+    const dt = new Date(Date.UTC(+ddm[1], +ddm[2] - 1, +ddm[3]));
+    const tbRaw = q.get('tb') ?? '';
+    const clRaw = q.get('cl') ?? '';
+    const fdRaw = q.get('fd') ?? '';
+    const pcRaw = q.get('pc') ?? '';
+    if (
+      dt.getUTCFullYear() === +ddm[1] && dt.getUTCMonth() === +ddm[2] - 1 && dt.getUTCDate() === +ddm[3] &&
+      /^-?\d{1,4}$/.test(tbRaw) && /^(?:0|5|10|15|20)$/.test(clRaw) && /^\d{1,2}$/.test(fdRaw) && /^\d{1,3}$/.test(pcRaw)
+    ) {
+      table = { date: dd, table: Math.max(-150, Math.min(9999, Number(tbRaw))), closeness: Number(clRaw), fedCount: Number(fdRaw), pace: Number(pcRaw) };
+    }
+  }
+
   const codeRaw = (q.get('i') ?? '').toUpperCase();
   const code = /^[A-Z2-9]{8}$/.test(codeRaw) ? codeRaw : null;
 
@@ -123,7 +144,7 @@ export function parseReceipt(url) {
     if (t.getUTCFullYear() === +dm[1] && t.getUTCMonth() === +dm[2] - 1 && t.getUTCDate() === +dm[3]) date = dRaw;
   }
 
-  return { moment, outcome, handLine, points, pattern, chips, jokerless, selfPick, away, winnerSeat, code, date };
+  return { moment, outcome, handLine, points, pattern, chips, jokerless, selfPick, away, winnerSeat, table, code, date };
 }
 
 /**
@@ -137,6 +158,28 @@ export function receiptMath(points, { jokerless, selfPick }) {
   const perPlayer = points * (jokerless ? 2 : 1) * (selfPick ? 2 : 1);
   const shares = selfPick ? 3 : 4;
   return { perPlayer, shares, total: perPlayer * shares };
+}
+
+/** The Daily Deal's score from its parts (engine/dailyTable in the app):
+ *  table + closeness + fed, fed being −5 a discard called, floor −20. */
+export function tableFedPoints(fedCount) {
+  const n = Number.isFinite(fedCount) && fedCount > 0 ? Math.floor(fedCount) : 0;
+  return Math.max(-20, -5 * n);
+}
+export function tableScore(t) {
+  return t.table + t.closeness + tableFedPoints(t.fedCount);
+}
+/** `+160`, `−40`, `0`. */
+export function signedPoints(n) {
+  if (n > 0) return `+${n}`;
+  if (n < 0) return `−${Math.abs(n)}`;
+  return '0';
+}
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+/** `2026-10-12` → `Oct 12`. */
+export function shortDay(date) {
+  const [, m, d] = date.split('-').map(Number);
+  return `${MONTHS[m - 1] ?? ''} ${d}`.trim();
 }
 
 /** "10/22/26" — the receipt's date line. */
@@ -221,6 +264,27 @@ export function receiptLines(r, name) {
     }
   }
 
+  // A ranked Daily Deal: the day's score, itemized under the game's own
+  // lines, and the TOTAL is the score, signed. Mirrors the app's
+  // lib/receiptLines.ts.
+  const t = r.table;
+  if (t) {
+    lines.push('---');
+    lines.push({ l: 'DAILY DEAL', r: receiptDate(t.date) });
+    lines.push({ l: 'TABLE', r: signedPoints(t.table) });
+    if (r.outcome !== 'win') {
+      const away = r.away;
+      lines.push({ l: away === null ? 'NO READABLE HAND' : away <= 0 ? 'READY FOR MAHJONG' : `${away} AWAY`, r: signedPoints(t.closeness) });
+    }
+    lines.push({ l: `FED ${t.fedCount}`, r: signedPoints(tableFedPoints(t.fedCount)) });
+    lines.push({ l: 'WALL DRAWS', r: String(t.pace), dim: true });
+    lines.push('---');
+    lines.push({ l: 'TOTAL', r: `${signedPoints(tableScore(t))} PTS`, bold: true });
+    lines.push('---');
+    lines.push({ c: 'THANK YOU · PLAY AGAIN SOON' });
+    return lines;
+  }
+
   lines.push('---');
   lines.push({ l: 'TOTAL', r: r.outcome === 'win' ? total ?? '—' : '0 PTS', bold: true });
   lines.push('---');
@@ -232,6 +296,16 @@ export function receiptLines(r, name) {
 export function receiptCopy(r, name) {
   const stat = [r.handLine, r.points ? `${r.points} pts` : null].filter(Boolean).join(' · ');
   const who = name ?? null;
+  // A ranked Daily Deal leads with the day and the score; the game's own
+  // story follows in the description.
+  if (r.table) {
+    const score = signedPoints(tableScore(r.table));
+    const dealLine = `Daily Deal · ${shortDay(r.table.date)} · ${score} · wall ${r.table.pace}`;
+    return {
+      title: who ? `${who} scored ${score} on the Daily Deal` : `${score} on the Daily Deal · ${shortDay(r.table.date)}`,
+      description: `${dealLine}${stat ? ` — ${headline(r).replace('!', '')} on ${stat}` : ''}. Play this deal on Mahjong Alley.`,
+    };
+  }
   let title;
   switch (r.moment) {
     case 'purse-payout':
@@ -271,6 +345,16 @@ export function receiptCopy(r, name) {
     who ? `Play with ${who} on Mahjong Alley.` : 'Come play American Mahjong on Mahjong Alley.'
   }`;
   return { title, description };
+}
+
+/** The one link on the slip: where it goes and what it says. A Daily
+ *  Deal's receipt invites to the same deal (the app's daily-table route
+ *  by scheme; the store when nothing answers); any other receipt opens
+ *  the app — into the friend ceremony when the sender's code is on it. */
+export function receiptLink(r, name) {
+  if (r.table) return { label: 'PLAY THIS DEAL ›', scheme: `mahjong://daily-table/${r.table.date}?via=share` };
+  if (r.code) return { label: name ? `PLAY WITH ${name.toUpperCase()} ›` : 'GET MAHJONG ALLEY ›', scheme: `mahjong://invite/${r.code}` };
+  return { label: 'GET MAHJONG ALLEY ›', scheme: 'mahjong://' };
 }
 
 /** The moment's media, when its art exists: the keyed transparent WebP the

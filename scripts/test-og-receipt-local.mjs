@@ -14,6 +14,8 @@ const samples = {
   'so-close': [at('/receipt/purse-payout?cat=quints&line=2&pts=40&pat=11111+2222+33333&away=1&d=2026-10-22'), null],
   'match-lit': [at('/receipt/match-lit?cat=369&line=1&pts=25&pat=333+666+999+DDD&away=2&w=south&d=2026-10-22'), 'DayRay'],
   'dead-hand': [at('/receipt/dead-hand?d=2026-10-22'), null],
+  'deal-win': [at('/receipt/pouch-fill?cat=2468&line=1&pts=25&pat=222+444+6666+8888&chips=concealed&dd=2026-10-12&tb=100&cl=0&fd=1&pc=97&i=ABCD2345&d=2026-10-12'), 'DayRay'],
+  'deal-loss': [at('/receipt/purse-payout?cat=2026&line=3&pts=30&pat=FFF+2026+222+6666&away=2&dd=2026-10-12&tb=-60&cl=15&fd=0&pc=88&d=2026-10-12'), null],
   'wall': [at('/receipt/dizzy-dragon?cat=2468&line=2&pts=30&pat=22+44+666+8888&away=4&d=2026-10-22'), 'DayRay'],
 };
 for (const [key, [r, name]] of Object.entries(samples)) {
