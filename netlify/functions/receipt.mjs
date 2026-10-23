@@ -273,12 +273,12 @@ export function receiptCopy(r, name) {
   return { title, description };
 }
 
-/** The moment's media, when its art exists: the mp4 for og:video (link
- *  previews), the keyed transparent WebP the page plays, its payoff frame. */
+/** The moment's media, when its art exists: the keyed transparent WebP the
+ *  page plays, and its payoff frame. (No og:video — the card is the
+ *  preview, and a preview shows either a clip or an image.) */
 export function receiptMedia(origin, moment) {
-  if (!HAS_ART.has(moment)) return { video: null, motion: null, art: null };
+  if (!HAS_ART.has(moment)) return { motion: null, art: null };
   return {
-    video: `${origin}/assets/receipt/${moment}.mp4`,
     motion: `${origin}/assets/receipt/${moment}.webp`,
     art: `${origin}/assets/receipt/${moment}-poster.png`,
   };

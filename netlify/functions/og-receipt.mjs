@@ -14,8 +14,10 @@ import { COURIER_BOLD_B64, COURIER_REGULAR_B64, WIN_ART_B64, WORDMARK_B64 } from
 import { fetchPeek } from './peeks.mjs';
 import { HAS_ART, parseReceipt, receiptLines } from './receipt.mjs';
 
+// A SQUARE card: Messages lays it at full bubble width, so the whole slip
+// reads — the art, the lines, TOTAL (Ellen 2026-10-23).
 const W = 1200;
-const H = 630;
+const H = 1200;
 const CREAM = '#F2E8D5';
 const PAPER = '#FFFFFF';
 const INK = '#1A1A2E';
@@ -29,7 +31,7 @@ const el = (type, style, children) => ({ type, props: { style, ...(children !== 
 
 function line(entry) {
   if (entry === '---') {
-    return el('div', { display: 'flex', borderBottom: `2px dashed ${INK}`, opacity: 0.35, marginTop: 7, marginBottom: 7 });
+    return el('div', { display: 'flex', borderBottom: `3px dashed ${INK}`, opacity: 0.35, marginTop: 12, marginBottom: 12 });
   }
   if (entry.c !== undefined) {
     return el(
@@ -37,21 +39,21 @@ function line(entry) {
       {
         display: 'flex',
         justifyContent: 'center',
-        fontSize: entry.big ? 32 : entry.small ? 14 : 17,
+        fontSize: entry.big ? 52 : entry.small ? 22 : 27,
         fontWeight: entry.bold || entry.big ? 700 : 400,
         letterSpacing: entry.big ? 1 : 0,
-        marginTop: entry.big ? 4 : 1,
-        marginBottom: entry.big ? 4 : 1,
+        marginTop: entry.big ? 8 : 2,
+        marginBottom: entry.big ? 8 : 2,
       },
       entry.c,
     );
   }
   const left = [];
-  if (entry.q !== undefined) left.push(el('div', { display: 'flex', width: 38, flexShrink: 0 }, `${entry.q}×`));
+  if (entry.q !== undefined) left.push(el('div', { display: 'flex', width: 60, flexShrink: 0 }, `${entry.q}×`));
   left.push(el('div', { display: 'flex', flexShrink: 1 }, entry.l));
   return el(
     'div',
-    { display: 'flex', flexDirection: 'row', justifyContent: 'space-between', fontSize: 17, fontWeight: entry.bold ? 700 : 400, opacity: entry.dim ? 0.8 : 1, paddingLeft: entry.indent ? 38 : 0, marginTop: 1, marginBottom: 1 },
+    { display: 'flex', flexDirection: 'row', justifyContent: 'space-between', fontSize: 27, fontWeight: entry.bold ? 700 : 400, opacity: entry.dim ? 0.8 : 1, paddingLeft: entry.indent ? 60 : 0, marginTop: 2, marginBottom: 2 },
     [el('div', { display: 'flex', flexDirection: 'row', flexShrink: 1, paddingRight: 12 }, left), el('div', { display: 'flex', flexShrink: 0 }, entry.r)],
   );
 }
@@ -62,14 +64,14 @@ function slip(r, name) {
   // way a shop's logo tops a receipt.
   if (HAS_ART.has(r.moment)) {
     rows.push(
-      el('div', { display: 'flex', justifyContent: 'center', marginTop: -14, marginBottom: -12 }, [
-        { type: 'img', props: { src: `data:image/png;base64,${WIN_ART_B64[r.moment]}`, width: 180, height: 180 } },
+      el('div', { display: 'flex', justifyContent: 'center', marginTop: -20, marginBottom: -16 }, [
+        { type: 'img', props: { src: `data:image/png;base64,${WIN_ART_B64[r.moment]}`, width: 300, height: 300 } },
       ]),
     );
   }
   rows.push(
-    el('div', { display: 'flex', justifyContent: 'center', marginTop: HAS_ART.has(r.moment) ? 0 : 8, marginBottom: 4 }, [
-      { type: 'img', props: { src: `data:image/png;base64,${WORDMARK_B64}`, width: 272, height: 57 } },
+    el('div', { display: 'flex', justifyContent: 'center', marginTop: HAS_ART.has(r.moment) ? 0 : 12, marginBottom: 8 }, [
+      { type: 'img', props: { src: `data:image/png;base64,${WORDMARK_B64}`, width: 400, height: 84 } },
     ]),
   );
   for (const entry of receiptLines(r, name)) rows.push(line(entry));
@@ -77,24 +79,28 @@ function slip(r, name) {
   const bars = [];
   const widths = [3, 2, 5, 2, 3, 6, 2, 2, 4, 3, 2, 5, 3, 2, 6, 2, 4, 2, 3, 5, 2, 3, 2, 6, 3, 2, 4, 2, 5, 3];
   for (let i = 0; i < widths.length; i++) {
-    bars.push(el('div', { display: 'flex', width: widths[i], height: 30, backgroundColor: i % 2 === 0 ? INK : 'transparent', marginRight: 2 }));
+    bars.push(el('div', { display: 'flex', width: widths[i] * 1.6, height: 50, backgroundColor: i % 2 === 0 ? INK : 'transparent', marginRight: 3 }));
   }
-  rows.push(el('div', { display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: 10 }, bars));
-  rows.push(el('div', { display: 'flex', justifyContent: 'center', fontSize: 15, marginTop: 6, opacity: 0.7 }, 'mahjongalley.com'));
+  rows.push(el('div', { display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: 16 }, bars));
+  rows.push(el('div', { display: 'flex', justifyContent: 'center', fontSize: 22, marginTop: 10, opacity: 0.7 }, 'mahjongalley.com'));
   return el(
     'div',
-    { display: 'flex', flexDirection: 'column', width: 470, backgroundColor: PAPER, color: INK, padding: '18px 26px 18px', fontFamily: 'Courier Prime', boxShadow: '0 12px 30px rgba(26,26,46,0.18)', transform: 'rotate(-1.5deg)' },
+    { display: 'flex', flexDirection: 'column', width: 760, backgroundColor: PAPER, color: INK, padding: '30px 40px 30px', fontFamily: 'Courier Prime', boxShadow: '0 20px 50px rgba(26,26,46,0.18)', transform: 'rotate(-1.5deg)' },
     rows,
   );
 }
 
 function card(r, name) {
-  // The slip stands in the middle of the card and runs off its bottom
-  // edge — still printing. What fits: the art, the wordmark, the date and
-  // player, the headline, the first items.
+  // A short slip (a loss, a plain win) sits centred on the card; a long
+  // one (a win with the math and three chips) starts at the top and may
+  // run off the bottom edge — still printing. Satori can't measure, so
+  // the height is estimated from the line count.
+  const n = receiptLines(r, name).length;
+  const estimate = 60 + (HAS_ART.has(r.moment) ? 264 : 0) + 92 + n * 40 + 140;
+  const tall = estimate > H - 80;
   return el(
     'div',
-    { width: W, height: H, display: 'flex', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'center', backgroundColor: CREAM, paddingTop: 22, overflow: 'hidden' },
+    { width: W, height: H, display: 'flex', flexDirection: 'row', alignItems: tall ? 'flex-start' : 'center', justifyContent: 'center', backgroundColor: CREAM, paddingTop: tall ? 40 : 0, overflow: 'hidden' },
     [slip(r, name)],
   );
 }
