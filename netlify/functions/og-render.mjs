@@ -136,15 +136,18 @@ export async function renderCardPng({ title, subtitle }) {
 /**
  * The promo-code card (/og/code/CODE.png) — Ellen's layout (2026-10-23):
  * her art layer full-bleed (the Joker Exchange tile in pink swirls, left),
- * and on the right three plain lines with the code in a pink box:
- *   Lucky, lucky. / This is a rare joker in Mahjong Alley.
+ * and on the right plain lines with the code in a pink box:
+ *   Lucky, lucky.
+ *   This joker is yours to unlock in Mahjong Alley.
  *   [ JOKERX ]
- *   tap through to unlock, or add the code in the shop →
+ *   Tap through to claim it, or enter the code in the Shop ⟶
  * Not the table/friend frame on purpose — the gift gets its own card.
  */
 export async function renderCodeCardPng({ code }) {
-  const line = (text, extra = {}) =>
-    el('div', { fontSize: 37, fontWeight: 400, color: CODE_INK, lineHeight: 1.38, display: 'flex', ...extra }, text);
+  const para = (text, extra = {}) =>
+    el('div', { fontSize: 34, fontWeight: 400, color: CODE_INK, lineHeight: 1.3, display: 'flex', ...extra }, text);
+  // A 13-char code (JOKEREXCHANGE) ran off the card at 56px; size by length.
+  const codeSize = code.length > 11 ? 38 : code.length > 8 ? 46 : 56;
   const tree = el(
     'div',
     { width: W, height: H, display: 'flex', backgroundColor: GOLD, fontFamily: 'Inter', position: 'relative' },
@@ -152,13 +155,12 @@ export async function renderCodeCardPng({ code }) {
       { type: 'img', props: { src: CODE_ART_DATA_URL, width: W, height: H, style: { position: 'absolute', top: 0, left: 0 } } },
       el(
         'div',
-        { position: 'absolute', left: 675, top: 92, width: 460, display: 'flex', flexDirection: 'column' },
+        { position: 'absolute', left: 640, top: 124, width: 548, display: 'flex', flexDirection: 'column' },
         [
-          // Explicit breaks, as in the mockup — satori would otherwise
-          // orphan the arrow on a line of its own.
-          line('Lucky, lucky.'),
-          line('This is a rare joker in'),
-          line('Mahjong Alley.'),
+          para('Lucky, lucky.'),
+          // Broken by hand so "Alley." never sits alone on a line.
+          para('This joker is yours to unlock'),
+          para('in Mahjong Alley.'),
           el(
             'div',
             {
@@ -166,132 +168,22 @@ export async function renderCodeCardPng({ code }) {
               alignSelf: 'flex-start',
               backgroundColor: CODE_PINK,
               color: CODE_INK,
-              fontSize: 60,
+              fontSize: codeSize,
               fontWeight: 700,
               letterSpacing: 1,
               lineHeight: 1,
-              padding: '14px 20px',
-              marginTop: 36,
+              padding: '12px 18px',
+              marginTop: 26,
             },
             code,
           ),
-          line('tap through to unlock,', { marginTop: 36 }),
-          line('or add the code in the'),
-          line('shop \u27F6'),
+          // Broken at the comma: a natural wrap left "or enter the" hanging.
+          para('Tap through to claim it,', { marginTop: 26 }),
+          para('or enter the code in the Shop\u00A0\u27F6'),
         ],
       ),
     ],
   );
   const svg = await satori(tree, { width: W, height: H, fonts: FONTS });
-  return new Resvg(svg, { fitTo: { mode: 'width', value: W } }).render().asPng();
-}
-
-/**
- * The friend-invite card (/og/invite/CODE.png) — Ellen's design
- * (2026-10-23): a pile of tiles at left on the gold, and at right a quiet
- * "Hey!", the @name set bold on an ivory chip, then "wants to be friends
- * on Mahjong Alley →". Only the name changes per player; the pile is one
- * transparent PNG (assets/invite-pile.png, embedded via og-assets).
- */
-const IVORY = '#F8F3E9';
-const PILE_W = 540; // the pile's drawn width; 850×940 source → 540×597
-const PILE_H = 597;
-
-function inviteCard({ name }) {
-  // Size the name to the chip's inner width (column 500 − chip padding 48):
-  // Inter Bold runs ≈0.62em per glyph, so a 20-char handle (the app's
-  // maximum) lands near 36px instead of clipping at the card's edge.
-  const nameSize = Math.max(32, Math.min(76, Math.floor(452 / (0.62 * name.length))));
-  const arrow = {
-    type: 'svg',
-    props: {
-      width: 64,
-      height: 44,
-      viewBox: '0 0 64 44',
-      style: { marginLeft: 14 },
-      children: [
-        { type: 'path', props: { d: 'M2 22 H58', stroke: NAVY, strokeWidth: 3, strokeLinecap: 'round' } },
-        { type: 'path', props: { d: 'M42 8 L60 22 L42 36', stroke: NAVY, strokeWidth: 3, strokeLinecap: 'round', strokeLinejoin: 'round', fill: 'none' } },
-      ],
-    },
-  };
-  return el(
-    'div',
-    {
-      width: W,
-      height: H,
-      display: 'flex',
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: GOLD,
-      fontFamily: 'Inter',
-      color: NAVY,
-    },
-    [
-      {
-        type: 'img',
-        props: {
-          src: INVITE_PILE_DATA_URL,
-          width: PILE_W,
-          height: PILE_H,
-          style: { position: 'absolute', left: 36, top: (H - PILE_H) / 2 },
-        },
-      },
-      el(
-        'div',
-        {
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-start',
-          // Centred on the card's height, not pinned to a top: a long
-          // handle shrinks the chip and the block with it, and a pinned
-          // block then sat high (Ellen 2026-10-23). The 8px keeps the
-          // extra air above "Hey!" she asked for.
-          position: 'absolute',
-          left: 660,
-          top: 0,
-          height: H,
-          justifyContent: 'center',
-          paddingTop: 8,
-          width: 500,
-        },
-        [
-          // Same size as the "wants to be friends" line (Ellen 2026-10-23).
-          el('div', { fontSize: 44, fontWeight: 400, lineHeight: 1, display: 'flex' }, 'Hey!'),
-          el(
-            'div',
-            {
-              fontSize: nameSize,
-              fontWeight: 700,
-              lineHeight: 1,
-              backgroundColor: IVORY,
-              padding: '18px 24px',
-              borderRadius: 6,
-              marginTop: 26,
-              display: 'flex',
-              maxWidth: 500,
-              overflow: 'hidden',
-            },
-            name,
-          ),
-          el(
-            'div',
-            { fontSize: 44, fontWeight: 400, lineHeight: 1.22, marginTop: 28, display: 'flex' },
-            'wants to be friends on',
-          ),
-          el(
-            'div',
-            { fontSize: 44, fontWeight: 400, lineHeight: 1.22, display: 'flex', alignItems: 'center' },
-            [el('div', { display: 'flex' }, 'Mahjong Alley'), arrow],
-          ),
-        ],
-      ),
-    ],
-  );
-}
-
-/** Render the friend-invite card to PNG bytes. Throws on failure. */
-export async function renderInviteCardPng({ name }) {
-  const svg = await satori(inviteCard({ name }), { width: W, height: H, fonts: FONTS });
   return new Resvg(svg, { fitTo: { mode: 'width', value: W } }).render().asPng();
 }
