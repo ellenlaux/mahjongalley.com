@@ -18,11 +18,19 @@
   <meta property="og:image" content="https://mahjongalley.com/assets/og-card.png?v=2" />
   <!-- A SQUARE card (Ellen 2026-10-23: "I want to see the receipt too,
        not only the dragon"): Messages lays a square at full bubble width,
-       so the whole slip reads — the art, the lines, TOTAL. No video tag:
-       a preview shows either the clip or the image, never both, and the
-       receipt is the share. -->
+       so the whole slip reads — the art, the lines, TOTAL. -->
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="1200" />
+  <!-- The card as a video: the same slip, the moment's clip animating in
+       its header (og-receipt-video). Previews that play a direct mp4
+       (Messages) show this; everything else draws og:image.
+       receipt-preview swaps the URL per receipt, and drops these tags
+       for a moment with no clip yet. -->
+  <meta property="og:video" content="https://mahjongalley.com/og/receipt-video/pouch-fill.mp4" />
+  <meta property="og:video:secure_url" content="https://mahjongalley.com/og/receipt-video/pouch-fill.mp4" />
+  <meta property="og:video:type" content="video/mp4" />
+  <meta property="og:video:width" content="960" />
+  <meta property="og:video:height" content="960" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Mahjong Alley" />
   <meta name="twitter:card" content="summary_large_image" />

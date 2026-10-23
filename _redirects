@@ -25,11 +25,14 @@
 #
 # /receipt/<moment>?… is a shared GAME — a win, a loss, a wall game — as a
 # printed receipt. receipt-preview injects its OG tags (and og:video, the
-# moment's clip, when one exists) into the static receipt page; the query
+# card as a video, when the moment has a clip) into the static receipt page; the query
 # string is the client's own, so it survives the rewrite.
-# /og/receipt/<moment>.png?… renders the card for that same query.
-/receipt/*     /.netlify/functions/receipt-preview  200
-/og/receipt/*  /.netlify/functions/og-receipt       200
+# /og/receipt/<moment>.png?… renders the card for that same query, and
+# /og/receipt-video/<moment>.mp4?… the same card as a short video with the
+# moment's clip composed live in its header (og:video — Messages plays it).
+/receipt/*           /.netlify/functions/receipt-preview   200
+/og/receipt/*        /.netlify/functions/og-receipt        200
+/og/receipt-video/*  /.netlify/functions/og-receipt-video  200
 #
 # /code/CODE is a PROMO CODE (a teacher's; app migration 0113) — the page
 # shows the code and where to enter it; code-preview injects the gift's
