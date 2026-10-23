@@ -210,7 +210,8 @@ function inviteCard({ name }) {
           width: 500,
         },
         [
-          el('div', { fontSize: 38, fontWeight: 400, lineHeight: 1, display: 'flex' }, 'Hey!'),
+          // Same size as the "wants to be friends" line (Ellen 2026-10-23).
+          el('div', { fontSize: 44, fontWeight: 400, lineHeight: 1, display: 'flex' }, 'Hey!'),
           el(
             'div',
             {
