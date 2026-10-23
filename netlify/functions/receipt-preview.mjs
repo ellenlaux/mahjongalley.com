@@ -6,10 +6,10 @@
  * deployed page, swap only <title>, the metas, and one data placeholder.
  * Anything unexpected → the page as it is, generic tags and all.
  *
- * og:video points at the moment's clip, when one exists, so link previews
- * that play video (iMessage's does, for a direct mp4) show the moment;
- * og:image is the rendered card for everything else. Without a clip the
- * video tags are removed.
+ * The card (og:image) is the receipt, and the only preview media: a link
+ * preview shows either a video or an image, and with the clip as og:video
+ * Messages showed only the dragon (Ellen 2026-10-23). The clips stay for
+ * the page itself (the keyed WebP on the slip).
  */
 
 import { fetchPeek } from './peeks.mjs';
@@ -23,7 +23,7 @@ const esc = (s) =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
-function metaSwap(html, { title, description, image, video }) {
+function metaSwap(html, { title, description, image }) {
   const t = esc(title);
   const d = esc(description);
   const swaps = [
@@ -36,14 +36,6 @@ function metaSwap(html, { title, description, image, video }) {
     [/(<meta name="twitter:image" content=")[^"]*(")/, `$1${image}$2`],
     [/(<meta name="description" content=")[^"]*(")/, `$1${d}$2`],
   ];
-  if (video) {
-    swaps.push(
-      [/(<meta property="og:video" content=")[^"]*(")/, `$1${video}$2`],
-      [/(<meta property="og:video:secure_url" content=")[^"]*(")/, `$1${video}$2`],
-    );
-  } else {
-    swaps.push([/\s*<meta property="og:video[^"]*" content="[^"]*" \/>/g, '']);
-  }
   return swaps.reduce((acc, [re, sub]) => acc.replace(re, sub), html);
 }
 
@@ -80,7 +72,7 @@ export default async (req) => {
   })
     // A closing script tag inside a JSON string would end the data block early.
     .replace(/</g, '\\u003c');
-  const html = metaSwap(baseHtml, { title: copy.title, description: copy.description, image, video: media.video }).replace(
+  const html = metaSwap(baseHtml, { title: copy.title, description: copy.description, image }).replace(
     '<script id="receipt-data" type="application/json">null</script>',
     `<script id="receipt-data" type="application/json">${data}</script>`,
   );
