@@ -24,13 +24,15 @@
   <!-- The card as a video: the same slip, the moment's clip animating in
        its header (og-receipt-video). Previews that play a direct mp4
        (Messages) show this; everything else draws og:image.
-       receipt-preview swaps the URL per receipt, and drops these tags
-       for a moment with no clip yet. -->
+       receipt-preview swaps the URL per receipt — and keeps these tags
+       only when the video is already built and quick (the app warms it
+       as the receipt prints); otherwise, and for a moment with no clip
+       yet, it drops them and the still card carries the preview. -->
   <meta property="og:video" content="https://mahjongalley.com/og/receipt-video/pouch-fill.mp4" />
   <meta property="og:video:secure_url" content="https://mahjongalley.com/og/receipt-video/pouch-fill.mp4" />
   <meta property="og:video:type" content="video/mp4" />
-  <meta property="og:video:width" content="960" />
-  <meta property="og:video:height" content="960" />
+  <meta property="og:video:width" content="800" />
+  <meta property="og:video:height" content="800" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Mahjong Alley" />
   <meta name="twitter:card" content="summary_large_image" />

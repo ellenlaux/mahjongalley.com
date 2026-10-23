@@ -28,9 +28,9 @@ import { HAS_ART, parseReceipt } from './receipt.mjs';
 const run = promisify(execFile);
 /** The video's side. Smaller than the PNG: it encodes in the function's
  *  time budget and Messages shows it at bubble width anyway. */
-export const VIDEO_PX = 960;
+export const VIDEO_PX = 800;
 const TILT_DEG = -1.5;
-const FPS = 24;
+const FPS = 20;
 
 /** The art's centre on the card, after the slip's tilt about its own
  *  centre (the art sits straight above that centre, so the tilt walks it
