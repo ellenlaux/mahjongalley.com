@@ -206,7 +206,7 @@ function inviteCard({ name }) {
           alignItems: 'flex-start',
           position: 'absolute',
           left: 660,
-          top: 150,
+          top: 158, // 150 + 8 of air above "Hey!" (Ellen 2026-10-23)
           width: 500,
         },
         [
