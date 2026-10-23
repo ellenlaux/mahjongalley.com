@@ -1,7 +1,7 @@
 // Local smoke test for the card renderer — writes two sample PNGs.
 //   node scripts/test-og-local.mjs
 import { writeFileSync } from 'node:fs';
-import { renderCardPng } from '../netlify/functions/og-render.mjs';
+import { renderCardPng, renderInviteCardPng } from '../netlify/functions/og-render.mjs';
 
 const table = await renderCardPng({
   title: "ElleBell’s Table",
@@ -9,9 +9,8 @@ const table = await renderCardPng({
 });
 writeFileSync('/tmp/og-join-sample.png', table);
 
-const invite = await renderCardPng({
-  title: 'DayRay',
-  subtitle: 'wants to be friends',
-});
+const invite = await renderInviteCardPng({ name: 'ElleBell' });
 writeFileSync('/tmp/og-invite-sample.png', invite);
-console.log('wrote /tmp/og-join-sample.png and /tmp/og-invite-sample.png');
+const inviteLong = await renderInviteCardPng({ name: 'MahjongMavenOfMesaAZ' });
+writeFileSync('/tmp/og-invite-long-sample.png', inviteLong);
+console.log('wrote /tmp/og-join-sample.png, /tmp/og-invite-sample.png and /tmp/og-invite-long-sample.png');
