@@ -78,7 +78,7 @@ export default async (req) => {
         }
       : {
           title: `${peek.displayName} wants to be friends`,
-          description: 'Join them on Mahjong Alley — come play American Mahjong, with friends.',
+          description: 'Check out Mahjong Alley',
           image,
         };
 
