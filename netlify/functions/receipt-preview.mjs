@@ -15,7 +15,7 @@
  */
 
 import { fetchPeek } from './peeks.mjs';
-import { parseReceipt, receiptCopy, receiptLines, receiptMedia } from './receipt.mjs';
+import { parseReceipt, receiptCopy, receiptLines, receiptLink, receiptMedia } from './receipt.mjs';
 
 const esc = (s) =>
   String(s)
@@ -82,13 +82,15 @@ export default async (req) => {
   // says. The query lands inside an attribute value, so its & is &amp;.
   const image = esc(`${url.origin}/og/receipt/${r.moment}.png${url.search}`);
 
+  const link = receiptLink(r, name);
   const data = JSON.stringify({
     moment: r.moment,
     outcome: r.outcome,
     code: r.code,
     name,
     lines: receiptLines(r, name),
-    linkLabel: name ? `PLAY WITH ${name.toUpperCase()} ›` : 'GET MAHJONG ALLEY ›',
+    linkLabel: link.label,
+    scheme: link.scheme,
     motion: media.motion,
     art: media.art,
   })
