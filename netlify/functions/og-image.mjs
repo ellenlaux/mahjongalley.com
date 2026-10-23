@@ -11,7 +11,7 @@
  * function existed.
  */
 
-import { renderCardPng } from './og-render.mjs';
+import { renderCardPng, renderInviteCardPng } from './og-render.mjs';
 import { fetchPeek, paceLabel, parsePreviewRequest } from './peeks.mjs';
 
 export default async (req) => {
@@ -29,18 +29,15 @@ export default async (req) => {
     const peek = await fetchPeek(kind, code);
     if (!peek) return fallback();
 
-    const card =
-      kind === 'join'
-        ? {
+    // Friend invites get Ellen's tile-pile card (2026-10-23); tables keep
+    // the tile + text column card.
+    const png =
+      kind === 'invite'
+        ? await renderInviteCardPng({ name: peek.displayName })
+        : await renderCardPng({
             title: peek.name ?? `${peek.hostDisplayName}’s Table`,
             subtitle: `${peek.seatCount}/${peek.maxPlayers} seated · ${paceLabel(peek.mode)}`,
-          }
-        : {
-            title: peek.displayName,
-            subtitle: 'wants to be friends',
-          };
-
-    const png = await renderCardPng(card);
+          });
     return new Response(png, {
       status: 200,
       headers: {
