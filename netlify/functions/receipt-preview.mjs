@@ -49,6 +49,18 @@ function metaSwap(html, { title, description, image, video }) {
   return swaps.reduce((acc, [re, sub]) => acc.replace(re, sub), html);
 }
 
+/** True when the card video answers fast (built and cached) — a cold
+ *  build takes seconds, which is exactly what the preview can't wait
+ *  for. The probe itself kicks that build off, so the NEXT look finds it. */
+async function videoReady(videoUrl) {
+  try {
+    const res = await fetch(videoUrl, { method: 'HEAD', signal: AbortSignal.timeout(1500) });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 export default async (req) => {
   const url = new URL(req.url);
   const baseRes = await fetch(new URL('/receipt/index.html', url.origin));
@@ -83,8 +95,15 @@ export default async (req) => {
     // A closing script tag inside a JSON string would end the data block early.
     .replace(/</g, '\\u003c');
   // The video carries the same query as the card, so it says what the
-  // card says. Inside an attribute value its & is &amp;.
-  const video = media.video ? esc(`${media.video}${url.search}`) : null;
+  // card says — but it is advertised ONLY when it is already built and
+  // quick to fetch. Messages builds its preview on the sender's phone
+  // and gives up on a slow og:video, taking the whole card with it
+  // (Ellen 2026-10-23: no unfurl at all). The app warms the video when
+  // the receipt prints, so by the time it is shared the probe answers
+  // in time; a cold one gets the still card. Inside an attribute value
+  // the query's & is &amp;.
+  const videoUrl = media.video ? `${media.video}${url.search}` : null;
+  const video = videoUrl && (await videoReady(videoUrl)) ? esc(videoUrl) : null;
   const html = metaSwap(baseHtml, { title: copy.title, description: copy.description, image, video }).replace(
     '<script id="receipt-data" type="application/json">null</script>',
     `<script id="receipt-data" type="application/json">${data}</script>`,
