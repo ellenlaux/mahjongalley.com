@@ -196,6 +196,12 @@
   <script>
     // /join/ABC123 (6-char table code) or /invite/ABCD2345 (8-char friend
     // code). Served via the 404 fallback, so parse the live path.
+    //
+    // The page renders a generic version at once, then asks the same
+    // public peek the link-preview card uses (0084 / 0120) and swaps in
+    // the host's name and table, or the friend's name (Ellen, 2026-10-23:
+    // "You're invited to a table" was the wrong phrase once the card
+    // already said who). A failed peek leaves the generic copy.
     (function () {
       var m = location.pathname.match(/^\/(join|invite)\/([A-Za-z0-9]{4,12})\/?$/);
       if (!m) return;
@@ -203,24 +209,25 @@
       var code = m[2].toUpperCase();
 
       var headline = document.getElementById('headline');
+      var subline = document.getElementById('subline');
       headline.textContent =
-        kind === 'join' ? "You're invited to a table" : "You're invited to play";
+        kind === 'join' ? 'A friend saved you a seat' : 'A friend wants to connect';
       headline.hidden = false;
       if (kind === 'invite') {
         document.getElementById('code-label').textContent = 'Friend code';
       }
-      document.getElementById('subline').textContent =
+      subline.textContent =
         kind === 'join'
-          ? 'A friend saved you a seat on Mahjong Alley.'
-          : "Join a friend on Mahjong Alley — you'll be connected automatically.";
+          ? 'There’s a table waiting for you on Mahjong Alley.'
+          : 'Say yes on Mahjong Alley — it takes a tap.';
 
       document.getElementById('code').textContent = code;
       document.getElementById('invite').hidden = false;
       var hint = document.getElementById('hint');
       hint.textContent =
         kind === 'join'
-          ? 'New here? Get the app first — the code will be waiting in this message. Have the app already? Tap “Open in the app”, or type the code on the Join a table screen.'
-          : 'New here? Get the app, then tap this link again — you’ll be friends as soon as you’re signed in. Have the app already? Tap “Open in the app” and you’ll be connected automatically.';
+          ? 'New here? Get the app, then come back and tap this link. Already have it? Tap Open in the app, or enter the code under Join a table.'
+          : 'New here? Get the app, then come back and tap this link. Already have it? Tap Open in the app.';
       hint.hidden = false;
 
       var open = document.getElementById('open-app');
@@ -243,6 +250,43 @@
           location.href = document.getElementById('get-app').href;
         }, 1200);
       });
+
+      // ---- Personalize from the public peek (same pair the app ships) ----
+      var SUPABASE_URL = 'https://bhtuztrwgpyzhxipcjda.supabase.co';
+      var SUPABASE_KEY = 'sb_publishable_86_PUFmbyZ5tKDuik07Y8A_8xNqUTE3';
+      var fn = kind === 'join' ? 'peek_lobby_preview' : 'peek_app_invite';
+      var ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+      if (ctrl) setTimeout(function () { ctrl.abort(); }, 4000);
+      fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_KEY,
+          authorization: 'Bearer ' + SUPABASE_KEY,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({ p_code: code }),
+        signal: ctrl ? ctrl.signal : undefined,
+      })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (rows) {
+          var row = Array.isArray(rows) ? rows[0] : null;
+          if (!row) return;
+          if (kind === 'join') {
+            var host = row.host_display_name || 'A friend';
+            var table = row.name || host + '’s Table';
+            var pace = row.mode === 'async' ? 'Async' : row.mode === 'live_scheduled' ? 'Scheduled' : 'Live';
+            var rules = row.rules_mode === 'social' ? 'House Rules' : 'NMJL Standard';
+            headline.textContent = host + ' saved you a seat';
+            subline.textContent =
+              table + ' · ' + Number(row.seat_count || 0) + ' of ' + Number(row.max_players || 4) +
+              ' seated · ' + pace + ' · ' + rules;
+          } else {
+            var name = row.display_name || 'A friend';
+            headline.textContent = name + ' wants to be friends';
+            subline.textContent = 'Say yes on Mahjong Alley — it takes a tap.';
+          }
+        })
+        .catch(function () { /* generic copy stays */ });
     })();
   </script>
 </body>
