@@ -66,13 +66,13 @@ const TOKEN = /^(?:[0-9]{1,5}|1D|F{2,6}|D{1,4}|N{1,4}|E{2,4}|W{2,4}|S{2,4}|NEWS)
 
 /**
  * Parse + validate a receipt request. Moment from the preserved pathname
- * (/receipt/<m>, /og/receipt/<m>.png — Netlify rewrites keep the client's
+ * (/receipt/<m>, /og/receipt/<m>.png, /og/receipt-video/<m>.mp4 — Netlify rewrites keep the client's
  * own query string, so the rest rides as query params). Returns null when
  * the moment is unknown; every other field degrades to "absent" rather
  * than failing the request, so a damaged link still lands on a sane page.
  */
 export function parseReceipt(url) {
-  const m = url.pathname.match(/^\/(?:og\/)?receipt\/([a-z-]{3,24})(?:\.png)?\/?$/);
+  const m = url.pathname.match(/^\/(?:og\/)?receipt(?:-video)?\/([a-z-]{3,24})(?:\.png|\.mp4)?\/?$/);
   const moment = m ? m[1] : url.searchParams.get('moment');
   const outcome = MOMENTS[moment];
   if (!outcome) return null;
@@ -274,11 +274,13 @@ export function receiptCopy(r, name) {
 }
 
 /** The moment's media, when its art exists: the keyed transparent WebP the
- *  page plays, and its payoff frame. (No og:video — the card is the
- *  preview, and a preview shows either a clip or an image.) */
+ *  page plays, its payoff frame, and the card as a VIDEO for og:video
+ *  (the same slip with the clip composed live in its header — a preview
+ *  shows either a clip or an image, so the clip must carry the receipt). */
 export function receiptMedia(origin, moment) {
-  if (!HAS_ART.has(moment)) return { motion: null, art: null };
+  if (!HAS_ART.has(moment)) return { motion: null, art: null, video: null };
   return {
+    video: `${origin}/og/receipt-video/${moment}.mp4`,
     motion: `${origin}/assets/receipt/${moment}.webp`,
     art: `${origin}/assets/receipt/${moment}-poster.png`,
   };

@@ -40,5 +40,15 @@ for (const beat of BEATS) {
   out += `  '${beat}': '${readFileSync(small).toString('base64')}',\n`;
 }
 out += `};\n`;
+// The card VIDEO (og-receipt-video) composes the moment's clip over the
+// slip: one small square cut per win beat (assets/receipt/<beat>-card.mp4,
+// the clip stage's 720px square scaled to 300, white stage kept — the
+// function keys it out at compose time), embedded so the function needs
+// no file beside it on the Lambda.
+out += `export const CARD_CLIP_B64 = {\n`;
+for (const beat of BEATS) {
+  out += `  '${beat}': '${readFileSync(`assets/receipt/${beat}-card.mp4`).toString('base64')}',\n`;
+}
+out += `};\n`;
 writeFileSync('netlify/functions/og-receipt-assets.mjs', out);
 console.log('wrote netlify/functions/og-receipt-assets.mjs');

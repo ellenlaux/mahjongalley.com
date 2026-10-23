@@ -58,14 +58,21 @@ function line(entry) {
   );
 }
 
-function slip(r, name) {
+const SLIP_W = 760;
+export const ART_PX = 300;
+
+/** `hole`: leave the art's box empty (the card video composes the live
+ *  clip there) — same size, so the lines land where the PNG's do. */
+function slip(r, name, hole = false) {
   const rows = [];
   // The header art: the moment (when recorded), then the wordmark — the
   // way a shop's logo tops a receipt.
   if (HAS_ART.has(r.moment)) {
     rows.push(
       el('div', { display: 'flex', justifyContent: 'center', marginTop: -20, marginBottom: -16 }, [
-        { type: 'img', props: { src: `data:image/png;base64,${WIN_ART_B64[r.moment]}`, width: 300, height: 300 } },
+        hole
+          ? el('div', { display: 'flex', width: ART_PX, height: ART_PX })
+          : { type: 'img', props: { src: `data:image/png;base64,${WIN_ART_B64[r.moment]}`, width: ART_PX, height: ART_PX } },
       ]),
     );
   }
@@ -85,28 +92,43 @@ function slip(r, name) {
   rows.push(el('div', { display: 'flex', justifyContent: 'center', fontSize: 22, marginTop: 10, opacity: 0.7 }, 'mahjongalley.com'));
   return el(
     'div',
-    { display: 'flex', flexDirection: 'column', width: 760, backgroundColor: PAPER, color: INK, padding: '30px 40px 30px', fontFamily: 'Courier Prime', boxShadow: '0 20px 50px rgba(26,26,46,0.18)', transform: 'rotate(-1.5deg)' },
+    { display: 'flex', flexDirection: 'column', width: SLIP_W, backgroundColor: PAPER, color: INK, padding: '30px 40px 30px', fontFamily: 'Courier Prime', boxShadow: '0 20px 50px rgba(26,26,46,0.18)', transform: 'rotate(-1.5deg)' },
     rows,
   );
 }
 
-function card(r, name) {
+/** Where the slip lands on the card, for the video's overlay: estimated
+ *  the way `card` lays it out (satori can't report positions). */
+export function cardLayout(r, name) {
+  const n = receiptLines(r, name).length;
+  const estimate = 60 + (HAS_ART.has(r.moment) ? 264 : 0) + 92 + n * 40 + 140;
+  return { tall: estimate > H - 80, slipW: SLIP_W };
+}
+
+function card(r, name, hole = false) {
   // A short slip (a loss, a plain win) sits centred on the card; a long
   // one (a win with the math and three chips) starts at the top and may
   // run off the bottom edge — still printing. Satori can't measure, so
   // the height is estimated from the line count.
-  const n = receiptLines(r, name).length;
-  const estimate = 60 + (HAS_ART.has(r.moment) ? 264 : 0) + 92 + n * 40 + 140;
-  const tall = estimate > H - 80;
+  const { tall } = cardLayout(r, name);
   return el(
     'div',
     { width: W, height: H, display: 'flex', flexDirection: 'row', alignItems: tall ? 'flex-start' : 'center', justifyContent: 'center', backgroundColor: CREAM, paddingTop: tall ? 40 : 0, overflow: 'hidden' },
-    [slip(r, name)],
+    [slip(r, name, hole)],
   );
 }
 
-export async function renderReceiptCardPng(r, name) {
-  const svg = await satori(card(r, name), { width: W, height: H, fonts: FONTS });
+/** The slip's rendered height, by laying it out alone at its width. */
+export async function slipHeight(r, name) {
+  const svg = await satori(slip(r, name, true), { width: SLIP_W, fonts: FONTS });
+  const m = svg.match(/height="(\d+(?:\.\d+)?)"/);
+  return m ? Number(m[1]) : H;
+}
+
+export { W as CARD_W, H as CARD_H };
+
+export async function renderReceiptCardPng(r, name, { hole = false } = {}) {
+  const svg = await satori(card(r, name, hole), { width: W, height: H, fonts: FONTS });
   return new Resvg(svg, { fitTo: { mode: 'width', value: W } }).render().asPng();
 }
 
