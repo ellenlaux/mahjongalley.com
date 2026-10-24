@@ -128,7 +128,18 @@ export function parseReceipt(url) {
       dt.getUTCFullYear() === +ddm[1] && dt.getUTCMonth() === +ddm[2] - 1 && dt.getUTCDate() === +ddm[3] &&
       /^-?\d{1,4}$/.test(tbRaw) && /^(?:0|5|10|15|20)$/.test(clRaw) && /^\d{1,2}$/.test(fdRaw) && /^\d{1,3}$/.test(pcRaw)
     ) {
-      table = { date: dd, table: Math.max(-150, Math.min(9999, Number(tbRaw))), closeness: Number(clRaw), fedCount: Number(fdRaw), pace: Number(pcRaw) };
+      table = { date: dd, table: Math.max(-150, Math.min(9999, Number(tbRaw))), closeness: Number(clRaw), fedCount: Number(fdRaw), pace: Number(pcRaw), rank: null };
+      // The rank stamp: where the score stood on the day's board when the
+      // receipt printed, and when — the board moves, the receipt does not.
+      const rk = q.get('rk') ?? '';
+      const at = q.get('at') ?? '';
+      if (/^\d{1,4}$/.test(rk) && Number(rk) > 0 && /^([01]\d|2[0-3])[0-5]\d$/.test(at)) {
+        const of = q.get('of') ?? '';
+        const fr = q.get('fr') ?? '';
+        const fo = q.get('fo') ?? '';
+        const friends = /^\d{1,4}$/.test(fr) && /^\d{1,4}$/.test(fo) && Number(fr) > 0 && Number(fo) >= Number(fr) ? { rank: Number(fr), of: Number(fo) } : null;
+        table.rank = { rank: Number(rk), of: /^\d{1,4}$/.test(of) && Number(of) >= Number(rk) ? Number(of) : null, friends, at: `${at.slice(0, 2)}:${at.slice(2)}` };
+      }
     }
   }
 
@@ -168,6 +179,16 @@ export function tableFedPoints(fedCount) {
 }
 export function tableScore(t) {
   return t.table + t.closeness + tableFedPoints(t.fedCount);
+}
+/** `#12 OF 340`, or `#12` when the field was larger than the app read. */
+export function rankLine(rank, of) {
+  return of === null ? `#${rank}` : `#${rank} OF ${of}`;
+}
+/** 'HH:MM' (24 h) → '2:14 PM'. */
+export function clockLabel(hhmm) {
+  const [h, m] = hhmm.split(':').map(Number);
+  const hour = h % 12 === 0 ? 12 : h % 12;
+  return `${hour}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`;
 }
 /** `+160`, `−40`, `0`. */
 export function signedPoints(n) {
@@ -278,6 +299,11 @@ export function receiptLines(r, name) {
     }
     lines.push({ l: `FED ${t.fedCount}`, r: signedPoints(tableFedPoints(t.fedCount)) });
     lines.push({ l: 'WALL DRAWS', r: String(t.pace), dim: true });
+    if (t.rank) {
+      lines.push({ l: 'EVERYONE', r: rankLine(t.rank.rank, t.rank.of) });
+      if (t.rank.friends) lines.push({ l: 'FRIENDS', r: rankLine(t.rank.friends.rank, t.rank.friends.of) });
+      lines.push({ l: 'AS OF', r: clockLabel(t.rank.at), dim: true });
+    }
     lines.push('---');
     lines.push({ l: 'TOTAL', r: `${signedPoints(tableScore(t))} PTS`, bold: true });
     lines.push('---');
@@ -300,9 +326,13 @@ export function receiptCopy(r, name) {
   // story follows in the description.
   if (r.table) {
     const score = signedPoints(tableScore(r.table));
-    const dealLine = `Daily Deal · ${shortDay(r.table.date)} · ${score} · wall ${r.table.pace}`;
+    const rk = r.table.rank;
+    const standing = rk ? (rk.of === null ? `#${rk.rank}` : `#${rk.rank} of ${rk.of}`) : null;
+    const dealLine = `Daily Deal · ${shortDay(r.table.date)} · ${score} · wall ${r.table.pace}${standing ? ` · ${standing}` : ''}`;
     return {
-      title: who ? `${who} scored ${score} on the Daily Deal` : `${score} on the Daily Deal · ${shortDay(r.table.date)}`,
+      title: who
+        ? standing ? `${who} is ${standing} on the Daily Deal · ${score}` : `${who} scored ${score} on the Daily Deal`
+        : `${score} on the Daily Deal · ${shortDay(r.table.date)}${standing ? ` · ${standing}` : ''}`,
       description: `${dealLine}${stat ? ` — ${headline(r).replace('!', '')} on ${stat}` : ''}. Play this deal on Mahjong Alley.`,
     };
   }
