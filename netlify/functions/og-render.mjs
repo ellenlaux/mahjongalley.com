@@ -167,6 +167,7 @@ export async function renderCodeCardPng({ code }) {
               display: 'flex',
               alignSelf: 'flex-start',
               backgroundColor: CODE_PINK,
+              borderRadius: 4,
               color: CODE_INK,
               fontSize: codeSize,
               fontWeight: 700,
