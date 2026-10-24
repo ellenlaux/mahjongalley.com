@@ -28,6 +28,8 @@ export const MOMENTS = {
   'smoked': 'loss',
   'dead-hand': 'loss',
   'dizzy-dragon': 'wall',
+  'shuffle-won': 'shuffle', // the Daily Shuffle: every Mahjong found
+  'shuffle-missed': 'shuffle', // the Daily Shuffle: out of lives, or given up
 };
 
 /** Moments with recorded art in assets/receipt/ (<m>.mp4, <m>.webp,
@@ -133,16 +135,29 @@ export function parseReceipt(url) {
       const taRaw = q.get('ta') ?? '';
       const tilesAway = /^\d{1,2}$/.test(taRaw) && Number(taRaw) <= 14 ? Number(taRaw) : null;
       table = { date: dd, table: Math.max(-150, Math.min(9999, Number(tbRaw))), closeness: Number(clRaw), fedCount: Number(fdRaw), pace: Number(pcRaw), tilesAway, rank: null };
-      // The rank stamp: where the score stood on the day's board when the
-      // receipt printed, and when — the board moves, the receipt does not.
-      const rk = q.get('rk') ?? '';
-      const at = q.get('at') ?? '';
-      if (/^\d{1,4}$/.test(rk) && Number(rk) > 0 && /^([01]\d|2[0-3])[0-5]\d$/.test(at)) {
-        const of = q.get('of') ?? '';
-        const fr = q.get('fr') ?? '';
-        const fo = q.get('fo') ?? '';
-        const friends = /^\d{1,4}$/.test(fr) && /^\d{1,4}$/.test(fo) && Number(fr) > 0 && Number(fo) >= Number(fr) ? { rank: Number(fr), of: Number(fo) } : null;
-        table.rank = { rank: Number(rk), of: /^\d{1,4}$/.test(of) && Number(of) >= Number(rk) ? Number(of) : null, friends, at: `${at.slice(0, 2)}:${at.slice(2)}` };
+      table.rank = parseRankStamp(q);
+    }
+  }
+
+  // The Daily Shuffle (the three-Mahjong puzzle): the day, the Mahjongs
+  // found of how many, hints and the time they bought, misses (a fixed
+  // minute each), the clock in tenths, an archive play. The total — the
+  // adjusted time that ranks — is re-added here, never carried. The
+  // hands' names never ride: a recipient may go play this very shuffle.
+  let shuffle = null;
+  if (outcome === 'shuffle') {
+    const sd = q.get('sd') ?? '';
+    const sdm = sd.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const n = q.get('n') ?? '';
+    const h = q.get('h') ?? '';
+    const hn = q.get('hn') ?? '';
+    const hp = q.get('hp') ?? '';
+    const mi = q.get('m') ?? '';
+    const c = q.get('c') ?? '';
+    if (sdm && /^[1-3]$/.test(n) && /^[0-3]$/.test(h) && Number(h) <= Number(n) && /^\d{1,2}$/.test(hn) && /^\d{1,4}$/.test(hp) && /^\d{1,2}$/.test(mi) && /^\d{1,6}$/.test(c)) {
+      const dt = new Date(Date.UTC(+sdm[1], +sdm[2] - 1, +sdm[3]));
+      if (dt.getUTCFullYear() === +sdm[1] && dt.getUTCMonth() === +sdm[2] - 1 && dt.getUTCDate() === +sdm[3]) {
+        shuffle = { date: sd, handsMade: Number(h), hands: Number(n), hints: Number(hn), hintPenalty: Number(hp), misses: Number(mi), clock: Number(c) / 10, isArchive: q.get('a') === '1', rank: parseRankStamp(q) };
       }
     }
   }
@@ -159,7 +174,7 @@ export function parseReceipt(url) {
     if (t.getUTCFullYear() === +dm[1] && t.getUTCMonth() === +dm[2] - 1 && t.getUTCDate() === +dm[3]) date = dRaw;
   }
 
-  return { moment, outcome, handLine, points, pattern, chips, jokerless, selfPick, away, winnerSeat, table, code, date };
+  return { moment, outcome, handLine, points, pattern, chips, jokerless, selfPick, away, winnerSeat, table, shuffle, code, date };
 }
 
 /**
@@ -173,6 +188,48 @@ export function receiptMath(points, { jokerless, selfPick }) {
   const perPlayer = points * (jokerless ? 2 : 1) * (selfPick ? 2 : 1);
   const shares = selfPick ? 3 : 4;
   return { perPlayer, shares, total: perPlayer * shares };
+}
+
+/** The rank stamp — where a score stood on the day's board when the
+ *  receipt printed, and when — from its tokens, or null. */
+function parseRankStamp(q) {
+  const rk = q.get('rk') ?? '';
+  const at = q.get('at') ?? '';
+  if (!(/^\d{1,4}$/.test(rk) && Number(rk) > 0 && /^([01]\d|2[0-3])[0-5]\d$/.test(at))) return null;
+  const of = q.get('of') ?? '';
+  const fr = q.get('fr') ?? '';
+  const fo = q.get('fo') ?? '';
+  const friends = /^\d{1,4}$/.test(fr) && /^\d{1,4}$/.test(fo) && Number(fr) > 0 && Number(fo) >= Number(fr) ? { rank: Number(fr), of: Number(fo) } : null;
+  return { rank: Number(rk), of: /^\d{1,4}$/.test(of) && Number(of) >= Number(rk) ? Number(of) : null, friends, at: `${at.slice(0, 2)}:${at.slice(2)}` };
+}
+
+/** The rank stamp's lines — EVERYONE, FRIENDS when another friend
+ *  played, AS OF — or none without a stamp. */
+function rankStampLines(rank) {
+  if (!rank) return [];
+  const lines = [{ l: 'EVERYONE', r: rankLine(rank.rank, rank.of) }];
+  if (rank.friends) lines.push({ l: 'FRIENDS', r: rankLine(rank.friends.rank, rank.friends.of) });
+  lines.push({ l: 'AS OF', r: clockLabel(rank.at), dim: true });
+  return lines;
+}
+
+/** A miss costs a fixed minute (the app's PENALTY_MS.mistake). */
+const SHUFFLE_MISS_SECONDS = 60;
+/** The Shuffle's adjusted time: the clock plus what was bought on it. */
+export function shuffleTotalSeconds(f) {
+  return Math.round((f.clock + f.hintPenalty + f.misses * SHUFFLE_MISS_SECONDS) * 10) / 10;
+}
+/** `4:12.3`, `1:02:03.4` (tenths), or `+1:30` for a price. Mirrors the app's formatClock. */
+export function formatClock(seconds, { tenths = true, signed = false } = {}) {
+  const total = Math.max(0, tenths ? Math.round(seconds * 10) / 10 : Math.floor(seconds));
+  const whole = Math.floor(total);
+  const h = Math.floor(whole / 3600);
+  const m = Math.floor((whole % 3600) / 60);
+  const sec = whole % 60;
+  const t = Math.round((total - whole) * 10) % 10;
+  const mm = h > 0 ? String(m).padStart(2, '0') : String(m);
+  const body = `${h > 0 ? `${h}:` : ''}${mm}:${String(sec).padStart(2, '0')}${tenths ? `.${t}` : ''}`;
+  return signed ? `+${body}` : body;
 }
 
 /** The Daily Deal's score from its parts (engine/dailyTable in the app):
@@ -227,6 +284,10 @@ export function headline(r) {
       return 'DEAD HAND';
     case 'dizzy-dragon':
       return 'WALL GAME';
+    case 'shuffle-won':
+      return 'YOU WON!';
+    case 'shuffle-missed':
+      return 'NICE TRY';
     default:
       return 'MAHJONG!';
   }
@@ -241,6 +302,7 @@ export function headline(r) {
  *   { l, r, bold?, dim?, indent? } a row: left and right
  */
 export function receiptLines(r, name) {
+  if (r.outcome === 'shuffle') return r.shuffle ? shuffleReceiptLines(r.shuffle, r.moment, name) : ['---', { c: headline(r), big: true }, '---', { c: 'THANK YOU · PLAY AGAIN SOON' }];
   const pts = r.points ? `${r.points} PTS` : null;
   const lines = ['---'];
   if (r.date) lines.push({ l: 'DATE', r: receiptDate(r.date) });
@@ -303,11 +365,7 @@ export function receiptLines(r, name) {
     }
     lines.push({ l: `FED ${t.fedCount}`, r: signedPoints(tableFedPoints(t.fedCount)) });
     lines.push({ l: 'WALL DRAWS', r: String(t.pace), dim: true });
-    if (t.rank) {
-      lines.push({ l: 'EVERYONE', r: rankLine(t.rank.rank, t.rank.of) });
-      if (t.rank.friends) lines.push({ l: 'FRIENDS', r: rankLine(t.rank.friends.rank, t.rank.friends.of) });
-      lines.push({ l: 'AS OF', r: clockLabel(t.rank.at), dim: true });
-    }
+    lines.push(...rankStampLines(t.rank));
     lines.push('---');
     lines.push({ l: 'TOTAL', r: `${signedPoints(tableScore(t))} PTS`, bold: true });
     lines.push('---');
@@ -322,10 +380,42 @@ export function receiptLines(r, name) {
   return lines;
 }
 
+/** The Daily Shuffle's slip — the app's lib/receiptLines.ts
+ *  shuffleReceiptLines, line for line: a bill. */
+export function shuffleReceiptLines(f, moment, name) {
+  const lines = ['---', { l: 'SHUFFLE', r: receiptDate(f.date) }];
+  if (name) lines.push({ l: 'PLAYER', r: name.toUpperCase() });
+  lines.push('---', { c: headline({ moment }), big: true });
+  lines.push({ q: f.handsMade, l: 'MAHJONG', r: '' });
+  if (f.handsMade < f.hands) lines.push({ l: `${f.hands - f.handsMade} LEFT ON THE RACKS`, r: '', indent: true, dim: true });
+  lines.push({ l: 'ON THE CLOCK', r: formatClock(f.clock) });
+  if (f.hints > 0) lines.push({ q: f.hints, l: f.hints === 1 ? 'HINT' : 'HINTS', r: formatClock(f.hintPenalty, { tenths: false, signed: true }) });
+  if (f.misses > 0) lines.push({ q: f.misses, l: f.misses === 1 ? 'MISS' : 'MISSES', r: formatClock(f.misses * SHUFFLE_MISS_SECONDS, { tenths: false, signed: true }) });
+  if (f.isArchive) lines.push({ l: 'ARCHIVE PLAY', r: '', dim: true });
+  lines.push(...rankStampLines(f.rank));
+  lines.push('---', { l: 'TOTAL', r: formatClock(shuffleTotalSeconds(f)), bold: true }, '---', { c: 'THANK YOU · PLAY AGAIN SOON' });
+  return lines;
+}
+
 /** The words around the slip: the page title / OG title + description. */
 export function receiptCopy(r, name) {
   const stat = [r.handLine, r.points ? `${r.points} pts` : null].filter(Boolean).join(' · ');
   const who = name ?? null;
+  // The Daily Shuffle: solved in a time, or how many of its Mahjongs.
+  if (r.outcome === 'shuffle') {
+    const f = r.shuffle;
+    if (!f) return { title: 'The Daily Shuffle on Mahjong Alley', description: 'One puzzle a day. Find three Mahjongs. Play this shuffle on Mahjong Alley.' };
+    const time = formatClock(shuffleTotalSeconds(f));
+    const rk = f.rank;
+    const standing = rk ? (rk.of === null ? `#${rk.rank}` : `#${rk.rank} of ${rk.of}`) : null;
+    const solved = r.moment === 'shuffle-won';
+    const title = solved
+      ? who ? `${who} solved the Daily Shuffle in ${time}` : `Daily Shuffle · ${shortDay(f.date)} · solved in ${time}`
+      : who ? `${who} found ${f.handsMade} of ${f.hands} on the Daily Shuffle` : `Daily Shuffle · ${shortDay(f.date)} · ${f.handsMade} of ${f.hands}`;
+    const details = [`Daily Shuffle · ${shortDay(f.date)}${f.isArchive ? ' · archive' : ''}`, `${f.handsMade} of ${f.hands} Mahjongs`, time];
+    if (standing) details.push(standing);
+    return { title, description: `${details.join(' · ')}. Play this shuffle on Mahjong Alley.` };
+  }
   // A ranked Daily Deal leads with the day and the score; the game's own
   // story follows in the description.
   if (r.table) {
@@ -386,6 +476,7 @@ export function receiptCopy(r, name) {
  *  by scheme; the store when nothing answers); any other receipt opens
  *  the app — into the friend ceremony when the sender's code is on it. */
 export function receiptLink(r, name) {
+  if (r.shuffle) return { label: 'PLAY THIS SHUFFLE ›', scheme: `mahjong://daily-deal/${r.shuffle.date}?via=share` };
   if (r.table) return { label: 'PLAY THIS DEAL ›', scheme: `mahjong://daily-table/${r.table.date}?via=share` };
   if (r.code) return { label: name ? `PLAY WITH ${name.toUpperCase()} ›` : 'GET MAHJONG ALLEY ›', scheme: `mahjong://invite/${r.code}` };
   return { label: 'GET MAHJONG ALLEY ›', scheme: 'mahjong://' };
