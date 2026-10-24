@@ -43,10 +43,19 @@ function metaSwap(html, { title, description, image, video }) {
       [/(<meta property="og:video" content=")[^"]*(")/, `$1${video}$2`],
       [/(<meta property="og:video:secure_url" content=")[^"]*(")/, `$1${video}$2`],
     );
-  } else {
-    swaps.push([/\s*<meta property="og:video[^"]*" content="[^"]*" \/>/g, '']);
   }
-  return swaps.reduce((acc, [re, sub]) => acc.replace(re, sub), html);
+  const swapped = swaps.reduce((acc, [re, sub]) => acc.replace(re, sub), html);
+  return video ? swapped : stripVideo(swapped);
+}
+
+/** Drop the static page's og:video tags. They point at the default
+ *  moment's video with NO query — a card nobody built, so the first
+ *  crawler to ask waits ~10s for ffmpeg while Messages gives up on the
+ *  whole preview (Apple's fetcher measured 12s on an unparsed receipt
+ *  link, 2026-10-24). A video is advertised only when THIS receipt's is
+ *  already built and quick. */
+function stripVideo(html) {
+  return html.replace(/\s*<meta property="og:video[^"]*" content="[^"]*" \/>/g, '');
 }
 
 /** True when the card video answers fast (built and cached) — a cold
@@ -72,7 +81,9 @@ export default async (req) => {
     });
 
   const r = parseReceipt(url);
-  if (!r) return asPage(baseHtml);
+  // An unparsed link still gets the page, with its generic tags — minus
+  // the default video, which would stall the preview (see stripVideo).
+  if (!r) return asPage(stripVideo(baseHtml));
 
   const peek = r.code ? await fetchPeek('invite', r.code).catch(() => null) : null;
   const name = peek?.displayName ?? null;
