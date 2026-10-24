@@ -128,7 +128,11 @@ export function parseReceipt(url) {
       dt.getUTCFullYear() === +ddm[1] && dt.getUTCMonth() === +ddm[2] - 1 && dt.getUTCDate() === +ddm[3] &&
       /^-?\d{1,4}$/.test(tbRaw) && /^(?:0|5|10|15|20)$/.test(clRaw) && /^\d{1,2}$/.test(fdRaw) && /^\d{1,3}$/.test(pcRaw)
     ) {
-      table = { date: dd, table: Math.max(-150, Math.min(9999, Number(tbRaw))), closeness: Number(clRaw), fedCount: Number(fdRaw), pace: Number(pcRaw), rank: null };
+      // Tiles away as the Daily Deal's scorer read the hand (the game's
+      // own `away` is absent on a wall game); null: no readable hand.
+      const taRaw = q.get('ta') ?? '';
+      const tilesAway = /^\d{1,2}$/.test(taRaw) && Number(taRaw) <= 14 ? Number(taRaw) : null;
+      table = { date: dd, table: Math.max(-150, Math.min(9999, Number(tbRaw))), closeness: Number(clRaw), fedCount: Number(fdRaw), pace: Number(pcRaw), tilesAway, rank: null };
       // The rank stamp: where the score stood on the day's board when the
       // receipt printed, and when — the board moves, the receipt does not.
       const rk = q.get('rk') ?? '';
@@ -294,7 +298,7 @@ export function receiptLines(r, name) {
     lines.push({ l: 'DAILY DEAL', r: receiptDate(t.date) });
     lines.push({ l: 'TABLE', r: signedPoints(t.table) });
     if (r.outcome !== 'win') {
-      const away = r.away;
+      const away = t.tilesAway !== null ? t.tilesAway : r.away;
       lines.push({ l: away === null ? 'NO READABLE HAND' : away <= 0 ? 'READY FOR MAHJONG' : `${away} AWAY`, r: signedPoints(t.closeness) });
     }
     lines.push({ l: `FED ${t.fedCount}`, r: signedPoints(tableFedPoints(t.fedCount)) });
