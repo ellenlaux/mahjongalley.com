@@ -178,7 +178,14 @@ export function parseReceipt(url) {
     if (/^\d{1,3}$/.test(sh) && Number(sh) > 0 && /^-?\d{1,5}$/.test(sx) && /^-?\d{1,6}$/.test(sb) && /^[1-4]$/.test(sk) && /^[2-4]$/.test(sn) && Number(sk) <= Number(sn)) {
       const so = q.get('so') ?? '';
       const of = /^\d{1,3}$/.test(so) && Number(so) >= Number(sh) ? Number(so) : null;
-      session = { hand: Number(sh), of, delta: Number(sx), before: Number(sb), place: Number(sk), seats: Number(sn), final: of !== null && q.get('sf') === '1' };
+      // The finished game's id and the player's seat: the seats' NAMES
+      // never ride the link — the functions read them from the game
+      // (peeks.withSeatNames) and list the other three after the player.
+      const g = (q.get('g') ?? '').toLowerCase();
+      const gameId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(g) ? g : null;
+      const vs = (q.get('vs') ?? '').toLowerCase();
+      const viewerSeat = ['east', 'south', 'west', 'north'].includes(vs) ? vs : null;
+      session = { hand: Number(sh), of, delta: Number(sx), before: Number(sb), place: Number(sk), seats: Number(sn), final: of !== null && q.get('sf') === '1', gameId, viewerSeat, with: null };
     }
   }
 
@@ -433,6 +440,8 @@ export function receiptLines(r, name) {
  *  TABLE CLOSED when the session ended on this hand. */
 export function sessionLines(s) {
   const lines = [{ l: 'SOCIAL PLAY', r: s.of === null ? `HAND ${s.hand}` : `HAND ${s.hand} OF ${s.of}` }];
+  // Who was at the table — names only, one a row, never their accounts.
+  (s.with ?? []).forEach((name, i) => lines.push({ l: i === 0 ? 'WITH' : '', r: name.toUpperCase() }));
   lines.push({ l: 'THIS HAND', r: signedPoints(s.delta) });
   if (s.hand > 1) lines.push({ l: 'BALANCE FWD', r: signedPoints(s.before) });
   lines.push({ l: 'PLACE', r: `${ordinalCaps(s.place)} OF ${s.seats}` });
@@ -498,11 +507,12 @@ export function receiptCopy(r, name) {
     const place = `${ordinalWord(s.place)} of ${s.seats}`;
     const hand = s.final ? 'Final hand' : s.of === null ? `Hand ${s.hand}` : `Hand ${s.hand} of ${s.of}`;
     const story = r.outcome === 'win' ? `Mahjong${stat ? ` on ${stat}` : ''}` : headline(r).replace('!', '').toLowerCase().replace(/^./, (c) => c.toUpperCase());
+    const names = s.with?.length ? ` with ${s.with.length > 1 ? `${s.with.slice(0, -1).join(', ')} and ${s.with[s.with.length - 1]}` : s.with[0]}` : '';
     return {
       title: who
         ? s.final ? `${who} finished ${place} at the table · ${balance}` : `${who} is ${place} after hand ${s.hand} · ${balance}`
         : `Social Play · ${hand} · ${balance} · ${place}`,
-      description: `Social Play · ${hand} · ${balance} · ${place} — ${story}. ${who ? `Play with ${who} on Mahjong Alley.` : 'Come play American Mahjong on Mahjong Alley.'}`,
+      description: `Social Play · ${hand}${names} · ${balance} · ${place} — ${story}. ${who ? `Play with ${who} on Mahjong Alley.` : 'Come play American Mahjong on Mahjong Alley.'}`,
     };
   }
   let title;

@@ -91,6 +91,34 @@ export async function fetchPeek(kind, code) {
   };
 }
 
+const SEAT_ORDER = ['east', 'south', 'west', 'north'];
+
+/**
+ * The seats of a FINISHED Social Play hand, by the game's id (app
+ * migration 0122 peek_game_seats): the names the table showed its own
+ * players, nothing else. Returns the OTHER seats' names in turn order
+ * after `viewerSeat` (all four in table order when no seat is given), or
+ * null when the game is unknown, unfinished, or the RPC is not deployed
+ * yet — the receipt then prints without the names.
+ */
+export async function fetchSeatNames(gameId, viewerSeat) {
+  const rows = await rpc('peek_game_seats', { p_game_id: gameId });
+  if (!Array.isArray(rows) || rows.length === 0) return null;
+  const bySeat = new Map(rows.map((row) => [row.seat, String(row.display_name ?? '').trim()]));
+  const start = SEAT_ORDER.indexOf(viewerSeat);
+  const order = start >= 0 ? [...SEAT_ORDER.slice(start + 1), ...SEAT_ORDER.slice(0, start)] : SEAT_ORDER;
+  const names = order.map((seat) => bySeat.get(seat)).filter((n) => !!n).map((n) => n.slice(0, 24));
+  return names.length ? names : null;
+}
+
+/** A receipt with its Social Play seats named: `r.session.with` filled
+ *  from the finished game when the link names one. Never throws. */
+export async function withSeatNames(r) {
+  if (!r?.session?.gameId) return r;
+  const names = await fetchSeatNames(r.session.gameId, r.session.viewerSeat).catch(() => null);
+  return names ? { ...r, session: { ...r.session, with: names } } : r;
+}
+
 /** A promo / teacher code (app migration 0113): true when an ACTIVE code
  *  exists. The peek returns only yes/no (0121) — never the owner or the
  *  count — so a crawler can card a real code and nothing else. */

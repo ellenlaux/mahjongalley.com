@@ -14,7 +14,7 @@
  * with no clip yet drops the video tags.
  */
 
-import { fetchPeek } from './peeks.mjs';
+import { fetchPeek, withSeatNames } from './peeks.mjs';
 import { parseReceipt, receiptCopy, receiptLines, receiptLink, receiptMedia } from './receipt.mjs';
 
 const esc = (s) =>
@@ -80,7 +80,8 @@ export default async (req) => {
       headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=300' },
     });
 
-  const r = parseReceipt(url);
+  // The seats of a Social Play hand, named from the finished game (null-safe).
+  const r = await withSeatNames(parseReceipt(url));
   // An unparsed link still gets the page, with its generic tags — minus
   // the default video, which would stall the preview (see stripVideo).
   if (!r) return asPage(stripVideo(baseHtml));
