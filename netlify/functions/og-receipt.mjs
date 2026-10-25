@@ -11,7 +11,7 @@
 import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 import { COURIER_BOLD_B64, COURIER_REGULAR_B64, WIN_ART_B64, WORDMARK_B64 } from './og-receipt-assets.mjs';
-import { fetchPeek } from './peeks.mjs';
+import { fetchPeek, withSeatNames } from './peeks.mjs';
 import { HAS_ART, parseReceipt, receiptLines } from './receipt.mjs';
 
 // A SQUARE card: Messages lays it at full bubble width, so the whole slip
@@ -135,7 +135,8 @@ export async function renderReceiptCardPng(r, name, { hole = false } = {}) {
 export default async (req) => {
   const url = new URL(req.url);
   const fallback = () => Response.redirect(new URL('/assets/og-card.png', url.origin), 302);
-  const r = parseReceipt(url);
+  // The seats of a Social Play hand, named from the finished game (null-safe).
+  const r = await withSeatNames(parseReceipt(url));
   if (!r) return fallback();
   try {
     const peek = r.code ? await fetchPeek('invite', r.code).catch(() => null) : null;
