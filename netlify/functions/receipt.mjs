@@ -162,6 +162,26 @@ export function parseReceipt(url) {
     }
   }
 
+  // A Social Play hand (the app's multiplayer session): which hand of how
+  // many (no denominator on an open-ended table), what the hand paid the
+  // player (signed), the balance carried in from the hands before, the
+  // player's place of how many seats, and whether the table closed on
+  // this hand. The balance is re-added here, never carried. Only the
+  // player's own account rides: no other seat, no other loss.
+  let session = null;
+  if (outcome !== 'shuffle') {
+    const sh = q.get('sh') ?? '';
+    const sx = q.get('sx') ?? '';
+    const sb = q.get('sb') ?? '';
+    const sk = q.get('sk') ?? '';
+    const sn = q.get('sn') ?? '';
+    if (/^\d{1,3}$/.test(sh) && Number(sh) > 0 && /^-?\d{1,5}$/.test(sx) && /^-?\d{1,6}$/.test(sb) && /^[1-4]$/.test(sk) && /^[2-4]$/.test(sn) && Number(sk) <= Number(sn)) {
+      const so = q.get('so') ?? '';
+      const of = /^\d{1,3}$/.test(so) && Number(so) >= Number(sh) ? Number(so) : null;
+      session = { hand: Number(sh), of, delta: Number(sx), before: Number(sb), place: Number(sk), seats: Number(sn), final: of !== null && q.get('sf') === '1' };
+    }
+  }
+
   const codeRaw = (q.get('i') ?? '').toUpperCase();
   const code = /^[A-Z2-9]{8}$/.test(codeRaw) ? codeRaw : null;
 
@@ -174,7 +194,7 @@ export function parseReceipt(url) {
     if (t.getUTCFullYear() === +dm[1] && t.getUTCMonth() === +dm[2] - 1 && t.getUTCDate() === +dm[3]) date = dRaw;
   }
 
-  return { moment, outcome, handLine, points, pattern, chips, jokerless, selfPick, away, winnerSeat, table, shuffle, code, date };
+  return { moment, outcome, handLine, points, pattern, chips, jokerless, selfPick, away, winnerSeat, table, session, shuffle, code, date };
 }
 
 /**
@@ -250,6 +270,20 @@ export function clockLabel(hhmm) {
   const [h, m] = hhmm.split(':').map(Number);
   const hour = h % 12 === 0 ? 12 : h % 12;
   return `${hour}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`;
+}
+/** The session balance after a Social Play hand: carried in plus paid. */
+export function sessionTotal(s) {
+  return s.before + s.delta;
+}
+/** `1ST`, `2ND`, `3RD`, `4TH`. */
+export function ordinalCaps(n) {
+  const v = n % 100;
+  if (v >= 11 && v <= 13) return `${n}TH`;
+  return `${n}${['TH', 'ST', 'ND', 'RD'][n % 10] ?? 'TH'}`;
+}
+/** `1st`, `2nd`, `3rd`, `4th`. */
+export function ordinalWord(n) {
+  return ordinalCaps(n).toLowerCase().replace(/^(\d+)/, '$1');
 }
 /** `+160`, `−40`, `0`. */
 export function signedPoints(n) {
@@ -373,10 +407,36 @@ export function receiptLines(r, name) {
     return lines;
   }
 
+  // A Social Play hand: the player's account at the table under the
+  // hand's own lines, and the TOTAL is the session balance. Mirrors the
+  // app's lib/receiptLines.ts sessionLines.
+  const s = r.session;
+  if (s) {
+    lines.push('---');
+    lines.push(...sessionLines(s));
+    lines.push('---');
+    lines.push({ l: 'TOTAL', r: `${signedPoints(sessionTotal(s))} PTS`, bold: true });
+    lines.push('---');
+    lines.push({ c: 'THANK YOU · PLAY AGAIN SOON' });
+    return lines;
+  }
+
   lines.push('---');
   lines.push({ l: 'TOTAL', r: r.outcome === 'win' ? total ?? '—' : '0 PTS', bold: true });
   lines.push('---');
   lines.push({ c: 'THANK YOU · PLAY AGAIN SOON' });
+  return lines;
+}
+
+/** The Social Play section: which hand, what it paid, the balance
+ *  carried forward (from the second hand on), the place at the table,
+ *  TABLE CLOSED when the session ended on this hand. */
+export function sessionLines(s) {
+  const lines = [{ l: 'SOCIAL PLAY', r: s.of === null ? `HAND ${s.hand}` : `HAND ${s.hand} OF ${s.of}` }];
+  lines.push({ l: 'THIS HAND', r: signedPoints(s.delta) });
+  if (s.hand > 1) lines.push({ l: 'BALANCE FWD', r: signedPoints(s.before) });
+  lines.push({ l: 'PLACE', r: `${ordinalCaps(s.place)} OF ${s.seats}` });
+  if (s.final) lines.push({ c: 'TABLE CLOSED', small: true });
   return lines;
 }
 
@@ -428,6 +488,21 @@ export function receiptCopy(r, name) {
         ? standing ? `${who} is ${standing} on the Daily Deal · ${score}` : `${who} scored ${score} on the Daily Deal`
         : `${score} on the Daily Deal · ${shortDay(r.table.date)}${standing ? ` · ${standing}` : ''}`,
       description: `${dealLine}${stat ? ` — ${headline(r).replace('!', '')} on ${stat}` : ''}. Play this deal on Mahjong Alley.`,
+    };
+  }
+  // A Social Play hand leads with the table's line — which hand, the
+  // session balance, the player's place — and the hand's story follows.
+  if (r.session) {
+    const s = r.session;
+    const balance = signedPoints(sessionTotal(s));
+    const place = `${ordinalWord(s.place)} of ${s.seats}`;
+    const hand = s.final ? 'Final hand' : s.of === null ? `Hand ${s.hand}` : `Hand ${s.hand} of ${s.of}`;
+    const story = r.outcome === 'win' ? `Mahjong${stat ? ` on ${stat}` : ''}` : headline(r).replace('!', '').toLowerCase().replace(/^./, (c) => c.toUpperCase());
+    return {
+      title: who
+        ? s.final ? `${who} finished ${place} at the table · ${balance}` : `${who} is ${place} after hand ${s.hand} · ${balance}`
+        : `Social Play · ${hand} · ${balance} · ${place}`,
+      description: `Social Play · ${hand} · ${balance} · ${place} — ${story}. ${who ? `Play with ${who} on Mahjong Alley.` : 'Come play American Mahjong on Mahjong Alley.'}`,
     };
   }
   let title;
