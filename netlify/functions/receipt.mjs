@@ -268,6 +268,13 @@ export function tableFedPoints(fedCount) {
 export function tableScore(t) {
   return t.table + t.closeness + tableFedPoints(t.fedCount);
 }
+/** The Daily Deal's tiebreak as players see it: the tiles LEFT in the
+ *  wall when the game ended (152 − pace; pace counts every tile taken,
+ *  the deal included). The app's receiptModel `tableWallLeft`. */
+export function tableWallLeft(pace) {
+  const taken = Number.isFinite(pace) ? Math.floor(pace) : 0;
+  return Math.min(152, Math.max(0, 152 - taken));
+}
 /** `#12 OF 340`, or `#12` when the field was larger than the app read. */
 export function rankLine(rank, of) {
   return of === null ? `#${rank}` : `#${rank} OF ${of}`;
@@ -405,7 +412,7 @@ export function receiptLines(r, name) {
       lines.push({ l: away === null ? 'NO READABLE HAND' : away <= 0 ? 'READY FOR MAHJONG' : `${away} AWAY`, r: signedPoints(t.closeness) });
     }
     lines.push({ l: `FED ${t.fedCount}`, r: signedPoints(tableFedPoints(t.fedCount)) });
-    lines.push({ l: 'WALL DRAWS', r: String(t.pace), dim: true });
+    lines.push({ l: 'WALL LEFT', r: `${tableWallLeft(t.pace)} TILES`, dim: true });
     lines.push(...rankStampLines(t.rank));
     lines.push('---');
     lines.push({ l: 'TOTAL', r: `${signedPoints(tableScore(t))} PTS`, bold: true });
