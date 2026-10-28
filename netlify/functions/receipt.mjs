@@ -141,9 +141,11 @@ export function parseReceipt(url) {
 
   // The Daily Shuffle (the three-Mahjong puzzle): the day, the Mahjongs
   // found of how many, hints and the time they bought, misses (a fixed
-  // minute each), the clock in tenths, an archive play. The total — the
-  // adjusted time that ranks — is re-added here, never carried. The
-  // hands' names never ride: a recipient may go play this very shuffle.
+  // minute each), the clock in tenths, an archive play — and, on an
+  // archive play, where it would have placed that day (`wb` of `wf`). The
+  // total — the adjusted time that ranks — is re-added here, never
+  // carried. The hands' names never ride: a recipient may go play this
+  // very shuffle.
   let shuffle = null;
   if (outcome === 'shuffle') {
     const sd = q.get('sd') ?? '';
@@ -157,7 +159,8 @@ export function parseReceipt(url) {
     if (sdm && /^[1-3]$/.test(n) && /^[0-3]$/.test(h) && Number(h) <= Number(n) && /^\d{1,2}$/.test(hn) && /^\d{1,4}$/.test(hp) && /^\d{1,2}$/.test(mi) && /^\d{1,6}$/.test(c)) {
       const dt = new Date(Date.UTC(+sdm[1], +sdm[2] - 1, +sdm[3]));
       if (dt.getUTCFullYear() === +sdm[1] && dt.getUTCMonth() === +sdm[2] - 1 && dt.getUTCDate() === +sdm[3]) {
-        shuffle = { date: sd, handsMade: Number(h), hands: Number(n), hints: Number(hn), hintPenalty: Number(hp), misses: Number(mi), clock: Number(c) / 10, isArchive: q.get('a') === '1', rank: parseRankStamp(q) };
+        const isArchive = q.get('a') === '1';
+        shuffle = { date: sd, handsMade: Number(h), hands: Number(n), hints: Number(hn), hintPenalty: Number(hp), misses: Number(mi), clock: Number(c) / 10, isArchive, rank: parseRankStamp(q), wouldBe: isArchive ? parseWouldBe(q) : null };
       }
     }
   }
@@ -228,6 +231,20 @@ function parseRankStamp(q) {
   const fo = q.get('fo') ?? '';
   const friends = /^\d{1,4}$/.test(fr) && /^\d{1,4}$/.test(fo) && Number(fr) > 0 && Number(fo) >= Number(fr) ? { rank: Number(fr), of: Number(fo) } : null;
   return { rank: Number(rk), of: /^\d{1,4}$/.test(of) && Number(of) >= Number(rk) ? Number(of) : null, friends, at: `${at.slice(0, 2)}:${at.slice(2)}` };
+}
+
+/** A late (archive) play's would-be place (the app's Daily rules, Ellen
+ *  2026-10-27): `wb` of `wf`, the field counting the player. A late play
+ *  is never on the day's board, so it never carries the rank stamp; this
+ *  says where it would have placed instead. Nothing to place among (a
+ *  field of 1) prints nothing. */
+function parseWouldBe(q) {
+  const wb = q.get('wb') ?? '';
+  const wf = q.get('wf') ?? '';
+  if (!(/^\d{1,4}$/.test(wb) && /^\d{1,4}$/.test(wf))) return null;
+  const place = Number(wb);
+  const field = Number(wf);
+  return place > 0 && field > 1 && field >= place ? { place, field } : null;
 }
 
 /** The rank stamp's lines — EVERYONE, FRIENDS when another friend
@@ -468,6 +485,7 @@ export function shuffleReceiptLines(f, moment, name) {
   if (f.hints > 0) lines.push({ q: f.hints, l: f.hints === 1 ? 'HINT' : 'HINTS', r: formatClock(f.hintPenalty, { tenths: false, signed: true }) });
   if (f.misses > 0) lines.push({ q: f.misses, l: f.misses === 1 ? 'MISS' : 'MISSES', r: formatClock(f.misses * SHUFFLE_MISS_SECONDS, { tenths: false, signed: true }) });
   if (f.isArchive) lines.push({ l: 'ARCHIVE PLAY', r: '', dim: true });
+  if (f.wouldBe) lines.push({ l: 'WOULD BE', r: rankLine(f.wouldBe.place, f.wouldBe.field) });
   lines.push(...rankStampLines(f.rank));
   lines.push('---', { l: 'TOTAL', r: formatClock(shuffleTotalSeconds(f)), bold: true }, '---', { c: 'THANK YOU · PLAY AGAIN SOON' });
   return lines;
