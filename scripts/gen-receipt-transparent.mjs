@@ -7,7 +7,7 @@
 // square the moment sits in on the clip stage (1080x1920 recordings).
 import { execFileSync } from 'node:child_process';
 
-const BEATS = ['pouch-fill', 'big-money', 'burnt-joker', 'heart-eyes'];
+const BEATS = ['pouch-fill', 'big-money', 'burnt-joker', 'heart-eyes', 'purse-payout', 'match-lit', 'smoked', 'dead-hand', 'dizzy-dragon'];
 const KEY = 'crop=720:720:180:560,scale=480:480,colorkey=0xFFFFFF:0.10:0.08';
 // What the page LOOPS. A moment with an entrance and then a steady beat
 // loops only the beat (Ellen 2026-10-22: "the heart eyes just keep
@@ -30,6 +30,15 @@ const LOOP = {
   // coins rain in and the big pouch takes over at 1.95 s: an arrival, so
   // it plays once and holds the full pouch
   'pouch-fill': { once: true },
+  // The loss and wall moments (recorded 2026-10-28). The purse settles,
+  // flips and hangs there — an arrival; the rest hold a steady beat once
+  // the story has landed: the cyclone eye, the fuming smoke, the charred
+  // dog's wisps, the match's flicker.
+  'purse-payout': { once: true, poster: 4.0 },
+  'match-lit': { start: 2.5, dur: 2.0, poster: 3.5 },
+  'smoked': { start: 3.5, dur: 1.5, poster: 4.2 },
+  'dead-hand': { start: 3.4, dur: 1.6, poster: 4.0 },
+  'dizzy-dragon': { start: 2.6, dur: 2.0, poster: 4.0 },
 };
 for (const beat of BEATS) {
   const loop = LOOP[beat] ?? {};
@@ -37,7 +46,9 @@ for (const beat of BEATS) {
   const window = loop.start !== undefined ? ['-ss', String(loop.start), '-t', String(loop.dur)] : [];
   execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', ...window, '-i', src, '-vf', `${KEY},format=yuva420p`,
     '-c:v', 'libwebp_anim', '-lossless', '0', '-q:v', '80', '-loop', loop.once ? '1' : '0', '-an', `assets/receipt/${beat}.webp`]);
-  execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-ss', '2.6', '-i', `assets/receipt/${beat}.mp4`, '-frames:v', '1',
+  // The poster: the payoff frame (2.6 s for the win beats; a moment may
+  // name its own).
+  execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-ss', String(loop.poster ?? 2.6), '-i', `assets/receipt/${beat}.mp4`, '-frames:v', '1',
     '-vf', `${KEY},format=rgba`, `assets/receipt/${beat}-poster.png`]);
   console.log('wrote', beat);
 }
