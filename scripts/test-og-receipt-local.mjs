@@ -22,6 +22,10 @@ const samples = {
   'shuffle-won': [at('/receipt/shuffle-won?sd=2026-10-24&h=3&n=3&hn=2&hp=150&m=1&c=1923&rk=12&of=340&fr=2&fo=9&at=1414&i=ABCD2345&d=2026-10-24'), 'ElleBell'],
   'shuffle-missed': [at('/receipt/shuffle-missed?sd=2026-10-24&h=1&n=3&hn=0&hp=0&m=4&c=1923&a=1&d=2026-10-24'), null],
   'shuffle-late': [at('/receipt/shuffle-won?sd=2026-10-09&h=3&n=3&hn=0&hp=0&m=1&c=2214&a=1&wb=2&wf=4&d=2026-10-13'), 'ElleBell'],
+  'read-won': [at('/receipt/read-won?rd=2026-10-25&rf=8&rt=8&rh=150&rn=0&rc=0&rb=41&rl=139&rk=12&of=340&fr=2&fo=9&at=1414&i=ABCD2345&d=2026-10-25'), 'ElleBell'],
+  'read-time-up': [at('/receipt/read-time-up?rd=2026-10-25&rf=3&rt=30&rh=60&rn=1&rc=10&rb=0&rl=143&d=2026-10-25'), null],
+  'read-late': [at('/receipt/read-done?rd=2026-10-25&rf=2&rt=8&rh=40&rn=0&rc=0&rb=0&rl=97&a=1&wb=1&wf=2&d=2026-10-28'), 'ElleBell'],
+  'read-floor': [at('/receipt/read-done?rd=2026-10-25&rf=1&rt=8&rh=25&rn=2&rc=30&rb=0&rl=40&d=2026-10-25'), null],
   'mp-final-win': [seated(at('/receipt/pouch-fill?cat=2026&line=3&pts=25&pat=FFF+2026+222+6666&sh=4&so=4&sx=100&sb=-35&sk=1&sn=4&sf=1&g=7f1e0d2c-3b4a-4c5d-8e9f-0a1b2c3d4e5f&vs=west&i=ABCD2345&d=2026-10-25'), ['Carmen', 'Billie', 'Ruth']), 'ElleBell'],
   'mp-hand-loss': [at('/receipt/smoked?cat=2026&line=3&pts=30&pat=FFF+2026+222+6666&away=5&sh=2&sx=-25&sb=40&sk=3&sn=4&d=2026-10-25'), null],
   'board-table': [{ ...at('/receipt/board?k=table&bd=2026-10-28&rk=12&of=14&at=1414&i=ABCD2345&d=2026-10-28'), board: { kind: 'table', date: '2026-10-28', of: 14, you: { rank: 12, of: 14, friends: null, at: '14:14' }, rows: [

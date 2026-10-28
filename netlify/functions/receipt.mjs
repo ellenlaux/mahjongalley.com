@@ -30,6 +30,9 @@ export const MOMENTS = {
   'dizzy-dragon': 'wall',
   'shuffle-won': 'shuffle', // the Daily Shuffle: every Mahjong found
   'shuffle-missed': 'shuffle', // the Daily Shuffle: out of lives, or given up
+  'read-won': 'read', // the Daily Read: found them all in time
+  'read-time-up': 'read', // the Daily Read: the clock ran out first
+  'read-done': 'read', // the Daily Read: ended short on Done
   'board': 'board', // a day's top ten on one of the Daily's boards
 };
 
@@ -166,6 +169,52 @@ export function parseReceipt(url) {
     }
   }
 
+  // The Daily Read (the read-their-hand puzzle): the day, the hands found
+  // in time of how many the exposures allow, what they scored, the hints
+  // and what they cost, the time bonus finding them all earned (the
+  // seconds left, at most the round's 180), the seconds to the last find,
+  // an archive play — and, on an archive play, where it would have placed
+  // (`wb` of `wf`); on a live one, the rank stamp. The total — the points
+  // that rank — is re-added here, never carried. Its tokens carry an `r`
+  // so none can be read as another ending's. The hands' names never ride:
+  // a recipient may go play this very read.
+  let read = null;
+  if (outcome === 'read') {
+    const rd = q.get('rd') ?? '';
+    const rdm = rd.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const rf = q.get('rf') ?? '';
+    const rt = q.get('rt') ?? '';
+    const rh = q.get('rh') ?? '';
+    const rn = q.get('rn') ?? '';
+    const rc = q.get('rc') ?? '';
+    const rb = q.get('rb') ?? '';
+    const rl = q.get('rl') ?? '';
+    if (
+      rdm &&
+      /^\d{1,3}$/.test(rt) && Number(rt) > 0 && /^\d{1,3}$/.test(rf) && Number(rf) <= Number(rt) &&
+      /^\d{1,4}$/.test(rh) && /^\d{1,2}$/.test(rn) && /^\d{1,4}$/.test(rc) &&
+      /^\d{1,3}$/.test(rb) && Number(rb) <= 180 && /^\d{1,3}$/.test(rl)
+    ) {
+      const dt = new Date(Date.UTC(+rdm[1], +rdm[2] - 1, +rdm[3]));
+      if (dt.getUTCFullYear() === +rdm[1] && dt.getUTCMonth() === +rdm[2] - 1 && dt.getUTCDate() === +rdm[3]) {
+        const isArchive = q.get('a') === '1';
+        read = {
+          date: rd,
+          found: Number(rf),
+          total: Number(rt),
+          hands: Number(rh),
+          hints: Number(rn),
+          hintCost: Number(rc),
+          timeBonus: Number(rb),
+          lastFind: Number(rl),
+          isArchive,
+          rank: isArchive ? null : parseRankStamp(q),
+          wouldBe: isArchive ? parseWouldBe(q) : null,
+        };
+      }
+    }
+  }
+
   // A Social Play hand (the app's multiplayer session): which hand of how
   // many (no denominator on an open-ended table), what the hand paid the
   // player (signed), the balance carried in from the hands before, the
@@ -173,7 +222,7 @@ export function parseReceipt(url) {
   // this hand. The balance is re-added here, never carried. Only the
   // player's own account rides: no other seat, no other loss.
   let session = null;
-  if (outcome !== 'shuffle') {
+  if (outcome !== 'shuffle' && outcome !== 'read') {
     const sh = q.get('sh') ?? '';
     const sx = q.get('sx') ?? '';
     const sb = q.get('sb') ?? '';
@@ -222,7 +271,7 @@ export function parseReceipt(url) {
     if (t.getUTCFullYear() === +dm[1] && t.getUTCMonth() === +dm[2] - 1 && t.getUTCDate() === +dm[3]) date = dRaw;
   }
 
-  return { moment, outcome, handLine, points, pattern, chips, jokerless, selfPick, away, winnerSeat, table, session, shuffle, board, code, date };
+  return { moment, outcome, handLine, points, pattern, chips, jokerless, selfPick, away, winnerSeat, table, session, shuffle, read, board, code, date };
 }
 
 /**
@@ -277,6 +326,12 @@ function rankStampLines(rank) {
 
 /** A miss costs a fixed minute (the app's PENALTY_MS.mistake). */
 const SHUFFLE_MISS_SECONDS = 60;
+/** The Read's total, as the app keeps it: hands less hints plus the time
+ *  bonus, never below zero. */
+export function readTotalPoints(f) {
+  return Math.max(0, f.hands - f.hintCost + f.timeBonus);
+}
+
 /** The Shuffle's adjusted time: the clock plus what was bought on it. */
 export function shuffleTotalSeconds(f) {
   return Math.round((f.clock + f.hintPenalty + f.misses * SHUFFLE_MISS_SECONDS) * 10) / 10;
@@ -371,6 +426,13 @@ export function headline(r) {
       return 'YOU WON!';
     case 'shuffle-missed':
       return 'NICE TRY';
+    case 'read-won':
+      return 'FOUND THEM ALL';
+    // A read that ended short heads its slip with the count
+    // (readReceiptLines); without one, its name.
+    case 'read-time-up':
+    case 'read-done':
+      return 'DAILY READ';
     default:
       return 'MAHJONG!';
   }
@@ -387,6 +449,7 @@ export function headline(r) {
 export function receiptLines(r, name) {
   if (r.outcome === 'board') return r.board ? boardReceiptLines(r.board, name) : ['---', { c: 'THE BOARD', big: true }, '---', { c: 'A NEW ONE TOMORROW' }];
   if (r.outcome === 'shuffle') return r.shuffle ? shuffleReceiptLines(r.shuffle, r.moment, name) : ['---', { c: headline(r), big: true }, '---', { c: 'THANK YOU · PLAY AGAIN SOON' }];
+  if (r.outcome === 'read') return r.read ? readReceiptLines(r.read, r.moment, name) : ['---', { c: headline(r), big: true }, '---', { c: 'THANK YOU · PLAY AGAIN SOON' }];
   const pts = r.points ? `${r.points} PTS` : null;
   const lines = ['---'];
   if (r.date) lines.push({ l: 'DATE', r: receiptDate(r.date) });
@@ -542,6 +605,31 @@ export function boardReceiptLines(b, name) {
   return lines;
 }
 
+/** The Daily Read's slip — the app's lib/receiptLines.ts readReceiptLines,
+ *  line for line: a bill in points. */
+export function readReceiptLines(f, moment, name) {
+  const lines = ['---', { l: 'READ', r: receiptDate(f.date) }];
+  if (name) lines.push({ l: 'PLAYER', r: name.toUpperCase() });
+  // The heading is the app's results sheet's: found them all, or the
+  // count — which is why no "OF n" line follows the item.
+  const heading = moment === 'read-won' ? headline({ moment }) : `${f.found} OF ${f.total} FOUND`;
+  lines.push('---', { c: heading, big: true });
+  lines.push({ q: f.found, l: f.found === 1 ? 'HAND FOUND' : 'HANDS FOUND', r: `${f.hands}` });
+  if (f.hints > 0) lines.push({ q: f.hints, l: f.hints === 1 ? 'HINT' : 'HINTS', r: signedPoints(-f.hintCost) });
+  if (f.timeBonus > 0) lines.push({ l: 'TIME BONUS', r: signedPoints(f.timeBonus) });
+  // No find, no last find: the round's whole length would read as one.
+  if (f.found > 0) lines.push({ l: 'LAST FIND', r: formatClock(f.lastFind, { tenths: false }) });
+  if (f.isArchive) lines.push({ l: 'ARCHIVE PLAY', r: '', dim: true });
+  if (f.wouldBe) lines.push({ l: 'WOULD BE', r: rankLine(f.wouldBe.place, f.wouldBe.field) });
+  lines.push(...rankStampLines(f.rank));
+  // Hints that cost more than the hands scored: the score stops at 0, and
+  // the slip says what that gave back so the items still add up.
+  const raw = f.hands - f.hintCost + f.timeBonus;
+  if (raw < 0) lines.push({ l: 'NEVER BELOW 0', r: signedPoints(-raw), dim: true });
+  lines.push('---', { l: 'TOTAL', r: `${readTotalPoints(f)} PTS`, bold: true }, '---', { c: 'THANK YOU · PLAY AGAIN SOON' });
+  return lines;
+}
+
 /** The words around the slip: the page title / OG title + description. */
 export function receiptCopy(r, name) {
   const stat = [r.handLine, r.points ? `${r.points} pts` : null].filter(Boolean).join(' · ');
@@ -555,6 +643,22 @@ export function receiptCopy(r, name) {
     const lead = top ? `${top.name} leads${b.of ? ` a board of ${b.of}` : ''}` : 'Nobody on the board yet';
     const yours = b.you && who ? ` ${who} is ${b.you.of === null ? `#${b.you.rank}` : `#${b.you.rank} of ${b.you.of}`}.` : '';
     return { title, description: `${lead}.${yours} Play today's ${BOARD_WORD[b.kind]} on Mahjong Alley.` };
+  }
+  // The Daily Read: the points, and how many of its hands were found.
+  if (r.outcome === 'read') {
+    const f = r.read;
+    if (!f) return { title: 'The Daily Read on Mahjong Alley', description: 'One read a day. Their exposures are showing. What are they playing? Play this read on Mahjong Alley.' };
+    const pts = `${readTotalPoints(f)} pts`;
+    const rk = f.rank;
+    const standing = rk ? (rk.of === null ? `#${rk.rank}` : `#${rk.rank} of ${rk.of}`) : null;
+    const title = who
+      ? r.moment === 'read-won'
+        ? `${who} found them all on the Daily Read`
+        : `${who} found ${f.found} of ${f.total} on the Daily Read`
+      : `Daily Read · ${shortDay(f.date)} · ${pts}`;
+    const details = [`Daily Read · ${shortDay(f.date)}${f.isArchive ? ' · archive' : ''}`, `${f.found} of ${f.total} hands`, pts];
+    if (standing) details.push(standing);
+    return { title, description: `${details.join(' · ')}. Play this read on Mahjong Alley.` };
   }
   // The Daily Shuffle: solved in a time, or how many of its Mahjongs.
   if (r.outcome === 'shuffle') {
@@ -653,6 +757,7 @@ export function receiptLink(r, name) {
     return { label, scheme: `mahjong://${route}/${r.board.date}?via=share` };
   }
   if (r.shuffle) return { label: 'PLAY THIS SHUFFLE ›', scheme: `mahjong://daily-deal/${r.shuffle.date}?via=share` };
+  if (r.read) return { label: 'PLAY THIS READ ›', scheme: `mahjong://daily-read/${r.read.date}?via=share` };
   if (r.table) return { label: 'PLAY THIS DEAL ›', scheme: `mahjong://daily-table/${r.table.date}?via=share` };
   if (r.code) return { label: name ? `PLAY WITH ${name.toUpperCase()} ›` : 'GET MAHJONG ALLEY ›', scheme: `mahjong://invite/${r.code}` };
   return { label: 'GET MAHJONG ALLEY ›', scheme: 'mahjong://' };
