@@ -326,7 +326,8 @@ function rankStampLines(rank) {
 
 /** A miss costs a fixed minute (the app's PENALTY_MS.mistake). */
 const SHUFFLE_MISS_SECONDS = 60;
-/** The Shuffle's adjusted time: the clock plus what was bought on it. */
+/** The Read's total, as the app keeps it: hands less hints plus the time
+ *  bonus, never below zero. */
 export function readTotalPoints(f) {
   return Math.max(0, f.hands - f.hintCost + f.timeBonus);
 }
