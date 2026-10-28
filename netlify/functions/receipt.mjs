@@ -33,9 +33,9 @@ export const MOMENTS = {
 };
 
 /** Moments with recorded art in assets/receipt/ (<m>.mp4, <m>.webp,
- *  <m>-poster.png). The others print the slip without a picture until
- *  their clips are recorded from the app's clip stage. */
-export const HAS_ART = new Set(['pouch-fill', 'big-money', 'burnt-joker', 'heart-eyes']);
+ *  <m>-poster.png): the four win beats (2026-10-18) and the five loss and
+ *  wall moments (2026-10-28). The Shuffle's two wait for wordless clips. */
+export const HAS_ART = new Set(['pouch-fill', 'big-money', 'burnt-joker', 'heart-eyes', 'purse-payout', 'match-lit', 'smoked', 'dead-hand', 'dizzy-dragon']);
 
 /** Card category slug (as the app sends it) → the card's own name. */
 export const CATEGORIES = {

@@ -11,7 +11,7 @@ import { join } from 'node:path';
 
 import { Resvg } from '@resvg/resvg-js';
 
-const BEATS = ['pouch-fill', 'big-money', 'burnt-joker', 'heart-eyes'];
+const BEATS = ['pouch-fill', 'big-money', 'burnt-joker', 'heart-eyes', 'purse-payout', 'match-lit', 'smoked', 'dead-hand', 'dizzy-dragon'];
 const INK = '#1A1A2E';
 
 /** The wordmark SVG draws in currentColor; paint it ink and render at
