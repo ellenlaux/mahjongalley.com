@@ -30,6 +30,7 @@ export const MOMENTS = {
   'dizzy-dragon': 'wall',
   'shuffle-won': 'shuffle', // the Daily Shuffle: every Mahjong found
   'shuffle-missed': 'shuffle', // the Daily Shuffle: out of lives, or given up
+  'board': 'board', // a day's top ten on one of the Daily's boards
 };
 
 /** Moments with recorded art in assets/receipt/ (<m>.mp4, <m>.webp,
@@ -192,6 +193,23 @@ export function parseReceipt(url) {
     }
   }
 
+  // A day's board (Ellen 2026-10-28: "print a daily receipt of the top
+  // 10"): which puzzle and which day; the rows come from the day's board
+  // through peeks.withBoardRows, never from the link. The sender's own
+  // place rides as the rank stamp (rk, of, at).
+  let board = null;
+  if (outcome === 'board') {
+    const k = (q.get('k') ?? '').toLowerCase();
+    const bd = q.get('bd') ?? '';
+    const bdm = bd.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (['deal', 'read', 'table'].includes(k) && bdm) {
+      const dt = new Date(Date.UTC(+bdm[1], +bdm[2] - 1, +bdm[3]));
+      if (dt.getUTCFullYear() === +bdm[1] && dt.getUTCMonth() === +bdm[2] - 1 && dt.getUTCDate() === +bdm[3]) {
+        board = { kind: k, date: bd, rows: null, of: null, you: parseRankStamp(q) };
+      }
+    }
+  }
+
   const codeRaw = (q.get('i') ?? '').toUpperCase();
   const code = /^[A-Z2-9]{8}$/.test(codeRaw) ? codeRaw : null;
 
@@ -204,7 +222,7 @@ export function parseReceipt(url) {
     if (t.getUTCFullYear() === +dm[1] && t.getUTCMonth() === +dm[2] - 1 && t.getUTCDate() === +dm[3]) date = dRaw;
   }
 
-  return { moment, outcome, handLine, points, pattern, chips, jokerless, selfPick, away, winnerSeat, table, session, shuffle, code, date };
+  return { moment, outcome, handLine, points, pattern, chips, jokerless, selfPick, away, winnerSeat, table, session, shuffle, board, code, date };
 }
 
 /**
@@ -367,6 +385,7 @@ export function headline(r) {
  *   { l, r, bold?, dim?, indent? } a row: left and right
  */
 export function receiptLines(r, name) {
+  if (r.outcome === 'board') return r.board ? boardReceiptLines(r.board, name) : ['---', { c: 'THE BOARD', big: true }, '---', { c: 'A NEW ONE TOMORROW' }];
   if (r.outcome === 'shuffle') return r.shuffle ? shuffleReceiptLines(r.shuffle, r.moment, name) : ['---', { c: headline(r), big: true }, '---', { c: 'THANK YOU · PLAY AGAIN SOON' }];
   const pts = r.points ? `${r.points} PTS` : null;
   const lines = ['---'];
@@ -491,10 +510,52 @@ export function shuffleReceiptLines(f, moment, name) {
   return lines;
 }
 
+/** The Daily's puzzle names, as the slip prints them. */
+const BOARD_TITLE = { deal: 'DAILY SHUFFLE', read: 'DAILY READ', table: 'DAILY DEAL' };
+const BOARD_WORD = { deal: 'Daily Shuffle', read: 'Daily Read', table: 'Daily Deal' };
+/** The Shuffle's hands, for an unsolved row's "2 OF 3". */
+const SHUFFLE_HANDS = 3;
+/** The number that ranks a row, by kind — mirrors the app's boardRowValue. */
+export function boardRowValue(kind, row) {
+  if (kind === 'table') return row.score == null ? '—' : signedPoints(row.score);
+  if (kind === 'read') return row.points == null ? '—' : `${Math.round(row.points)} PTS`;
+  if (row.solved) return row.seconds == null ? '—' : formatClock(row.seconds);
+  return `${Math.max(0, row.greens ?? 0)} OF ${SHUFFLE_HANDS}`;
+}
+/** A day's top ten — the app's lib/receiptLines.ts boardReceiptLines,
+ *  line for line. The rows are the board's own; the sender's place is
+ *  the stamp under them. */
+export function boardReceiptLines(b, name) {
+  const lines = ['---', { l: BOARD_TITLE[b.kind] ?? 'THE DAILY', r: receiptDate(b.date) }];
+  if (name) lines.push({ l: 'PRINTED FOR', r: name.toUpperCase() });
+  lines.push('---', { c: 'TOP 10', big: true });
+  const rows = (b.rows ?? []).slice(0, 10);
+  if (rows.length === 0) lines.push({ c: 'NOBODY ON THE BOARD YET', small: true });
+  for (const row of rows) lines.push({ l: `${`#${row.rank}`.padEnd(4)}${row.name.toUpperCase()}`, r: boardRowValue(b.kind, row) });
+  if (b.of !== null && b.of !== undefined && b.of > rows.length) lines.push({ l: `AND ${b.of - rows.length} MORE`, r: '', dim: true });
+  if (b.you) {
+    lines.push('---');
+    lines.push({ l: 'YOU', r: rankLine(b.you.rank, b.you.of), bold: true });
+    lines.push({ l: 'AS OF', r: clockLabel(b.you.at), dim: true });
+  }
+  lines.push('---', { c: 'A NEW ONE TOMORROW' });
+  return lines;
+}
+
 /** The words around the slip: the page title / OG title + description. */
 export function receiptCopy(r, name) {
   const stat = [r.handLine, r.points ? `${r.points} pts` : null].filter(Boolean).join(' · ');
   const who = name ?? null;
+  // A day's board: the top ten, and who sent it.
+  if (r.outcome === 'board') {
+    const b = r.board;
+    if (!b) return { title: 'The Daily on Mahjong Alley', description: 'Three puzzles a day. Come play on Mahjong Alley.' };
+    const top = b.rows?.[0];
+    const title = `${BOARD_WORD[b.kind]} · ${shortDay(b.date)} · the top 10`;
+    const lead = top ? `${top.name} leads${b.of ? ` a board of ${b.of}` : ''}` : 'Nobody on the board yet';
+    const yours = b.you && who ? ` ${who} is ${b.you.of === null ? `#${b.you.rank}` : `#${b.you.rank} of ${b.you.of}`}.` : '';
+    return { title, description: `${lead}.${yours} Play today's ${BOARD_WORD[b.kind]} on Mahjong Alley.` };
+  }
   // The Daily Shuffle: solved in a time, or how many of its Mahjongs.
   if (r.outcome === 'shuffle') {
     const f = r.shuffle;
@@ -586,6 +647,11 @@ export function receiptCopy(r, name) {
  *  by scheme; the store when nothing answers); any other receipt opens
  *  the app — into the friend ceremony when the sender's code is on it. */
 export function receiptLink(r, name) {
+  if (r.board) {
+    const route = { deal: 'daily-deal', read: 'daily-read', table: 'daily-table' }[r.board.kind];
+    const label = { deal: 'PLAY THIS SHUFFLE ›', read: 'PLAY THIS READ ›', table: 'PLAY THIS DEAL ›' }[r.board.kind];
+    return { label, scheme: `mahjong://${route}/${r.board.date}?via=share` };
+  }
   if (r.shuffle) return { label: 'PLAY THIS SHUFFLE ›', scheme: `mahjong://daily-deal/${r.shuffle.date}?via=share` };
   if (r.table) return { label: 'PLAY THIS DEAL ›', scheme: `mahjong://daily-table/${r.table.date}?via=share` };
   if (r.code) return { label: name ? `PLAY WITH ${name.toUpperCase()} ›` : 'GET MAHJONG ALLEY ›', scheme: `mahjong://invite/${r.code}` };

@@ -119,6 +119,40 @@ export async function withSeatNames(r) {
   return names ? { ...r, session: { ...r.session, with: names } } : r;
 }
 
+/**
+ * The day's top ten on one of the Daily's boards (app migration 0124
+ * peek_daily_board): rank, the name as the board shows it, and the
+ * numbers that rank — the live field of named players, never a guest or
+ * a late play. Null when the day has no board, the kind is unknown, or
+ * the RPC is not deployed yet.
+ */
+export async function fetchDailyBoard(kind, date) {
+  const rows = await rpc('peek_daily_board', { p_kind: kind, p_date: date });
+  if (!Array.isArray(rows) || rows.length === 0) return null;
+  const field = Number(rows[0].field ?? rows.length);
+  return {
+    field: Number.isFinite(field) ? field : rows.length,
+    rows: rows.map((r) => ({
+      rank: Number(r.rank),
+      name: String(r.display_name ?? '').trim().slice(0, 24) || 'A PLAYER',
+      solved: r.solved === true,
+      seconds: r.seconds == null ? null : Number(r.seconds),
+      score: r.score == null ? null : Number(r.score),
+      greens: r.greens == null ? null : Number(r.greens),
+      points: r.points == null ? null : Number(r.points),
+      swept: r.swept === true,
+    })),
+  };
+}
+
+/** A board receipt with its rows: `r.board.rows` / `r.board.of` filled
+ *  from the day's board when the link names one. Never throws. */
+export async function withBoardRows(r) {
+  if (!r?.board) return r;
+  const board = await fetchDailyBoard(r.board.kind, r.board.date).catch(() => null);
+  return board ? { ...r, board: { ...r.board, rows: board.rows, of: board.field } } : r;
+}
+
 /** A promo / teacher code (app migration 0113): true when an ACTIVE code
  *  exists. The peek returns only yes/no (0121) — never the owner or the
  *  count — so a crawler can card a real code and nothing else. */

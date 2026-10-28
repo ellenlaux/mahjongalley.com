@@ -24,6 +24,12 @@ const samples = {
   'shuffle-late': [at('/receipt/shuffle-won?sd=2026-10-09&h=3&n=3&hn=0&hp=0&m=1&c=2214&a=1&wb=2&wf=4&d=2026-10-13'), 'ElleBell'],
   'mp-final-win': [seated(at('/receipt/pouch-fill?cat=2026&line=3&pts=25&pat=FFF+2026+222+6666&sh=4&so=4&sx=100&sb=-35&sk=1&sn=4&sf=1&g=7f1e0d2c-3b4a-4c5d-8e9f-0a1b2c3d4e5f&vs=west&i=ABCD2345&d=2026-10-25'), ['Carmen', 'Billie', 'Ruth']), 'ElleBell'],
   'mp-hand-loss': [at('/receipt/smoked?cat=2026&line=3&pts=30&pat=FFF+2026+222+6666&away=5&sh=2&sx=-25&sb=40&sk=3&sn=4&d=2026-10-25'), null],
+  'board-table': [{ ...at('/receipt/board?k=table&bd=2026-10-28&rk=12&of=14&at=1414&i=ABCD2345&d=2026-10-28'), board: { kind: 'table', date: '2026-10-28', of: 14, you: { rank: 12, of: 14, friends: null, at: '14:14' }, rows: [
+    { rank: 1, name: 'ElleBell', solved: true, score: 110 }, { rank: 2, name: 'DayRay', solved: true, score: 95 }, { rank: 3, name: 'Carmen', solved: false, score: 20 }, { rank: 4, name: 'Billie', solved: false, score: 5 },
+    { rank: 5, name: 'Ruth', solved: false, score: -10 }, { rank: 6, name: 'Pat', solved: false, score: -25 }, { rank: 7, name: 'Lou', solved: false, score: -40 }, { rank: 8, name: 'Kim', solved: false, score: -40 },
+    { rank: 9, name: 'Sue', solved: false, score: -60 }, { rank: 10, name: 'Marge', solved: false, score: -150 } ] } }, 'ElleBell'],
+  'board-shuffle': [{ ...at('/receipt/board?k=deal&bd=2026-10-28&d=2026-10-28'), board: { kind: 'deal', date: '2026-10-28', of: 3, you: null, rows: [
+    { rank: 1, name: 'DayRay', solved: true, seconds: 192.3 }, { rank: 2, name: 'ElleBell', solved: true, seconds: 402.3 }, { rank: 3, name: 'Carmen', solved: false, greens: 2, seconds: 500 } ] } }, null],
   'wall': [at('/receipt/dizzy-dragon?cat=2468&line=2&pts=30&pat=22+44+666+8888&away=4&d=2026-10-22'), 'DayRay'],
 };
 for (const [key, [r, name]] of Object.entries(samples)) {
