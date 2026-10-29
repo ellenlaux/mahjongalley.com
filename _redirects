@@ -33,6 +33,9 @@
 /receipt/*           /.netlify/functions/receipt-preview   200
 /og/receipt/*        /.netlify/functions/og-receipt        200
 /og/receipt-video/*  /.netlify/functions/og-receipt-video  200
+# /og/receipt-print/<moment>.mp4?… is the same receipt PRINTING — the slip fed up
+# out of the app's printer — as a 9:16 video to post (Reels, TikTok, Stories).
+/og/receipt-print/*  /.netlify/functions/og-receipt-print  200
 #
 # /code/CODE is a PROMO CODE (a teacher's; app migration 0113) — the page
 # shows the code and where to enter it; code-preview injects the gift's

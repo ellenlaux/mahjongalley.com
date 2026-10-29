@@ -64,6 +64,18 @@ export const ART_PX = 300;
 /** `hole`: leave the art's box empty (the card video composes the live
  *  clip there) — same size, so the lines land where the PNG's do. */
 function slip(r, name, hole = false) {
+  return el(
+    'div',
+    { display: 'flex', flexDirection: 'column', width: SLIP_W, backgroundColor: PAPER, color: INK, padding: '30px 40px 30px', fontFamily: 'Courier Prime', boxShadow: '0 20px 50px rgba(26,26,46,0.18)', transform: 'rotate(-1.5deg)' },
+    slipRows(r, name, hole),
+  );
+}
+
+/** What the slip prints, top to bottom: the moment's art (or its hole),
+ *  the wordmark, the lines, the one link line when `link` is given (the
+ *  printing video's slip — the app's slip prints it; the card leaves it
+ *  to the page), the barcode, the site. */
+function slipRows(r, name, hole, link = null) {
   const rows = [];
   // The header art: the moment (when recorded), then the wordmark — the
   // way a shop's logo tops a receipt.
@@ -82,6 +94,13 @@ function slip(r, name, hole = false) {
     ]),
   );
   for (const entry of receiptLines(r, name)) rows.push(line(entry));
+  // The one link, printed where a receipt prints its web address — the
+  // app's ReceiptSlip link box, at the slip's type scale (13 pt → 27 px).
+  if (link) {
+    rows.push(
+      el('div', { display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 25, marginBottom: 8, padding: '21px 17px', minHeight: 91, borderWidth: 4, borderStyle: 'solid', borderColor: INK, borderRadius: 8, fontSize: 31, fontWeight: 700, letterSpacing: 2 }, link),
+    );
+  }
   // The barcode: a row of bars of varying width.
   const bars = [];
   const widths = [3, 2, 5, 2, 3, 6, 2, 2, 4, 3, 2, 5, 3, 2, 6, 2, 4, 2, 3, 5, 2, 3, 2, 6, 3, 2, 4, 2, 5, 3];
@@ -90,12 +109,47 @@ function slip(r, name, hole = false) {
   }
   rows.push(el('div', { display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: 16 }, bars));
   rows.push(el('div', { display: 'flex', justifyContent: 'center', fontSize: 22, marginTop: 10, opacity: 0.7 }, 'mahjongalley.com'));
-  return el(
-    'div',
-    { display: 'flex', flexDirection: 'column', width: SLIP_W, backgroundColor: PAPER, color: INK, padding: '30px 40px 30px', fontFamily: 'Courier Prime', boxShadow: '0 20px 50px rgba(26,26,46,0.18)', transform: 'rotate(-1.5deg)' },
-    rows,
-  );
+  return rows;
 }
+
+// The torn bottom edge — the app's TornEdge (14 × 8 pt teeth) at the
+// slip's scale: paper triangles pointing down, the room showing between.
+const TEAR_W = 33;
+const TEAR_H = 19;
+function tornEdge() {
+  const pts = ['0,0'];
+  for (let i = 0; i < Math.ceil(SLIP_W / TEAR_W); i++) pts.push(`${i * TEAR_W + TEAR_W / 2},${TEAR_H}`, `${(i + 1) * TEAR_W},0`);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${SLIP_W}" height="${TEAR_H}" viewBox="0 0 ${SLIP_W} ${TEAR_H}"><polygon points="${pts.join(' ')}" fill="${PAPER}"/></svg>`;
+  return { type: 'img', props: { src: `data:image/svg+xml;base64,${btoa(svg)}`, width: SLIP_W, height: TEAR_H } };
+}
+
+/** The slip as the printer feeds it (og-receipt-print): the app's
+ *  ReceiptSlip — the card's paper with the one link line and a torn
+ *  bottom edge — tilted as one piece about its centre. */
+function printSlip(r, name, hole, link) {
+  return el('div', { display: 'flex', flexDirection: 'column', width: SLIP_W, transform: 'rotate(-1.5deg)' }, [
+    el('div', { display: 'flex', flexDirection: 'column', backgroundColor: PAPER, color: INK, padding: '30px 40px 19px', fontFamily: 'Courier Prime', boxShadow: '0 20px 50px rgba(26,26,46,0.18)' }, slipRows(r, name, hole, link)),
+    tornEdge(),
+  ]);
+}
+
+/** The printed slip's laid-out height at the card's scale (SLIP_W wide). */
+export async function printSlipHeight(r, name, { hole = false, link = null } = {}) {
+  const svg = await satori(printSlip(r, name, hole, link), { width: SLIP_W, fonts: FONTS });
+  const m = svg.match(/height="(\d+(?:\.\d+)?)"/);
+  return m ? Number(m[1]) : H;
+}
+
+/** The printed slip as a transparent PNG, tilted, with `pad` card pixels
+ *  of room on every side for the tilt and the shadow, scaled by `zoom`.
+ *  The slip's own (untilted) box sits at (pad, pad) · zoom. */
+export async function renderPrintSlipPng(r, name, { hole = false, link = null, height, pad, zoom }) {
+  const root = el('div', { display: 'flex', width: SLIP_W + 2 * pad, height: height + 2 * pad, padding: pad }, [printSlip(r, name, hole, link)]);
+  const svg = await satori(root, { width: SLIP_W + 2 * pad, height: height + 2 * pad, fonts: FONTS });
+  return new Resvg(svg, { fitTo: { mode: 'zoom', value: zoom } }).render().asPng();
+}
+
+export { SLIP_W };
 
 /** Where the slip lands on the card, for the video's overlay: estimated
  *  the way `card` lays it out (satori can't report positions). */
