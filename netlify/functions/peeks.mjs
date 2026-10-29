@@ -121,6 +121,9 @@ export async function withSeatNames(r) {
   return names ? { ...r, session: { ...r.session, with: names } } : r;
 }
 
+/** The board the app reads is this many rows (its LEADERBOARD_FETCH). */
+const APP_BOARD_FETCH = 200;
+
 /**
  * The day's top ten on one of the Daily's boards (app migration 0124
  * peek_daily_board): rank, the name as the board shows it, and the
@@ -131,9 +134,13 @@ export async function withSeatNames(r) {
 export async function fetchDailyBoard(kind, date) {
   const rows = await rpc('peek_daily_board', { p_kind: kind, p_date: date });
   if (!Array.isArray(rows) || rows.length === 0) return null;
-  const field = Number(rows[0].field ?? rows.length);
+  const read = Number(rows[0].field ?? rows.length);
+  const field = Number.isFinite(read) ? read : rows.length;
   return {
-    field: Number.isFinite(field) ? field : rows.length,
+    // The field only below the rows the app reads (its LEADERBOARD_FETCH):
+    // the app can't count past what it fetched, so neither does the card —
+    // at 200 or more there is no "AND n MORE" on either.
+    field: field < APP_BOARD_FETCH ? field : null,
     rows: rows.map((r) => ({
       rank: Number(r.rank),
       name: String(r.display_name ?? '').trim().slice(0, 24) || 'A PLAYER',

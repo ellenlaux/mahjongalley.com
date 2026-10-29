@@ -530,7 +530,7 @@ export function receiptLines(r, name) {
     lines.push(...rankStampLines(t.rank));
     lines.push('---');
     lines.push({ l: 'TOTAL', r: `${signedPoints(tableScore(t))} PTS`, bold: true });
-    lines.push(...topTenLines(r.top, t.rank?.rank ?? null));
+    lines.push(...topTenLines(r.top));
     lines.push('---');
     lines.push({ c: 'THANK YOU · PLAY AGAIN SOON' });
     return lines;
@@ -586,7 +586,7 @@ export function shuffleReceiptLines(f, moment, name, top = null) {
   if (f.wouldBe) lines.push({ l: 'WOULD BE', r: rankLine(f.wouldBe.place, f.wouldBe.field) });
   lines.push(...rankStampLines(f.rank));
   lines.push('---', { l: 'TOTAL', r: formatClock(shuffleTotalSeconds(f)), bold: true });
-  lines.push(...topTenLines(top, f.rank?.rank ?? null));
+  lines.push(...topTenLines(top));
   lines.push('---', { c: 'THANK YOU · PLAY AGAIN SOON' });
   return lines;
 }
@@ -612,7 +612,7 @@ export function boardReceiptLines(b, name) {
   lines.push('---', { c: 'TOP 10', big: true });
   const all = b.rows ?? [];
   if (all.length === 0) lines.push({ c: 'NOBODY ON THE BOARD YET', small: true });
-  lines.push(...boardRowLines(b.kind, all, b.of ?? null, null));
+  lines.push(...boardRowLines(b.kind, all, b.of ?? null));
   if (b.you) {
     lines.push('---');
     lines.push({ l: 'YOU', r: rankLine(b.you.rank, b.you.of), bold: true });
@@ -627,16 +627,12 @@ const BOARD_RECEIPT_ROWS = 10;
 
 /** The board's rows — the app's lib/receiptLines.ts boardRowLines: the
  *  top ten as the board ranks them, each with the number that ranks it,
- *  then how many more were on the board when the field is known.
- *  `youRank` bolds the sender's own row (a daily's own slip, where the
- *  stamp says it). */
-function boardRowLines(kind, all, of, youRank) {
+ *  then how many more were on the board when the field is known. No row
+ *  is marked as the sender's: the board is read when the card renders,
+ *  so the stamp's rank may belong to someone else by then. */
+function boardRowLines(kind, all, of) {
   const rows = all.slice(0, BOARD_RECEIPT_ROWS);
-  const lines = rows.map((row) => ({
-    l: `${`#${row.rank}`.padEnd(4)}${row.name.toUpperCase()}`,
-    r: boardRowValue(kind, row),
-    ...(youRank !== null && row.rank === youRank ? { bold: true } : {}),
-  }));
+  const lines = rows.map((row) => ({ l: `${`#${row.rank}`.padEnd(4)}${row.name.toUpperCase()}`, r: boardRowValue(kind, row) }));
   if (of !== null && of > rows.length) lines.push({ l: `AND ${of - rows.length} MORE`, r: '', dim: true });
   return lines;
 }
@@ -646,9 +642,9 @@ function boardRowLines(kind, all, of, youRank) {
  *  { kind, rows, of }, read from the day's board by peeks.withTopTen,
  *  never from the link. Nothing without a row: a board that never
  *  answered, or an empty one, leaves the slip as it was. */
-export function topTenLines(top, youRank) {
+export function topTenLines(top) {
   if (!top || !top.rows || top.rows.length === 0) return [];
-  return ['---', { c: 'TOP 10', bold: true }, ...boardRowLines(top.kind, top.rows, top.of ?? null, youRank)];
+  return ['---', { c: 'TOP 10', bold: true }, ...boardRowLines(top.kind, top.rows, top.of ?? null)];
 }
 
 /** The Daily Read's slip — the app's lib/receiptLines.ts readReceiptLines,
@@ -673,7 +669,7 @@ export function readReceiptLines(f, moment, name, top = null) {
   const raw = f.hands - f.hintCost + f.timeBonus;
   if (raw < 0) lines.push({ l: 'NEVER BELOW 0', r: signedPoints(-raw), dim: true });
   lines.push('---', { l: 'TOTAL', r: `${readTotalPoints(f)} PTS`, bold: true });
-  lines.push(...topTenLines(top, f.rank?.rank ?? null));
+  lines.push(...topTenLines(top));
   lines.push('---', { c: 'THANK YOU · PLAY AGAIN SOON' });
   return lines;
 }
