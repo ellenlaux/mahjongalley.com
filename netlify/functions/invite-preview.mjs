@@ -13,8 +13,14 @@
  *
  * All injected text is HTML-escaped — table and display names are user
  * content and land inside attribute values.
+ *
+ * A friend invite sent from one of The Daily's leaderboards carries the
+ * puzzle and the day (/invite/CODE?k=deal&d=2026-10-28, daily-invite.mjs): it
+ * gets The Daily's page (daily-invite/index.html) and its card, titled
+ * "<Name> invited you to the Daily Shuffle" (Ellen 2026-10-28).
  */
 
+import { DAILY_PUZZLES, parseDailyInvite } from './daily-invite.mjs';
 import { fetchPeek, paceLabel, parsePreviewRequest } from './peeks.mjs';
 
 const esc = (s) =>
@@ -46,8 +52,9 @@ export default async (req) => {
   const { kind, code } = parsePreviewRequest(url);
 
   // The static invite page is the base (and the graceful answer to
-  // everything unexpected).
-  const baseRes = await fetch(new URL('/404.html', url.origin));
+  // everything unexpected) — The Daily's own page for a Daily invite.
+  const daily = kind === 'invite' ? parseDailyInvite(url.searchParams) : null;
+  const baseRes = await fetch(new URL(daily ? '/daily-invite/index.html' : '/404.html', url.origin));
   const baseHtml = await baseRes.text();
   const asPage = (html) =>
     new Response(html, {
@@ -67,8 +74,16 @@ export default async (req) => {
   if (!peek) return asPage(baseHtml);
 
   const image = `${url.origin}/og/${kind}/${encodeURIComponent(code.toUpperCase())}.png`;
-  const tags =
-    kind === 'join'
+  // A Daily invite's card is the same image URL with the puzzle and the day
+  // on it, rebuilt from the parsed tokens (never the raw query). It lands
+  // in an attribute value, so its & is &amp;.
+  const tags = daily
+    ? {
+        title: `${peek.displayName} invited you to the ${DAILY_PUZZLES[daily.kind].name}`,
+        description: DAILY_PUZZLES[daily.kind].blurb,
+        image: esc(`${image}?k=${daily.kind}&d=${daily.date}`),
+      }
+    : kind === 'join'
       ? {
           title: peek.name ?? `${peek.hostDisplayName}’s Table`,
           description: `${peek.seatCount}/${peek.maxPlayers} seated · ${paceLabel(peek.mode)} · ${
