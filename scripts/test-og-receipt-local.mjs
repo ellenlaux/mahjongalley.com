@@ -9,6 +9,14 @@ const at = (path) => parseReceipt(new URL(`https://mahjongalley.com${path}`));
 // A Social Play hand's seats come from the DB (peek_game_seats) at request
 // time; the local render stubs the names the way peeks.withSeatNames fills them.
 const seated = (r, names) => ({ ...r, session: { ...r.session, with: names } });
+// A daily's own receipt prints the day's top ten under its bill; the rows
+// come from peek_daily_board at request time, stubbed here the way
+// peeks.withTopTen fills them.
+const topped = (r, kind, of, rows) => ({ ...r, top: { kind, of, rows } });
+const TABLE_TOP = [
+  { rank: 1, name: 'ElleBell', solved: true, score: 140 }, { rank: 2, name: 'Carmen', solved: true, score: 125 }, { rank: 3, name: 'DayRay', solved: true, score: 95 }, { rank: 4, name: 'Billie', solved: false, score: 20 },
+  { rank: 5, name: 'Ruth', solved: false, score: 5 }, { rank: 6, name: 'Pat', solved: false, score: -10 }, { rank: 7, name: 'Lou', solved: false, score: -25 }, { rank: 8, name: 'Kim', solved: false, score: -40 },
+  { rank: 9, name: 'Sue', solved: false, score: -40 }, { rank: 10, name: 'Marge', solved: false, score: -60 }, { rank: 11, name: 'Dot', solved: false, score: -90 }, { rank: 12, name: 'Bea', solved: false, score: -150 } ];
 const samples = {
   'named': [at('/receipt/heart-eyes?cat=2026&line=3&pts=30&pat=FFF+2026+222+6666&jl=1&sp=1&chips=self-pick,jokerless,streak-4&i=ABCD2345&d=2026-10-22'), 'DayRay'],
   'called': [at('/receipt/pouch-fill?cat=2026&line=3&pts=30&pat=FFF+2026+222+6666&chips=concealed&d=2026-10-22'), null],
@@ -35,6 +43,12 @@ const samples = {
   'board-shuffle': [{ ...at('/receipt/board?k=deal&bd=2026-10-28&d=2026-10-28'), board: { kind: 'deal', date: '2026-10-28', of: 3, you: null, rows: [
     { rank: 1, name: 'DayRay', solved: true, seconds: 192.3 }, { rank: 2, name: 'ElleBell', solved: true, seconds: 402.3 }, { rank: 3, name: 'Carmen', solved: false, greens: 2, seconds: 500 } ] } }, null],
   'wall': [at('/receipt/dizzy-dragon?cat=2468&line=2&pts=30&pat=22+44+666+8888&away=4&d=2026-10-22'), 'DayRay'],
+  // The daily's own slip, then the day's top ten (the stamp's row bold).
+  'deal-win-top': [topped(at('/receipt/pouch-fill?cat=2468&line=1&pts=25&pat=222+444+6666+8888&chips=concealed&dd=2026-10-12&tb=100&cl=0&fd=1&pc=97&rk=3&of=14&at=1414&i=ABCD2345&d=2026-10-12'), 'table', 14, TABLE_TOP), 'DayRay'],
+  'shuffle-won-top': [topped(at('/receipt/shuffle-won?sd=2026-10-24&h=3&n=3&hn=2&hp=150&m=1&c=1923&rk=2&of=3&at=1414&i=ABCD2345&d=2026-10-24'), 'deal', 3, [
+    { rank: 1, name: 'DayRay', solved: true, seconds: 192.3 }, { rank: 2, name: 'ElleBell', solved: true, seconds: 402.3 }, { rank: 3, name: 'Carmen', solved: false, greens: 2, seconds: 500 } ]), 'ElleBell'],
+  'read-won-top': [topped(at('/receipt/read-won?rd=2026-10-25&rf=8&rt=8&rh=150&rn=0&rc=0&rb=41&rl=139&rk=1&of=3&at=1414&i=ABCD2345&d=2026-10-25'), 'read', 3, [
+    { rank: 1, name: 'ElleBell', solved: true, points: 191 }, { rank: 2, name: 'DayRay', solved: true, points: 160 }, { rank: 3, name: 'Carmen', solved: false, points: 45 } ]), 'ElleBell'],
 };
 for (const [key, [r, name]] of Object.entries(samples)) {
   writeFileSync(`${out}/og-receipt-${key}.png`, await renderReceiptCardPng(r, name));
