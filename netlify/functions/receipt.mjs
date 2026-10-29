@@ -72,13 +72,13 @@ const TOKEN = /^(?:[0-9]{1,5}|1D|F{2,6}|D{1,4}|N{1,4}|E{2,4}|W{2,4}|S{2,4}|NEWS)
 
 /**
  * Parse + validate a receipt request. Moment from the preserved pathname
- * (/receipt/<m>, /og/receipt/<m>.png, /og/receipt-video/<m>.mp4 — Netlify rewrites keep the client's
+ * (/receipt/<m>, /og/receipt/<m>.png, /og/receipt-video/<m>.mp4, /og/receipt-print/<m>.mp4 — Netlify rewrites keep the client's
  * own query string, so the rest rides as query params). Returns null when
  * the moment is unknown; every other field degrades to "absent" rather
  * than failing the request, so a damaged link still lands on a sane page.
  */
 export function parseReceipt(url) {
-  const m = url.pathname.match(/^\/(?:og\/)?receipt(?:-video)?\/([a-z-]{3,24})(?:\.png|\.mp4)?\/?$/);
+  const m = url.pathname.match(/^\/(?:og\/)?receipt(?:-video|-print)?\/([a-z-]{3,24})(?:\.png|\.mp4)?\/?$/);
   const moment = m ? m[1] : url.searchParams.get('moment');
   const outcome = MOMENTS[moment];
   if (!outcome) return null;

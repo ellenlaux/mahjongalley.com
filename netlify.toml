@@ -4,6 +4,7 @@
 #   receipt-preview — serves /receipt/* (a shared game, as a receipt) with its OG tags
 #   og-receipt      — renders the receipt's 1200x1200 card PNG
 #   og-receipt-video — the same card as a short mp4, the moment's clip composed live (ffmpeg-static)
+#   og-receipt-print — the receipt printing out of the app's printer, a 9:16 mp4 to post (ffmpeg-static)
 # Routing to the functions lives in _redirects (rewrites take precedence
 # over function URLs, so the pretty paths map there explicitly).
 
@@ -25,4 +26,9 @@
 [functions.og-receipt-video]
   # resvg (napi) and ffmpeg-static (an ~80 MB binary) stay out of the
   # esbuild bundle; Netlify packages them from node_modules.
+  external_node_modules = ["@resvg/resvg-js", "ffmpeg-static"]
+
+[functions.og-receipt-print]
+  # As og-receipt-video: resvg (napi) and the ffmpeg binary stay out of
+  # the esbuild bundle.
   external_node_modules = ["@resvg/resvg-js", "ffmpeg-static"]
