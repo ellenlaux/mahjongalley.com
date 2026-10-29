@@ -271,7 +271,22 @@ export function parseReceipt(url) {
     if (t.getUTCFullYear() === +dm[1] && t.getUTCMonth() === +dm[2] - 1 && t.getUTCDate() === +dm[3]) date = dRaw;
   }
 
-  return { moment, outcome, handLine, points, pattern, chips, jokerless, selfPick, away, winnerSeat, table, session, shuffle, read, board, code, date };
+  // `top`: the day's top ten under a daily's own slip, filled from the
+  // day's board by peeks.withTopTen (never from the link); null until then.
+  return { moment, outcome, handLine, points, pattern, chips, jokerless, selfPick, away, winnerSeat, table, session, shuffle, read, board, code, date, top: null };
+}
+
+/** Which day's board a daily's OWN receipt prints the top ten of (Ellen
+ *  2026-10-28): the Daily Deal's (kind `table`, day `dd`), the Shuffle's
+ *  (`deal`, `sd`), the Read's (`read`, `rd`). Null for any other receipt —
+ *  the board receipt prints its rows itself, and a solo or Social Play
+ *  receipt prints none. */
+export function topTenBoard(r) {
+  if (!r || r.board) return null;
+  if (r.table) return { kind: 'table', date: r.table.date };
+  if (r.shuffle) return { kind: 'deal', date: r.shuffle.date };
+  if (r.read) return { kind: 'read', date: r.read.date };
+  return null;
 }
 
 /**
@@ -448,8 +463,8 @@ export function headline(r) {
  */
 export function receiptLines(r, name) {
   if (r.outcome === 'board') return r.board ? boardReceiptLines(r.board, name) : ['---', { c: 'THE BOARD', big: true }, '---', { c: 'A NEW ONE TOMORROW' }];
-  if (r.outcome === 'shuffle') return r.shuffle ? shuffleReceiptLines(r.shuffle, r.moment, name) : ['---', { c: headline(r), big: true }, '---', { c: 'THANK YOU · PLAY AGAIN SOON' }];
-  if (r.outcome === 'read') return r.read ? readReceiptLines(r.read, r.moment, name) : ['---', { c: headline(r), big: true }, '---', { c: 'THANK YOU · PLAY AGAIN SOON' }];
+  if (r.outcome === 'shuffle') return r.shuffle ? shuffleReceiptLines(r.shuffle, r.moment, name, r.top) : ['---', { c: headline(r), big: true }, '---', { c: 'THANK YOU · PLAY AGAIN SOON' }];
+  if (r.outcome === 'read') return r.read ? readReceiptLines(r.read, r.moment, name, r.top) : ['---', { c: headline(r), big: true }, '---', { c: 'THANK YOU · PLAY AGAIN SOON' }];
   const pts = r.points ? `${r.points} PTS` : null;
   const lines = ['---'];
   if (r.date) lines.push({ l: 'DATE', r: receiptDate(r.date) });
@@ -515,6 +530,7 @@ export function receiptLines(r, name) {
     lines.push(...rankStampLines(t.rank));
     lines.push('---');
     lines.push({ l: 'TOTAL', r: `${signedPoints(tableScore(t))} PTS`, bold: true });
+    lines.push(...topTenLines(r.top));
     lines.push('---');
     lines.push({ c: 'THANK YOU · PLAY AGAIN SOON' });
     return lines;
@@ -557,7 +573,7 @@ export function sessionLines(s) {
 
 /** The Daily Shuffle's slip — the app's lib/receiptLines.ts
  *  shuffleReceiptLines, line for line: a bill. */
-export function shuffleReceiptLines(f, moment, name) {
+export function shuffleReceiptLines(f, moment, name, top = null) {
   const lines = ['---', { l: 'SHUFFLE', r: receiptDate(f.date) }];
   if (name) lines.push({ l: 'PLAYER', r: name.toUpperCase() });
   lines.push('---', { c: headline({ moment }), big: true });
@@ -569,7 +585,9 @@ export function shuffleReceiptLines(f, moment, name) {
   if (f.isArchive) lines.push({ l: 'ARCHIVE PLAY', r: '', dim: true });
   if (f.wouldBe) lines.push({ l: 'WOULD BE', r: rankLine(f.wouldBe.place, f.wouldBe.field) });
   lines.push(...rankStampLines(f.rank));
-  lines.push('---', { l: 'TOTAL', r: formatClock(shuffleTotalSeconds(f)), bold: true }, '---', { c: 'THANK YOU · PLAY AGAIN SOON' });
+  lines.push('---', { l: 'TOTAL', r: formatClock(shuffleTotalSeconds(f)), bold: true });
+  lines.push(...topTenLines(top));
+  lines.push('---', { c: 'THANK YOU · PLAY AGAIN SOON' });
   return lines;
 }
 
@@ -592,10 +610,9 @@ export function boardReceiptLines(b, name) {
   const lines = ['---', { l: BOARD_TITLE[b.kind] ?? 'THE DAILY', r: receiptDate(b.date) }];
   if (name) lines.push({ l: 'PRINTED FOR', r: name.toUpperCase() });
   lines.push('---', { c: 'TOP 10', big: true });
-  const rows = (b.rows ?? []).slice(0, 10);
-  if (rows.length === 0) lines.push({ c: 'NOBODY ON THE BOARD YET', small: true });
-  for (const row of rows) lines.push({ l: `${`#${row.rank}`.padEnd(4)}${row.name.toUpperCase()}`, r: boardRowValue(b.kind, row) });
-  if (b.of !== null && b.of !== undefined && b.of > rows.length) lines.push({ l: `AND ${b.of - rows.length} MORE`, r: '', dim: true });
+  const all = b.rows ?? [];
+  if (all.length === 0) lines.push({ c: 'NOBODY ON THE BOARD YET', small: true });
+  lines.push(...boardRowLines(b.kind, all, b.of ?? null));
   if (b.you) {
     lines.push('---');
     lines.push({ l: 'YOU', r: rankLine(b.you.rank, b.you.of), bold: true });
@@ -605,9 +622,34 @@ export function boardReceiptLines(b, name) {
   return lines;
 }
 
+/** The board receipt lists this many rows (the app's BOARD_RECEIPT_ROWS). */
+const BOARD_RECEIPT_ROWS = 10;
+
+/** The board's rows — the app's lib/receiptLines.ts boardRowLines: the
+ *  top ten as the board ranks them, each with the number that ranks it,
+ *  then how many more were on the board when the field is known. No row
+ *  is marked as the sender's: the board is read when the card renders,
+ *  so the stamp's rank may belong to someone else by then. */
+function boardRowLines(kind, all, of) {
+  const rows = all.slice(0, BOARD_RECEIPT_ROWS);
+  const lines = rows.map((row) => ({ l: `${`#${row.rank}`.padEnd(4)}${row.name.toUpperCase()}`, r: boardRowValue(kind, row) }));
+  if (of !== null && of > rows.length) lines.push({ l: `AND ${of - rows.length} MORE`, r: '', dim: true });
+  return lines;
+}
+
+/** The day's top ten under a daily's OWN slip, after its TOTAL (Ellen
+ *  2026-10-28) — the app's lib/receiptLines.ts topTenLines. `top` is
+ *  { kind, rows, of }, read from the day's board by peeks.withTopTen,
+ *  never from the link. Nothing without a row: a board that never
+ *  answered, or an empty one, leaves the slip as it was. */
+export function topTenLines(top) {
+  if (!top || !top.rows || top.rows.length === 0) return [];
+  return ['---', { c: 'TOP 10', bold: true }, ...boardRowLines(top.kind, top.rows, top.of ?? null)];
+}
+
 /** The Daily Read's slip — the app's lib/receiptLines.ts readReceiptLines,
  *  line for line: a bill in points. */
-export function readReceiptLines(f, moment, name) {
+export function readReceiptLines(f, moment, name, top = null) {
   const lines = ['---', { l: 'READ', r: receiptDate(f.date) }];
   if (name) lines.push({ l: 'PLAYER', r: name.toUpperCase() });
   // The heading is the app's results sheet's: found them all, or the
@@ -626,7 +668,9 @@ export function readReceiptLines(f, moment, name) {
   // the slip says what that gave back so the items still add up.
   const raw = f.hands - f.hintCost + f.timeBonus;
   if (raw < 0) lines.push({ l: 'NEVER BELOW 0', r: signedPoints(-raw), dim: true });
-  lines.push('---', { l: 'TOTAL', r: `${readTotalPoints(f)} PTS`, bold: true }, '---', { c: 'THANK YOU · PLAY AGAIN SOON' });
+  lines.push('---', { l: 'TOTAL', r: `${readTotalPoints(f)} PTS`, bold: true });
+  lines.push(...topTenLines(top));
+  lines.push('---', { c: 'THANK YOU · PLAY AGAIN SOON' });
   return lines;
 }
 

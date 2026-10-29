@@ -22,7 +22,7 @@ import { promisify } from 'node:util';
 import ffmpegPath from 'ffmpeg-static';
 import { CARD_CLIP_B64 } from './og-receipt-assets.mjs';
 import { ART_PX, CARD_H, CARD_W, cardLayout, renderReceiptCardPng, slipHeight } from './og-receipt.mjs';
-import { fetchPeek, withBoardRows, withSeatNames } from './peeks.mjs';
+import { fetchPeek, withBoardRows, withSeatNames, withTopTen } from './peeks.mjs';
 import { HAS_ART, parseReceipt } from './receipt.mjs';
 
 const run = promisify(execFile);
@@ -82,8 +82,9 @@ export async function renderReceiptCardMp4(r, name) {
 
 export default async (req) => {
   const url = new URL(req.url);
-  // The seats of a Social Play hand, named from the finished game (null-safe).
-  const r = await withBoardRows(await withSeatNames(parseReceipt(url)));
+  // The seats of a Social Play hand, named from the finished game; a
+  // board's rows; a daily's top ten from its day's board (all null-safe).
+  const r = await withTopTen(await withBoardRows(await withSeatNames(parseReceipt(url))));
   if (!r || !HAS_ART.has(r.moment)) return new Response('no clip for this receipt', { status: 404 });
   try {
     const peek = r.code ? await fetchPeek('invite', r.code).catch(() => null) : null;

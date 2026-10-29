@@ -12,6 +12,8 @@
  * stalling crawler fetches (they give up fast).
  */
 
+import { topTenBoard } from './receipt.mjs';
+
 const SUPABASE_URL = 'https://bhtuztrwgpyzhxipcjda.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_86_PUFmbyZ5tKDuik07Y8A_8xNqUTE3';
 
@@ -119,6 +121,9 @@ export async function withSeatNames(r) {
   return names ? { ...r, session: { ...r.session, with: names } } : r;
 }
 
+/** The board the app reads is this many rows (its LEADERBOARD_FETCH). */
+const APP_BOARD_FETCH = 200;
+
 /**
  * The day's top ten on one of the Daily's boards (app migration 0124
  * peek_daily_board): rank, the name as the board shows it, and the
@@ -129,9 +134,13 @@ export async function withSeatNames(r) {
 export async function fetchDailyBoard(kind, date) {
   const rows = await rpc('peek_daily_board', { p_kind: kind, p_date: date });
   if (!Array.isArray(rows) || rows.length === 0) return null;
-  const field = Number(rows[0].field ?? rows.length);
+  const read = Number(rows[0].field ?? rows.length);
+  const field = Number.isFinite(read) ? read : rows.length;
   return {
-    field: Number.isFinite(field) ? field : rows.length,
+    // The field only below the rows the app reads (its LEADERBOARD_FETCH):
+    // the app can't count past what it fetched, so neither does the card —
+    // at 200 or more there is no "AND n MORE" on either.
+    field: field < APP_BOARD_FETCH ? field : null,
     rows: rows.map((r) => ({
       rank: Number(r.rank),
       name: String(r.display_name ?? '').trim().slice(0, 24) || 'A PLAYER',
@@ -151,6 +160,19 @@ export async function withBoardRows(r) {
   if (!r?.board) return r;
   const board = await fetchDailyBoard(r.board.kind, r.board.date).catch(() => null);
   return board ? { ...r, board: { ...r.board, rows: board.rows, of: board.field } } : r;
+}
+
+/** A daily's OWN receipt (the Daily Deal's, the Shuffle's, the Read's)
+ *  with the day's top ten: `r.top` = { kind, rows, of } read from that
+ *  day's board the way withBoardRows reads it (Ellen 2026-10-28: the
+ *  player's bill, then the top 10). Any other receipt, a board that
+ *  doesn't answer, or an empty one → `r` untouched, and the slip prints
+ *  as it always has. Never throws. */
+export async function withTopTen(r) {
+  const which = topTenBoard(r);
+  if (!which) return r;
+  const board = await fetchDailyBoard(which.kind, which.date).catch(() => null);
+  return board && board.rows.length > 0 ? { ...r, top: { kind: which.kind, rows: board.rows, of: board.field } } : r;
 }
 
 /** A promo / teacher code (app migration 0113): true when an ACTIVE code
