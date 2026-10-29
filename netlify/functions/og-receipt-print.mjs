@@ -208,7 +208,8 @@ export default async (req) => {
       headers: {
         'content-type': 'video/mp4',
         'content-length': String(mp4.length),
-        'accept-ranges': 'bytes',
+        // No accept-ranges: the file is a download (the app fetches it
+        // whole to hand to Instagram), and this function answers no Range.
         'cache-control': 'public, max-age=86400',
         'netlify-cdn-cache-control': 'public, max-age=604800, durable',
         'netlify-vary': 'query',
