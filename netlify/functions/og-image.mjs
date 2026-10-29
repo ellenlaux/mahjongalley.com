@@ -12,6 +12,8 @@
  */
 
 import { renderCardPng, renderInviteCardPng } from './og-render.mjs';
+import { renderDailyInviteCardPng } from './og-daily.mjs';
+import { parseDailyInvite } from './daily-invite.mjs';
 import { fetchPeek, paceLabel, parsePreviewRequest } from './peeks.mjs';
 
 export default async (req) => {
@@ -29,10 +31,15 @@ export default async (req) => {
     const peek = await fetchPeek(kind, code);
     if (!peek) return fallback();
 
-    // Friend invites get Ellen's tile-pile card (2026-10-23); tables keep
-    // the tile + text column card.
-    const png =
-      kind === 'invite'
+    // Friend invites get Ellen's tile-pile card (2026-10-23) — or, sent
+    // from a daily's leaderboard (`?k=&d=`), The Daily's card for that
+    // puzzle and day (og-daily.mjs; the code is still checked above, so
+    // no one mints a Daily card off a made-up link). Tables keep the
+    // tile + text column card.
+    const daily = kind === 'invite' ? parseDailyInvite(url.searchParams) : null;
+    const png = daily
+      ? await renderDailyInviteCardPng(daily)
+      : kind === 'invite'
         ? await renderInviteCardPng({ name: peek.displayName })
         : await renderCardPng({
             title: peek.name ?? `${peek.hostDisplayName}’s Table`,

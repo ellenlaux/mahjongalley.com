@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Smart App Banner — the same id as the invite page (404.html). -->
+  <meta name="apple-itunes-app" content="app-id=6769199909" />
+  <!-- A friend invite sent from one of The Daily's leaderboards:
+       /invite/CODE?k=deal&d=2026-10-28. invite-preview serves this page for
+       it (in place of the invite page) and swaps in the tags below — the
+       title names the sender, the image is The Daily's card for the puzzle
+       and the day (og-daily.mjs). These are the tags for a link it can't
+       read, the brand card's. -->
+  <title>The Daily · Mahjong Alley</title>
+  <meta name="description" content="Three daily puzzles on Mahjong Alley." />
+  <meta property="og:title" content="The Daily · Mahjong Alley" />
+  <meta property="og:description" content="Three daily puzzles on Mahjong Alley." />
+  <meta property="og:image" content="https://mahjongalley.com/assets/og-card.png?v=2" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Mahjong Alley" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="The Daily · Mahjong Alley" />
+  <meta name="twitter:description" content="Three daily puzzles on Mahjong Alley." />
+  <meta name="twitter:image" content="https://mahjongalley.com/assets/og-card.png?v=2" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="180x180" href="/assets/favicon-180.png" />
+  <link rel="apple-touch-icon" href="/assets/favicon-180.png" />
+  <link rel="preload" href="/assets/fonts/TAYNapili.otf" as="font" type="font/otf" crossorigin />
+  <style>
+    @font-face {
+      font-family: 'TAY Napili';
+      src: url('/assets/fonts/TAYNapili.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Inter';
+      src: url('/assets/fonts/Inter-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Inter';
+      src: url('/assets/fonts/Inter-SemiBold.ttf') format('truetype');
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Inter';
+      src: url('/assets/fonts/Inter-Bold.ttf') format('truetype');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+    :root {
+      /* The card's colours (og-daily.mjs): The Daily's apricot, the
+         badge's orange and cream, the masthead's ink. */
+      --apricot: #F6BC74;
+      --orange: #CC6D00;
+      --cream: #F6F2EA;
+      --ink: #141414;
+      --dim: rgba(20, 20, 20, 0.66);
+      /* The badge's capitals, and the tile around them (DailySectionBadge:
+         1.75 of the cap height tall, 7/16 of it for air). */
+      --cap: 18px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--apricot);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      padding: 8px 0 24px;
+    }
+    .masthead {
+      display: block;
+      width: 100%;
+      max-width: 360px;
+      height: auto;
+      margin: 0 auto;
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+    /* THE DAILY — SHUFFLE | OCT 28, as the puzzle's own screen wears it. */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: calc(var(--cap) * 7 / 16);
+      height: calc(var(--cap) * 1.75);
+      padding: 0 calc(var(--cap) * 7 / 16);
+      margin-top: 18px;
+      border-radius: 4px;
+      background: var(--orange);
+      color: var(--cream);
+    }
+    /* Ellen's wordmark, printed in cream: the outline is the mask. */
+    .badge-mark {
+      display: block;
+      height: var(--cap);
+      background: var(--cream);
+      -webkit-mask: var(--mark) no-repeat center / contain;
+      mask: var(--mark) no-repeat center / contain;
+    }
+    .badge-rule {
+      width: 2px;
+      height: calc(var(--cap) * 1.75 * 0.62);
+      background: var(--cream);
+      opacity: 0.6;
+    }
+    /* TAY Napili: capitals are 0.747 of the size; the line drops 0.15 of
+       it so the capitals, not the line box, sit centred. */
+    .badge-day {
+      font-family: 'TAY Napili', 'Inter', sans-serif;
+      font-size: calc(var(--cap) / 0.747);
+      line-height: 1.3;
+      transform: translateY(0.15em);
+      white-space: nowrap;
+    }
+    .blurb { font-size: 17px; line-height: 1.4; margin-top: 14px; }
+    .headline { font-size: 24px; font-weight: 600; letter-spacing: -0.3px; line-height: 1.25; margin-top: 32px; }
+    .code-label {
+      margin-top: 22px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      color: var(--dim);
+    }
+    .code {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      margin-top: 4px;
+      padding-left: 6px; /* optically recenter the letterspaced text */
+      user-select: all;
+      -webkit-user-select: all;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      margin-top: 14px;
+    }
+    .btn-primary { background: var(--ink); color: var(--cream); }
+    .btn-secondary { background: rgba(20, 20, 20, 0.1); color: var(--ink); }
+    .buttons { margin-top: 26px; }
+    .hint { color: var(--dim); font-size: 13px; line-height: 1.5; margin-top: 20px; }
+    .footer { margin-top: 36px; }
+    .footer a { color: var(--ink); font-size: 13px; font-weight: 600; text-decoration: none; }
+    .footer-sep { color: var(--dim); font-size: 13px; margin: 0 6px; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <img class="masthead" src="/assets/daily/TheDaily.png" alt="" aria-hidden="true" width="964" height="387" />
+    <h1 class="sr-only">The Daily</h1>
+
+    <div id="puzzle" hidden>
+      <div class="badge" id="badge" role="img">
+        <span class="badge-mark" id="badge-mark"></span>
+        <span class="badge-rule"></span>
+        <span class="badge-day" id="badge-day"></span>
+      </div>
+      <p class="blurb" id="blurb"></p>
+    </div>
+
+    <p class="headline" id="headline">Three daily puzzles on Mahjong Alley.</p>
+
+    <div id="invite" hidden>
+      <p class="code-label">Friend code</p>
+      <p class="code" id="code"></p>
+    </div>
+
+    <div class="buttons">
+      <!-- "Get the app" leads, as on the invite page: someone who has the
+           app and taps the link never sees this page — the universal link
+           opens the app on the puzzle. -->
+      <a class="btn btn-primary" id="get-app" href="https://apps.apple.com/app/id6769199909">Get the app</a>
+      <a class="btn btn-secondary" id="open-app" href="#" hidden>Open in the app</a>
+    </div>
+
+    <p class="hint" id="hint" hidden></p>
+
+    <p class="footer">
+      <a href="/support/">Support</a>
+      <span class="footer-sep">·</span>
+      <a href="/privacy/">Privacy</a>
+      <span class="footer-sep">·</span>
+      <a href="/terms/">Terms</a>
+      <span class="footer-sep">·</span>
+      <a href="https://www.instagram.com/mahjongalley/">@mahjongalley</a>
+    </p>
+  </main>
+
+  <script>
+    // /invite/ABCD2345?k=deal&d=2026-10-28 — read from the live URL (the
+    // rewrite keeps it). The three puzzles are netlify/functions/
+    // daily-invite.mjs's, copied: keep the names and lines in step.
+    (function () {
+      var PUZZLES = {
+        deal: { name: 'Daily Shuffle', blurb: 'Three hands, shuffled. Sort them out.', mark: 'TheDailyWordmarkShuffle.svg', aspect: 272.57 / 37 },
+        read: { name: 'Daily Read', blurb: 'Their exposures are showing. What are they playing?', mark: 'TheDailyWordmarkRead.svg', aspect: 236.98 / 36 },
+        table: { name: 'Daily Deal', blurb: 'One deal, same for everyone. Play it for score.', mark: 'TheDailyWordmarkDeal.svg', aspect: 232.63 / 36 },
+      };
+      var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      var LONG_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+      var m = location.pathname.match(/^\/invite\/([A-Za-z0-9]{4,12})\/?$/);
+      if (!m) return;
+      var code = m[1].toUpperCase();
+      var q = new URLSearchParams(location.search);
+      var kind = q.get('k');
+      var puzzle = Object.prototype.hasOwnProperty.call(PUZZLES, kind) ? PUZZLES[kind] : null;
+      var day = /^(\d{4})-(\d{2})-(\d{2})$/.exec(q.get('d') || '');
+      if (day) {
+        var t = new Date(Date.UTC(+day[1], +day[2] - 1, +day[3]));
+        if (t.getUTCMonth() !== +day[2] - 1 || t.getUTCDate() !== +day[3]) day = null;
+      }
+
+      var headline = document.getElementById('headline');
+      var who = 'A friend';
+      var setHeadline = function () {
+        headline.textContent = puzzle
+          ? who + ' invited you to the ' + puzzle.name
+          : who + ' invited you to The Daily';
+      };
+
+      if (puzzle && day) {
+        var mark = document.getElementById('badge-mark');
+        mark.style.setProperty('--mark', 'url(/assets/daily/' + puzzle.mark + ')');
+        mark.style.width = 'calc(var(--cap) * ' + puzzle.aspect + ')';
+        document.getElementById('badge-day').textContent = (MONTHS[+day[2] - 1] + ' ' + +day[3]).toUpperCase();
+        document.getElementById('badge').setAttribute(
+          'aria-label',
+          puzzle.name + ', part of The Daily, ' + LONG_MONTHS[+day[2] - 1] + ' ' + +day[3] + ', ' + day[1],
+        );
+        document.getElementById('blurb').textContent = puzzle.blurb;
+        document.getElementById('puzzle').hidden = false;
+      } else {
+        puzzle = null;
+      }
+      setHeadline();
+
+      document.getElementById('code').textContent = code;
+      document.getElementById('invite').hidden = false;
+      var hint = document.getElementById('hint');
+      hint.textContent = 'New here? Get the app, then come back and tap this link. Already have it? Tap Open in the app.';
+      hint.hidden = false;
+
+      // The app's invite route takes the puzzle and the day along: the
+      // friend moment first, then the puzzle.
+      var open = document.getElementById('open-app');
+      open.href = 'mahjong://invite/' + code + (puzzle ? '?k=' + kind + '&d=' + q.get('d') : '');
+      open.hidden = false;
+
+      // No app to answer the scheme: the store, not Safari's dead end (the
+      // invite page's rule — 404.html).
+      open.addEventListener('click', function (e) {
+        e.preventDefault();
+        var started = Date.now();
+        location.href = open.href;
+        setTimeout(function () {
+          if (document.hidden || Date.now() - started > 2500) return;
+          location.href = document.getElementById('get-app').href;
+        }, 1200);
+      });
+
+      // ---- Who sent it, from the public peek (the card's title says the same) ----
+      var SUPABASE_URL = 'https://bhtuztrwgpyzhxipcjda.supabase.co';
+      var SUPABASE_KEY = 'sb_publishable_86_PUFmbyZ5tKDuik07Y8A_8xNqUTE3';
+      var ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+      if (ctrl) setTimeout(function () { ctrl.abort(); }, 4000);
+      fetch(SUPABASE_URL + '/rest/v1/rpc/peek_app_invite', {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_KEY,
+          authorization: 'Bearer ' + SUPABASE_KEY,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({ p_code: code }),
+        signal: ctrl ? ctrl.signal : undefined,
+      })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (rows) {
+          var row = Array.isArray(rows) ? rows[0] : null;
+          if (!row || !row.display_name) return;
+          who = row.display_name;
+          setHeadline();
+        })
+        .catch(function () { /* "A friend" stays */ });
+    })();
+  </script>
+</body>
+</html>
