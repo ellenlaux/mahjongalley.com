@@ -1,5 +1,5 @@
 # Invite links route through the invite-preview function, which injects
-# PER-TABLE OG tags ("ElleBell's Table · Live now") into the static
+# PER-TABLE OG tags ("ElleBell's Table · Join now") into the static
 # invite page — and always answers 200 (crawlers refuse to card a 404).
 # These are REWRITES: the browser URL keeps /join/CODE, so the page's
 # pathname-parsing JS still reads the code — and the functions read

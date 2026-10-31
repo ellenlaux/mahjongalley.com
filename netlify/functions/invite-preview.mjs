@@ -5,7 +5,7 @@
  * the static invite page. A table link reads as an invitation (Ellen
  * 2026-10-30): the card says "Hey! @ElleBell saved you a seat on Mahjong
  * Alley →" and the bold line Messages draws under it says the table and
- * when, "ElleBell's Table · Live now". The table's name appears once, and
+ * when, "ElleBell's Table · Join now". The table's name appears once, and
  * no seats are counted.
  *
  * The human experience is untouched: we fetch the deployed 404.html (the
@@ -24,7 +24,7 @@
  */
 
 import { DAILY_PUZZLES, parseDailyInvite } from './daily-invite.mjs';
-import { fetchPeek, parsePreviewRequest, whenLabel } from './peeks.mjs';
+import { fetchPeek, parsePreviewRequest, tableLabel, whenLabel } from './peeks.mjs';
 
 const esc = (s) =>
   String(s)
@@ -90,7 +90,7 @@ export default async (req) => {
       }
     : kind === 'join'
       ? {
-          title: `${peek.name ?? `${peek.hostDisplayName}’s Table`} · ${whenLabel(peek.mode)}`,
+          title: `${tableLabel(peek)} · ${whenLabel(peek.mode)}`,
           description: "Let's mahj.",
           image,
         }

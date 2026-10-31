@@ -66,13 +66,23 @@ export function parsePreviewRequest(url) {
 export function whenLabel(mode) {
   if (mode === 'async') return 'Async';
   if (mode === 'live_scheduled') return 'Scheduled';
-  return 'Live now';
+  return 'Join now';
 }
 
 /** One way to write the host, as the app's personLabel: @handle, or the
- *  display name when they have no handle. */
+ *  display name when they have no handle. A guest's name is a placeholder the
+ *  server made (Player-3F2A, app src/utils/autoName.ts) and means nothing to
+ *  the person reading, so it reads "A friend" here. */
 export function hostLabel(peek) {
-  return peek.hostHandle ? `@${peek.hostHandle}` : peek.hostDisplayName;
+  if (peek.hostHandle) return `@${peek.hostHandle}`;
+  return /^Player-[0-9A-F]{4}$/.test(peek.hostDisplayName) ? 'A friend' : peek.hostDisplayName;
+}
+
+/** The table's name. A guest's table was named for the placeholder when it was
+ *  made, and keeps that name after they sign in, so it follows the host. */
+export function tableLabel(peek) {
+  const name = peek.name ?? `${peek.hostDisplayName}’s Table`;
+  return /^Player-[0-9A-F]{4}’s Table$/.test(name) ? `${hostLabel(peek)}’s Table` : name;
 }
 
 /** kind 'join' → table peek; kind 'invite' → friend-invite peek.
