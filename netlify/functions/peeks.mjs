@@ -60,12 +60,37 @@ export function parsePreviewRequest(url) {
   };
 }
 
+/** A scheduled table's start, "Thu, Nov 5, 7:00 PM MST" (the date wording of
+ *  the app's formatScheduledFor). One preview goes to everyone in the thread,
+ *  so it names the zone, and that's the host's (app migration 0127). It never
+ *  says Today or Tomorrow: the preview is read on some other day. Null when
+ *  there's no time or zone to give, or the start has passed, and the table
+ *  then just says Scheduled. */
+export function startLabel(scheduledFor, tz, now = Date.now()) {
+  const at = Date.parse(scheduledFor);
+  if (!tz || Number.isNaN(at) || at <= now) return null;
+  try {
+    return new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZoneName: 'short',
+    })
+      .format(at)
+      .replace(/ /g, ' ');
+  } catch {
+    return null; // not a zone Intl knows
+  }
+}
+
 /** When a table plays, for someone deciding whether to join: the head word
- *  of the app's paceLabelFor. A scheduled table can't give its time here
- *  because the peek doesn't carry it. */
-export function whenLabel(mode) {
-  if (mode === 'async') return 'Async';
-  if (mode === 'live_scheduled') return 'Scheduled';
+ *  of the app's paceLabelFor, or a scheduled table's start. */
+export function whenLabel(peek) {
+  if (peek.mode === 'async') return 'Async';
+  if (peek.mode === 'live_scheduled') return startLabel(peek.scheduledFor, peek.scheduledTz) ?? 'Scheduled';
   return 'Join now';
 }
 
@@ -98,6 +123,8 @@ export async function fetchPeek(kind, code) {
       hostHandle: row.host_handle ?? null,
       mode: row.mode ?? 'live_now',
       joinable: Boolean(row.joinable),
+      scheduledFor: row.scheduled_for ?? null,
+      scheduledTz: row.scheduled_tz ?? null,
     };
   }
   const rows = await rpc('peek_app_invite', { p_code: code.toUpperCase() });

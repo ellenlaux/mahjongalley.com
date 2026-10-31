@@ -332,6 +332,26 @@
         tableLine.classList.remove('is-waiting');
       }
 
+      // A scheduled table's start in this reader's zone, "Thu, Nov 5, 9:00 PM
+      // EST", with no-break spaces so the line wraps before it, never inside
+      // it. Empty when there's no time or it has passed.
+      function startLabel(scheduledFor) {
+        var at = Date.parse(scheduledFor);
+        if (isNaN(at) || at <= Date.now()) return '';
+        try {
+          return new Intl.DateTimeFormat('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            timeZoneName: 'short'
+          }).format(at).replace(/\s/g, ' ');
+        } catch (e) {
+          return '';
+        }
+      }
+
       // ---- Personalize from the public peek (same pair the app ships) ----
       var SUPABASE_URL = 'https://bhtuztrwgpyzhxipcjda.supabase.co';
       var SUPABASE_KEY = 'sb_publishable_86_PUFmbyZ5tKDuik07Y8A_8xNqUTE3';
@@ -358,14 +378,17 @@
           if (!row) return;
           if (kind === 'join') {
             // The card's words: hostLabel, tableLabel and whenLabel in
-            // netlify/functions/peeks.mjs. Keep the two together.
+            // netlify/functions/peeks.mjs. Keep the two together. The one
+            // difference is on purpose: the card is one picture for the whole
+            // thread and names the host's zone, this page has one reader and
+            // gives the start in theirs, as the app will when they open it.
             var shown = row.host_display_name || 'A friend';
             var host = row.host_handle
               ? '@' + row.host_handle
               : /^Player-[0-9A-F]{4}$/.test(shown) ? 'A friend' : shown;
             var table = row.name || shown + '’s Table';
             if (/^Player-[0-9A-F]{4}’s Table$/.test(table)) table = host + '’s Table';
-            var when = row.mode === 'async' ? 'Async' : row.mode === 'live_scheduled' ? 'Scheduled' : 'Join now';
+            var when = row.mode === 'async' ? 'Async' : row.mode === 'live_scheduled' ? (startLabel(row.scheduled_for) || 'Scheduled') : 'Join now';
             setWho(host);
             tableLine.textContent = table + ' · ' + when;
           } else {
