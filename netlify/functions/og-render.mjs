@@ -1,16 +1,15 @@
 /**
- * og-render — pure card renderer for the per-table / per-invite link
- * previews (Ellen 2026-07-22: "ElleBell's Table · 2/4 seated" with
- * per-table art instead of the generic brand card).
+ * og-render — pure card renderer for the link previews: the friend invite,
+ * the table invite (both the tile-pile card) and the promo code.
  *
- * satori (layout → SVG) + resvg (SVG → PNG), fonts and tile art embedded
- * via og-assets.mjs so the bundle is runtime-independent. Kept separate
- * from the function handler so scripts/test-og-local.mjs can render on a
- * dev machine without Netlify.
+ * satori (layout → SVG) + resvg (SVG → PNG), fonts and art embedded via
+ * og-assets.mjs so the bundle is runtime-independent. Kept separate from the
+ * function handler so scripts/test-og-local.mjs can render on a dev machine
+ * without Netlify.
  *
  * Palette: golden card bg #FBE5AC (Ellen 2026-08-10 — deliberately
  * warmer than the site's cream #F2E8D5; keep scripts/gen-og-card.mjs in
- * sync), ink-navy #1A1A2E, dim #5A5F72, cobalt #536AFA.
+ * sync), ink-navy #1A1A2E.
  */
 
 import satori from 'satori';
@@ -19,7 +18,6 @@ import {
   INTER_BOLD_B64,
   INTER_SEMIBOLD_B64,
   INTER_REGULAR_B64,
-  TILE_PNG_B64,
   CODE_ART_PNG_B64,
   INVITE_PILE_PNG_B64,
 } from './og-assets.mjs';
@@ -28,10 +26,7 @@ const W = 1200;
 const H = 630;
 const GOLD = '#FBE5AC';
 const NAVY = '#1A1A2E';
-const DIM = '#5A5F72';
-const COBALT = '#536AFA';
 
-const TILE_DATA_URL = `data:image/png;base64,${TILE_PNG_B64}`;
 const INVITE_PILE_DATA_URL = `data:image/png;base64,${INVITE_PILE_PNG_B64}`;
 const CODE_ART_DATA_URL = `data:image/png;base64,${CODE_ART_PNG_B64}`;
 // The promo card's own colours (Ellen's mockup, 2026-10-23): the same
@@ -49,89 +44,6 @@ const FONTS = [
 
 // satori element helpers (object trees, no JSX).
 const el = (type, style, children) => ({ type, props: { style, ...(children !== undefined ? { children } : {}) } });
-
-/**
- * The card: tile art left, text column right.
- *   title    — big navy line(s): "ElleBell's Table" / "DayRay"
- *   subtitle — cobalt status line: "2/4 seated · Live" / "wants to be friends"
- *   footer   — dim brand line.
- */
-function card({ title, subtitle, art = TILE_DATA_URL, footer = 'On Mahjong Alley' }) {
-  // Length-aware title size so long table names wrap inside the column
-  // instead of clipping at the card edge.
-  const titleSize = title.length > 40 ? 50 : title.length > 22 ? 60 : 76;
-  return el(
-    'div',
-    {
-      width: W,
-      height: H,
-      display: 'flex',
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: GOLD,
-      padding: '60px 80px',
-      fontFamily: 'Inter',
-    },
-    [
-      {
-        type: 'img',
-        props: { src: art, width: 312, height: 400, style: { flexShrink: 0 } },
-      },
-      el(
-        'div',
-        {
-          display: 'flex',
-          flexDirection: 'column',
-          marginLeft: 72,
-          // Explicit column width — satori's flex sizing lets unbroken
-          // long words overflow a flexGrow column; a hard width wraps
-          // them reliably. 1200 - 2*80 padding - 312 tile - 72 gap.
-          width: 656,
-        },
-        [
-          el(
-            'div',
-            {
-              fontSize: titleSize,
-              fontWeight: 700,
-              color: NAVY,
-              lineHeight: 1.12,
-              // satori wraps long names; clamp the block so a huge table
-              // name can't push the footer off-card.
-              maxHeight: 260,
-              overflow: 'hidden',
-              display: 'flex',
-              paddingRight: 12,
-            },
-            title,
-          ),
-          el(
-            'div',
-            { fontSize: 44, fontWeight: 600, color: COBALT, marginTop: 26, display: 'flex' },
-            subtitle,
-          ),
-          el(
-            'div',
-            { fontSize: 26, fontWeight: 600, color: DIM, marginTop: 44, display: 'flex', paddingRight: 12 },
-            footer,
-          ),
-        ],
-      ),
-    ],
-  );
-}
-
-/** Render the card to PNG bytes. Throws on failure — callers fall back
- *  to the static brand card. */
-export async function renderCardPng({ title, subtitle }) {
-  const svg = await satori(card({ title, subtitle }), {
-    width: W,
-    height: H,
-    fonts: FONTS,
-  });
-  const png = new Resvg(svg, { fitTo: { mode: 'width', value: W } }).render().asPng();
-  return png;
-}
 
 /**
  * The promo-code card (/og/code/CODE.png) — Ellen's layout (2026-10-23):
@@ -195,16 +107,23 @@ export async function renderCodeCardPng({ code }) {
  * "Hey!", the @name set bold on an ivory chip, then "wants to be friends
  * on Mahjong Alley →". Only the name changes per player; the pile is one
  * transparent PNG (assets/invite-pile.png, embedded via og-assets).
+ *
+ * The table-invite card (/og/join/CODE.png) is the same card, its line
+ * "saved you a seat on" (Ellen 2026-10-30). The table's name and when it
+ * plays are the link's bold line under the card (invite-preview), so the
+ * picture never has to fit them.
  */
 const IVORY = '#F8F3E9';
 const PILE_W = 540; // the pile's drawn width; 850×940 source → 540×597
 const PILE_H = 597;
 
-function inviteCard({ name }) {
+function inviteCard({ name, action }) {
   // Size the name to the chip's inner width (column 500 − chip padding 48):
   // Inter Bold runs ≈0.62em per glyph, so a 20-char handle (the app's
-  // maximum) lands near 36px instead of clipping at the card's edge.
-  const nameSize = Math.max(32, Math.min(76, Math.floor(452 / (0.62 * name.length))));
+  // maximum) lands near 36px instead of clipping at the card's edge. An @
+  // and its capitals run wider: 0.66em, measured on a 21-char "@handle".
+  const glyphEm = name.startsWith('@') ? 0.66 : 0.62;
+  const nameSize = Math.max(32, Math.min(76, Math.floor(452 / (glyphEm * name.length))));
   const arrow = {
     type: 'svg',
     props: {
@@ -280,7 +199,7 @@ function inviteCard({ name }) {
           el(
             'div',
             { fontSize: 44, fontWeight: 400, lineHeight: 1.22, marginTop: 28, display: 'flex' },
-            'wants to be friends on',
+            action,
           ),
           el(
             'div',
@@ -293,8 +212,18 @@ function inviteCard({ name }) {
   );
 }
 
-/** Render the friend-invite card to PNG bytes. Throws on failure. */
-export async function renderInviteCardPng({ name }) {
-  const svg = await satori(inviteCard({ name }), { width: W, height: H, fonts: FONTS });
+async function inviteCardPng(props) {
+  const svg = await satori(inviteCard(props), { width: W, height: H, fonts: FONTS });
   return new Resvg(svg, { fitTo: { mode: 'width', value: W } }).render().asPng();
+}
+
+/** Render the friend-invite card to PNG bytes. Throws on failure. */
+export function renderInviteCardPng({ name }) {
+  return inviteCardPng({ name, action: 'wants to be friends on' });
+}
+
+/** Render the table-invite card to PNG bytes. Throws on failure — the
+ *  caller falls back to the static brand card. */
+export function renderTableCardPng({ name }) {
+  return inviteCardPng({ name, action: 'saved you a seat on' });
 }

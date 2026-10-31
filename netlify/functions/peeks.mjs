@@ -60,10 +60,19 @@ export function parsePreviewRequest(url) {
   };
 }
 
-export function paceLabel(mode) {
+/** When a table plays, for someone deciding whether to join: the head word
+ *  of the app's paceLabelFor. A scheduled table can't give its time here
+ *  because the peek doesn't carry it. */
+export function whenLabel(mode) {
   if (mode === 'async') return 'Async';
   if (mode === 'live_scheduled') return 'Scheduled';
-  return 'Live';
+  return 'Live now';
+}
+
+/** One way to write the host, as the app's personLabel: @handle, or the
+ *  display name when they have no handle. */
+export function hostLabel(peek) {
+  return peek.hostHandle ? `@${peek.hostHandle}` : peek.hostDisplayName;
 }
 
 /** kind 'join' → table peek; kind 'invite' → friend-invite peek.
@@ -77,10 +86,7 @@ export async function fetchPeek(kind, code) {
       name: row.name ?? null,
       hostDisplayName: row.host_display_name ?? 'A player',
       hostHandle: row.host_handle ?? null,
-      seatCount: Number(row.seat_count ?? 0),
-      maxPlayers: Number(row.max_players ?? 4),
       mode: row.mode ?? 'live_now',
-      rulesMode: row.rules_mode ?? 'nmjl',
       joinable: Boolean(row.joinable),
     };
   }
