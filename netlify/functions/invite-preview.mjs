@@ -5,8 +5,9 @@
  * the static invite page. A table link reads as an invitation (Ellen
  * 2026-10-30): the card says "Hey! @ElleBell saved you a seat on Mahjong
  * Alley →" and the bold line Messages draws under it says the table and
- * when, "ElleBell's Table · Join now". The table's name appears once, and
- * no seats are counted.
+ * when, "ElleBell's Table · Join now", or a scheduled table's start in the
+ * host's time zone, "Thursday Night Mahj · Thu, Nov 5, 7:00 PM MST". The
+ * table's name appears once, and no seats are counted.
  *
  * The human experience is untouched: we fetch the deployed 404.html (the
  * invite page — its JS reads location.pathname, which the rewrite
@@ -90,7 +91,7 @@ export default async (req) => {
       }
     : kind === 'join'
       ? {
-          title: `${tableLabel(peek)} · ${whenLabel(peek.mode)}`,
+          title: `${tableLabel(peek)} · ${whenLabel(peek)}`,
           description: "Let's mahj.",
           image,
         }
