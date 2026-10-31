@@ -11,10 +11,10 @@
  * function existed.
  */
 
-import { renderCardPng, renderInviteCardPng } from './og-render.mjs';
+import { renderInviteCardPng, renderTableCardPng } from './og-render.mjs';
 import { renderDailyInviteCardPng } from './og-daily.mjs';
 import { parseDailyInvite } from './daily-invite.mjs';
-import { fetchPeek, paceLabel, parsePreviewRequest } from './peeks.mjs';
+import { fetchPeek, hostLabel, parsePreviewRequest } from './peeks.mjs';
 
 export default async (req) => {
   const url = new URL(req.url);
@@ -30,26 +30,25 @@ export default async (req) => {
   try {
     const peek = await fetchPeek(kind, code);
     if (!peek) return fallback();
+    // "Saved you a seat" is false on a table that closed or filled.
+    if (kind === 'join' && !peek.joinable) return fallback();
 
     // Friend invites get Ellen's tile-pile card (2026-10-23) — or, sent
     // from a daily's leaderboard (`?k=&d=`), The Daily's card for that
     // puzzle and day (og-daily.mjs; the code is still checked above, so
-    // no one mints a Daily card off a made-up link). Tables keep the
-    // tile + text column card.
+    // no one mints a Daily card off a made-up link). Tables get the
+    // tile-pile card too (2026-10-30).
     const daily = kind === 'invite' ? parseDailyInvite(url.searchParams) : null;
     const png = daily
       ? await renderDailyInviteCardPng(daily)
       : kind === 'invite'
         ? await renderInviteCardPng({ name: peek.displayName })
-        : await renderCardPng({
-            title: peek.name ?? `${peek.hostDisplayName}’s Table`,
-            subtitle: `${peek.seatCount}/${peek.maxPlayers} seated · ${paceLabel(peek.mode)}`,
-          });
+        : await renderTableCardPng({ name: hostLabel(peek) });
     return new Response(png, {
       status: 200,
       headers: {
         'content-type': 'image/png',
-        // Short-lived: seat counts move. Crawlers cache on their side
+        // Short-lived: a table can close. Crawlers cache on their side
         // anyway; this keeps repeat fetches honest without hammering.
         'cache-control': 'public, max-age=300',
       },

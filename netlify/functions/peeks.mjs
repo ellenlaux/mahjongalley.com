@@ -60,10 +60,29 @@ export function parsePreviewRequest(url) {
   };
 }
 
-export function paceLabel(mode) {
+/** When a table plays, for someone deciding whether to join: the head word
+ *  of the app's paceLabelFor. A scheduled table can't give its time here
+ *  because the peek doesn't carry it. */
+export function whenLabel(mode) {
   if (mode === 'async') return 'Async';
   if (mode === 'live_scheduled') return 'Scheduled';
-  return 'Live';
+  return 'Join now';
+}
+
+/** One way to write the host, as the app's personLabel: @handle, or the
+ *  display name when they have no handle. A guest's name is a placeholder the
+ *  server made (Player-3F2A, app src/utils/autoName.ts) and means nothing to
+ *  the person reading, so it reads "A friend" here. */
+export function hostLabel(peek) {
+  if (peek.hostHandle) return `@${peek.hostHandle}`;
+  return /^Player-[0-9A-F]{4}$/.test(peek.hostDisplayName) ? 'A friend' : peek.hostDisplayName;
+}
+
+/** The table's name. A guest's table was named for the placeholder when it was
+ *  made, and keeps that name after they sign in, so it follows the host. */
+export function tableLabel(peek) {
+  const name = peek.name ?? `${peek.hostDisplayName}’s Table`;
+  return /^Player-[0-9A-F]{4}’s Table$/.test(name) ? `${hostLabel(peek)}’s Table` : name;
 }
 
 /** kind 'join' → table peek; kind 'invite' → friend-invite peek.
@@ -77,10 +96,7 @@ export async function fetchPeek(kind, code) {
       name: row.name ?? null,
       hostDisplayName: row.host_display_name ?? 'A player',
       hostHandle: row.host_handle ?? null,
-      seatCount: Number(row.seat_count ?? 0),
-      maxPlayers: Number(row.max_players ?? 4),
       mode: row.mode ?? 'live_now',
-      rulesMode: row.rules_mode ?? 'nmjl',
       joinable: Boolean(row.joinable),
     };
   }

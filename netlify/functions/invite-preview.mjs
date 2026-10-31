@@ -2,14 +2,17 @@
  * invite-preview — serves /join/CODE and /invite/CODE (a _redirects
  * rewrite; kind + code are parsed from the preserved original pathname —
  * see parsePreviewRequest) with PER-TABLE Open Graph tags injected into
- * the static invite page (Ellen 2026-07-22: the iMessage card should read
- * "ElleBell's Table · 2/4 seated", not the generic brand card).
+ * the static invite page. A table link reads as an invitation (Ellen
+ * 2026-10-30): the card says "Hey! @ElleBell saved you a seat on Mahjong
+ * Alley →" and the bold line Messages draws under it says the table and
+ * when, "ElleBell's Table · Join now". The table's name appears once, and
+ * no seats are counted.
  *
  * The human experience is untouched: we fetch the deployed 404.html (the
  * invite page — its JS reads location.pathname, which the rewrite
  * preserves in the browser) and string-swap only <title> + the og:/
- * twitter: metas. Unknown code / peek failure → the page exactly as it
- * was, generic tags and all.
+ * twitter: metas. Unknown code / peek failure / a table that closed or
+ * filled → the page exactly as it was, generic tags and all.
  *
  * All injected text is HTML-escaped — table and display names are user
  * content and land inside attribute values.
@@ -21,7 +24,7 @@
  */
 
 import { DAILY_PUZZLES, parseDailyInvite } from './daily-invite.mjs';
-import { fetchPeek, paceLabel, parsePreviewRequest } from './peeks.mjs';
+import { fetchPeek, parsePreviewRequest, tableLabel, whenLabel } from './peeks.mjs';
 
 const esc = (s) =>
   String(s)
@@ -61,7 +64,7 @@ export default async (req) => {
       status: 200,
       headers: {
         'content-type': 'text/html; charset=utf-8',
-        // Seat counts move — keep crawler/browser copies short-lived.
+        // A table can close — keep crawler/browser copies short-lived.
         'cache-control': 'public, max-age=60',
       },
     });
@@ -72,6 +75,8 @@ export default async (req) => {
 
   const peek = await fetchPeek(kind, code);
   if (!peek) return asPage(baseHtml);
+  // "Saved you a seat" is false on a table that closed or filled.
+  if (kind === 'join' && !peek.joinable) return asPage(baseHtml);
 
   const image = `${url.origin}/og/${kind}/${encodeURIComponent(code.toUpperCase())}.png`;
   // A Daily invite's card is the same image URL with the puzzle and the day
@@ -85,10 +90,8 @@ export default async (req) => {
       }
     : kind === 'join'
       ? {
-          title: peek.name ?? `${peek.hostDisplayName}’s Table`,
-          description: `${peek.seatCount}/${peek.maxPlayers} seated · ${paceLabel(peek.mode)} · ${
-            peek.rulesMode === 'social' ? 'House Rules' : 'NMJL Standard'
-          } — tap to join on Mahjong Alley.`,
+          title: `${tableLabel(peek)} · ${whenLabel(peek.mode)}`,
+          description: "Let's mahj.",
           image,
         }
       : {

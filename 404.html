@@ -28,6 +28,12 @@
   <link rel="icon" type="image/png" sizes="180x180" href="/assets/favicon-180.png" />
   <link rel="apple-touch-icon" href="/assets/favicon-180.png" />
   <link rel="preload" href="/assets/fonts/TAYBarro.otf" as="font" type="font/otf" crossorigin />
+  <script>
+    // Before the first paint, so an invite link never flashes the plain page.
+    if (/^\/(join|invite)\/[A-Za-z0-9]{4,12}\/?$/.test(location.pathname)) {
+      document.documentElement.classList.add('invite-page');
+    }
+  </script>
   <style>
     @font-face {
       font-family: 'TAY Barro';
@@ -64,6 +70,8 @@
       --pink: #FB79B9;
       --dim: #5A5F72;
       --card: #FFFFFF;
+      --gold: #FBE5AC;
+      --ivory: #F8F3E9;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     [hidden] { display: none !important; }
@@ -152,19 +160,63 @@
     .footer { margin-top: 36px; }
     .footer a { color: var(--cobalt); font-size: 13px; font-weight: 600; text-decoration: none; }
     .footer-sep { color: var(--dim); font-size: 13px; margin: 0 6px; }
+    /* An invite link wears the card that was texted (Ellen, 2026-10-30): the
+       same gold, the tile pile, then "Hey!" and the name on an ivory chip, in
+       the card's order and words. The class is set in <head>. */
+    .pile { display: none; }
+    .invite-page body { background: var(--gold); }
+    .invite-page .tile-img { display: none; }
+    .invite-page .pile {
+      display: block;
+      width: 200px;
+      height: auto;
+      margin: 0 auto;
+    }
+    .invitation { font-size: 22px; line-height: 1.25; margin-top: 18px; }
+    .invitation > span { display: block; }
+    .invitation > .who {
+      display: inline-block;
+      max-width: 100%;
+      margin: 10px 0 12px;
+      padding: 12px 18px;
+      border-radius: 6px;
+      background: var(--ivory);
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1;
+      overflow-wrap: anywhere;
+    }
+    .table-line { font-size: 16px; font-weight: 600; line-height: 1.35; margin-top: 12px; }
+    /* Held back until the peek answers, so "A friend" never flips to a name. */
+    .is-waiting { visibility: hidden; }
+    .invite-page .invite-headline { margin-top: 18px; }
+    .invite-page .sub { margin-top: 8px; }
+    .invite-page .buttons { margin-top: 20px; }
+    .invite-page .btn { margin-top: 10px; }
+    .invite-page .btn-primary { background: var(--navy); color: var(--ivory); }
+    .invite-page .btn-secondary { background: var(--ivory); color: var(--navy); }
+    .invite-page .code-label { margin-top: 24px; }
+    .invite-page .code { font-size: 28px; letter-spacing: 6px; margin-top: 4px; padding-left: 6px; }
+    .invite-page .hint { margin-top: 16px; }
+    .invite-page .footer { margin-top: 24px; }
+    .invite-page .footer a { color: var(--navy); }
   </style>
 </head>
 <body>
   <main class="card">
     <img class="tile-img" src="/assets/tile-wordmark.svg?v=3" alt="" aria-hidden="true" />
+    <!-- src set below: only an invite link pays for the pile. -->
+    <img class="pile" id="pile" width="720" height="796" alt="" aria-hidden="true" />
     <h1 class="sr-only">Mahjong Alley</h1>
+    <p class="invitation is-waiting" id="invitation" hidden>
+      <span>Hey!</span>
+      <span class="who" id="who"></span>
+      <span id="action"></span>
+      <span>Mahjong Alley</span>
+    </p>
+    <p class="table-line is-waiting" id="table-line" hidden>&nbsp;</p>
     <p class="invite-headline" id="headline" hidden></p>
     <p class="sub" id="subline"><span class="tagline">A <s>serious</s> game for serious players</span>Learn, practice, and play American Mahjong — solo or with friends.</p>
-
-    <div id="invite" hidden>
-      <p class="code-label" id="code-label">Invite code</p>
-      <p class="code" id="code"></p>
-    </div>
 
     <div class="buttons">
       <!-- "Get the app" leads. Someone who HAS the app and scans or taps
@@ -173,6 +225,11 @@
            without it, and the big button should be theirs. -->
       <a class="btn btn-primary" id="get-app" href="https://apps.apple.com/app/id6769199909">Get the app</a>
       <a class="btn btn-secondary" id="open-app" href="#" hidden>Open in the app</a>
+    </div>
+
+    <div id="invite" hidden>
+      <p class="code-label" id="code-label">Table code</p>
+      <p class="code" id="code"></p>
     </div>
 
     <p class="hint" id="hint" hidden></p>
@@ -196,7 +253,9 @@
     // public peek the link-preview card uses (0084 / 0120) and swaps in
     // the host's name and table, or the friend's name (Ellen, 2026-10-23:
     // "You're invited to a table" was the wrong phrase once the card
-    // already said who). A failed peek leaves the generic copy.
+    // already said who). A failed peek leaves the generic copy. A table
+    // the peek says is closed, full or unknown says so, because "saved you
+    // a seat" would be false there (the card goes plain for the same reason).
     (function () {
       var m = location.pathname.match(/^\/(join|invite)\/([A-Za-z0-9]{4,12})\/?$/);
       if (!m) return;
@@ -205,23 +264,34 @@
 
       var headline = document.getElementById('headline');
       var subline = document.getElementById('subline');
-      headline.textContent =
-        kind === 'join' ? 'A friend saved you a seat' : 'A friend wants to connect';
-      headline.hidden = false;
+      var invitation = document.getElementById('invitation');
+      var who = document.getElementById('who');
+      var tableLine = document.getElementById('table-line');
+      document.getElementById('pile').src = '/assets/invite-pile-page.webp';
+      subline.hidden = true;
+      invitation.hidden = false;
+      if (kind === 'join') tableLine.hidden = false;
+      document.getElementById('action').textContent =
+        kind === 'join' ? 'saved you a seat on' : 'wants to be friends on';
       if (kind === 'invite') {
         document.getElementById('code-label').textContent = 'Friend code';
       }
-      subline.textContent =
-        kind === 'join'
-          ? 'There’s a table waiting for you on Mahjong Alley.'
-          : 'Join them on Mahjong Alley.';
+
+      // The card's arithmetic: Inter Bold runs about 0.66em a glyph, so the
+      // longest handle (21 with its @) shrinks to fit the chip's one line.
+      function setWho(name) {
+        who.textContent = name;
+        var room = invitation.clientWidth - 36;
+        who.style.fontSize = Math.min(36, Math.floor(room / (0.66 * name.length))) + 'px';
+      }
+      setWho('A friend');
 
       document.getElementById('code').textContent = code;
       document.getElementById('invite').hidden = false;
       var hint = document.getElementById('hint');
       hint.textContent =
         kind === 'join'
-          ? 'New here? Get the app, then come back and tap this link. Already have it? Tap Open in the app, or enter the code under Join a table.'
+          ? 'New here? Get the app, then come back and tap this link. Already have it? Tap Open in the app, or enter the table code there.'
           : 'New here? Get the app, then come back and tap this link. Already have it? Tap Open in the app.';
       hint.hidden = false;
 
@@ -246,6 +316,22 @@
         }, 1200);
       });
 
+      function showClosed() {
+        invitation.hidden = true;
+        tableLine.hidden = true;
+        headline.textContent = 'This table is no longer open';
+        headline.hidden = false;
+        subline.textContent = 'It may have filled up or already started.';
+        subline.hidden = false;
+        document.getElementById('invite').hidden = true;
+        hint.hidden = true;
+        open.hidden = true;
+      }
+      function reveal() {
+        invitation.classList.remove('is-waiting');
+        tableLine.classList.remove('is-waiting');
+      }
+
       // ---- Personalize from the public peek (same pair the app ships) ----
       var SUPABASE_URL = 'https://bhtuztrwgpyzhxipcjda.supabase.co';
       var SUPABASE_KEY = 'sb_publishable_86_PUFmbyZ5tKDuik07Y8A_8xNqUTE3';
@@ -265,23 +351,29 @@
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (rows) {
           var row = Array.isArray(rows) ? rows[0] : null;
+          if (kind === 'join' && Array.isArray(rows) && (!row || !row.joinable)) {
+            showClosed();
+            return;
+          }
           if (!row) return;
           if (kind === 'join') {
-            var host = row.host_display_name || 'A friend';
-            var table = row.name || host + '’s Table';
-            var pace = row.mode === 'async' ? 'Async' : row.mode === 'live_scheduled' ? 'Scheduled' : 'Live';
-            var rules = row.rules_mode === 'social' ? 'House Rules' : 'NMJL Standard';
-            headline.textContent = host + ' saved you a seat';
-            subline.textContent =
-              table + ' · ' + Number(row.seat_count || 0) + ' of ' + Number(row.max_players || 4) +
-              ' seated · ' + pace + ' · ' + rules;
+            // The card's words: hostLabel, tableLabel and whenLabel in
+            // netlify/functions/peeks.mjs. Keep the two together.
+            var shown = row.host_display_name || 'A friend';
+            var host = row.host_handle
+              ? '@' + row.host_handle
+              : /^Player-[0-9A-F]{4}$/.test(shown) ? 'A friend' : shown;
+            var table = row.name || shown + '’s Table';
+            if (/^Player-[0-9A-F]{4}’s Table$/.test(table)) table = host + '’s Table';
+            var when = row.mode === 'async' ? 'Async' : row.mode === 'live_scheduled' ? 'Scheduled' : 'Join now';
+            setWho(host);
+            tableLine.textContent = table + ' · ' + when;
           } else {
-            var name = row.display_name || 'A friend';
-            headline.textContent = name + ' wants to be friends';
-            subline.textContent = 'Join them on Mahjong Alley.';
+            setWho(row.display_name || 'A friend');
           }
         })
-        .catch(function () { /* generic copy stays */ });
+        .catch(function () { /* generic copy stays */ })
+        .then(reveal);
     })();
   </script>
 </body>
