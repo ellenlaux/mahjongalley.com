@@ -644,8 +644,8 @@ export function boardRowHints(kind, row) {
   return row.hints;
 }
 
-/** True when the shown rows need the HINTS column (Ellen 2026-11-09: in a
- *  column, and the word said once, in its heading). */
+/** True when the shown rows need the "*" column and its footnote (Ellen
+ *  2026-11-09: a column, the word said once, no heading over the list). */
 export function boardHasHintColumn(kind, rows) {
   return rows.some((row) => boardRowHints(kind, row) !== null);
 }
@@ -653,25 +653,22 @@ export function boardHasHintColumn(kind, rows) {
 /** Satori and HTML both fold a run of plain spaces into one, so the column
  *  is padded with non-breaking ones. */
 const NB = '\u00a0';
-/** Between a count and its time. */
-const HINT_GAP = 3;
 
-/** The column lives on the RIGHT, beside the time — the app's
- *  boardRowRight. The right side never wraps and is right-aligned, so with
- *  every time padded to the widest one shown, every count lands in one
- *  column on the card, on the narrow page and in the app's slip, however
- *  long a name is. Names are never cut. */
-export function boardRowRight(kind, row, valueWidth) {
+/** A hinted row's mark, and the one line under the list that says what it
+ *  means — the way a till marks a line "*" and prints "* TAXABLE" once.
+ *  The app's BOARD_HINT_MARK / BOARD_HINTS_FOOTNOTE. */
+const BOARD_HINT_MARK = '*';
+const BOARD_HINTS_FOOTNOTE = '* SOLVED WITH HINTS';
+
+/** The mark follows the time — "3:31.0 *" — the app's boardRowRight. The
+ *  right side never wraps and is right-aligned, so when the top ten has a
+ *  mark every row's value ends in two characters (" *", or two blanks),
+ *  and every time and every "*" lands in one column on the card, on the
+ *  narrow page and in the app's slip, however long a name is. Names are
+ *  never cut. */
+export function boardRowRight(kind, row) {
   const value = boardRowValue(kind, row);
-  const hints = boardRowHints(kind, row);
-  return hints === null ? value : `${hints}${NB.repeat(HINT_GAP)}${value.padStart(valueWidth, NB)}`;
-}
-
-/** The heading over the counts, its last letter over each count's last
- *  digit. Plain ink, not dim: the page spaces out a dim line's letters,
- *  which would pull it off its column. */
-export function boardHintsHeading(valueWidth) {
-  return `HINTS${NB.repeat(HINT_GAP + valueWidth)}`;
+  return boardRowHints(kind, row) === null ? `${value}${NB}${NB}` : `${value}${NB}${BOARD_HINT_MARK}`;
 }
 
 /** The board receipt lists this many rows (the app's BOARD_RECEIPT_ROWS). */
@@ -684,15 +681,15 @@ const BOARD_RECEIPT_ROWS = 10;
  *  so the stamp's rank may belong to someone else by then. */
 function boardRowLines(kind, all, of) {
   const rows = all.slice(0, BOARD_RECEIPT_ROWS);
-  // A Shuffle top ten with a solve that took hints gets a HINTS column
-  // beside the times: the word once, in its heading, then the counts.
+  // A Shuffle top ten with a solve that took hints: a "*" after those
+  // times, in a column, and what it means said once, under the list.
   const hintColumn = boardHasHintColumn(kind, rows);
-  const valueWidth = hintColumn ? Math.max(...rows.map((row) => boardRowValue(kind, row).length)) : 0;
-  const lines = hintColumn ? [{ l: '', r: boardHintsHeading(valueWidth) }] : [];
+  const lines = [];
   for (const row of rows) {
-    lines.push({ l: `${`#${row.rank}`.padEnd(4)}${row.name.toUpperCase()}`, r: hintColumn ? boardRowRight(kind, row, valueWidth) : boardRowValue(kind, row) });
+    lines.push({ l: `${`#${row.rank}`.padEnd(4)}${row.name.toUpperCase()}`, r: hintColumn ? boardRowRight(kind, row) : boardRowValue(kind, row) });
   }
   if (of !== null && of > rows.length) lines.push({ l: `AND ${of - rows.length} MORE`, r: '', dim: true });
+  if (hintColumn) lines.push({ l: BOARD_HINTS_FOOTNOTE, r: '', dim: true });
   return lines;
 }
 
