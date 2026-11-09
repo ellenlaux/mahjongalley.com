@@ -193,6 +193,9 @@ export async function fetchDailyBoard(kind, date) {
       greens: r.greens == null ? null : Number(r.greens),
       points: r.points == null ? null : Number(r.points),
       swept: r.swept === true,
+      // The Shuffle's hints (app migration 0135); null for the other
+      // boards, and on a database without 0135.
+      hints: r.hints == null ? null : Number(r.hints),
     })),
   };
 }

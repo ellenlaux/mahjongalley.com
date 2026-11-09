@@ -633,6 +633,19 @@ export function boardReceiptLines(b, name) {
   return lines;
 }
 
+/** A Shuffle solve that took hints says so on a small indented line under
+ *  its row — "2 HINTS", the way a missed shuffle prints "2 LEFT ON THE
+ *  RACKS" (the app's lib/receiptModel.ts boardRowHintMark; the app board's
+ *  "· 2 hints"). Since app migration 0134 a solve with no hints ranks above
+ *  every solve with hints, so a faster time can sit lower; this says why.
+ *  Its own line, not after the name: a long name plus the mark ran into the
+ *  time. Nothing for a clean solve, a loss, the Read or the Daily Deal, or
+ *  a row without hints (a database before 0135). */
+export function boardRowHintMark(kind, row) {
+  if (kind !== 'deal' || !row.solved || !(row.hints > 0)) return '';
+  return row.hints === 1 ? '1 HINT' : `${row.hints} HINTS`;
+}
+
 /** The board receipt lists this many rows (the app's BOARD_RECEIPT_ROWS). */
 const BOARD_RECEIPT_ROWS = 10;
 
@@ -643,7 +656,11 @@ const BOARD_RECEIPT_ROWS = 10;
  *  so the stamp's rank may belong to someone else by then. */
 function boardRowLines(kind, all, of) {
   const rows = all.slice(0, BOARD_RECEIPT_ROWS);
-  const lines = rows.map((row) => ({ l: `${`#${row.rank}`.padEnd(4)}${row.name.toUpperCase()}`, r: boardRowValue(kind, row) }));
+  const lines = rows.flatMap((row) => {
+    const line = { l: `${`#${row.rank}`.padEnd(4)}${row.name.toUpperCase()}`, r: boardRowValue(kind, row) };
+    const mark = boardRowHintMark(kind, row);
+    return mark ? [line, { l: mark, r: '', indent: true, dim: true }] : [line];
+  });
   if (of !== null && of > rows.length) lines.push({ l: `AND ${of - rows.length} MORE`, r: '', dim: true });
   return lines;
 }
