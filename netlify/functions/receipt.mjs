@@ -144,12 +144,17 @@ export function parseReceipt(url) {
   }
 
   // The Daily Shuffle (the three-Mahjong puzzle): the day, the Mahjongs
-  // found of how many, hints and the time they bought, misses (a fixed
-  // minute each), the clock in tenths, an archive play — and, on an
-  // archive play, where it would have placed that day (`wb` of `wf`). The
-  // total — the adjusted time that ranks — is re-added here, never
-  // carried. The hands' names never ride: a recipient may go play this
-  // very shuffle.
+  // found of how many, hints and the time they bought, misses, what a miss
+  // cost on the clock (`mp`), the clock in tenths, an archive play — and,
+  // on an archive play, where it would have placed that day (`wb` of
+  // `wf`). The total — the adjusted time that ranks — is re-added here,
+  // never carried. The hands' names never ride: a recipient may go play
+  // this very shuffle.
+  //
+  // `mp` (app 2026-11-09): a miss costs a life and NO time, and every link
+  // the app prints says so with `mp=0`. A link without `mp` was printed by
+  // an app still on the old rule — a fixed minute a miss — and keeps it, so
+  // an old slip reads what that player saw. Only those two values exist.
   let shuffle = null;
   if (outcome === 'shuffle') {
     const sd = q.get('sd') ?? '';
@@ -160,11 +165,13 @@ export function parseReceipt(url) {
     const hp = q.get('hp') ?? '';
     const mi = q.get('m') ?? '';
     const c = q.get('c') ?? '';
-    if (sdm && /^[1-3]$/.test(n) && /^[0-3]$/.test(h) && Number(h) <= Number(n) && /^\d{1,2}$/.test(hn) && /^\d{1,4}$/.test(hp) && /^\d{1,2}$/.test(mi) && /^\d{1,6}$/.test(c)) {
+    const mp = q.get('mp');
+    const missSeconds = mp === null ? SHUFFLE_MISS_SECONDS : mp === '0' ? 0 : null;
+    if (sdm && missSeconds !== null && /^[1-3]$/.test(n) && /^[0-3]$/.test(h) && Number(h) <= Number(n) && /^\d{1,2}$/.test(hn) && /^\d{1,4}$/.test(hp) && /^\d{1,2}$/.test(mi) && /^\d{1,6}$/.test(c)) {
       const dt = new Date(Date.UTC(+sdm[1], +sdm[2] - 1, +sdm[3]));
       if (dt.getUTCFullYear() === +sdm[1] && dt.getUTCMonth() === +sdm[2] - 1 && dt.getUTCDate() === +sdm[3]) {
         const isArchive = q.get('a') === '1';
-        shuffle = { date: sd, handsMade: Number(h), hands: Number(n), hints: Number(hn), hintPenalty: Number(hp), misses: Number(mi), clock: Number(c) / 10, isArchive, rank: parseRankStamp(q), wouldBe: isArchive ? parseWouldBe(q) : null };
+        shuffle = { date: sd, handsMade: Number(h), hands: Number(n), hints: Number(hn), hintPenalty: Number(hp), misses: Number(mi), missSeconds, clock: Number(c) / 10, isArchive, rank: parseRankStamp(q), wouldBe: isArchive ? parseWouldBe(q) : null };
       }
     }
   }
@@ -339,7 +346,8 @@ function rankStampLines(rank) {
   return lines;
 }
 
-/** A miss costs a fixed minute (the app's PENALTY_MS.mistake). */
+/** What a miss cost on the clock under the OLD rule (a link without
+ *  `mp`): a fixed minute. Since 2026-11-09 the app prints `mp=0`. */
 const SHUFFLE_MISS_SECONDS = 60;
 /** The Read's total, as the app keeps it: hands less hints plus the time
  *  bonus, never below zero. */
@@ -347,9 +355,10 @@ export function readTotalPoints(f) {
   return Math.max(0, f.hands - f.hintCost + f.timeBonus);
 }
 
-/** The Shuffle's adjusted time: the clock plus what was bought on it. */
+/** The Shuffle's adjusted time: the clock plus what was bought on it —
+ *  hints, and on an old-rule link a minute a miss. */
 export function shuffleTotalSeconds(f) {
-  return Math.round((f.clock + f.hintPenalty + f.misses * SHUFFLE_MISS_SECONDS) * 10) / 10;
+  return Math.round((f.clock + f.hintPenalty + f.misses * (f.missSeconds ?? SHUFFLE_MISS_SECONDS)) * 10) / 10;
 }
 /** `4:12.3`, `1:02:03.4` (tenths), or `+1:30` for a price. Mirrors the app's formatClock. */
 export function formatClock(seconds, { tenths = true, signed = false } = {}) {
@@ -581,7 +590,9 @@ export function shuffleReceiptLines(f, moment, name, top = null) {
   if (f.handsMade < f.hands) lines.push({ l: `${f.hands - f.handsMade} LEFT ON THE RACKS`, r: '', indent: true, dim: true });
   lines.push({ l: 'ON THE CLOCK', r: formatClock(f.clock) });
   if (f.hints > 0) lines.push({ q: f.hints, l: f.hints === 1 ? 'HINT' : 'HINTS', r: formatClock(f.hintPenalty, { tenths: false, signed: true }) });
-  if (f.misses > 0) lines.push({ q: f.misses, l: f.misses === 1 ? 'MISS' : 'MISSES', r: formatClock(f.misses * SHUFFLE_MISS_SECONDS, { tenths: false, signed: true }) });
+  // A miss is counted; it shows a price only on an old-rule link (no `mp`).
+  const missSeconds = f.missSeconds ?? SHUFFLE_MISS_SECONDS;
+  if (f.misses > 0) lines.push({ q: f.misses, l: f.misses === 1 ? 'MISS' : 'MISSES', r: missSeconds > 0 ? formatClock(f.misses * missSeconds, { tenths: false, signed: true }) : '' });
   if (f.isArchive) lines.push({ l: 'ARCHIVE PLAY', r: '', dim: true });
   if (f.wouldBe) lines.push({ l: 'WOULD BE', r: rankLine(f.wouldBe.place, f.wouldBe.field) });
   lines.push(...rankStampLines(f.rank));
