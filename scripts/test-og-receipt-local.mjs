@@ -17,6 +17,10 @@ const TABLE_TOP = [
   { rank: 1, name: 'ElleBell', solved: true, score: 140 }, { rank: 2, name: 'Carmen', solved: true, score: 125 }, { rank: 3, name: 'DayRay', solved: true, score: 95 }, { rank: 4, name: 'Billie', solved: false, score: 20 },
   { rank: 5, name: 'Ruth', solved: false, score: 5 }, { rank: 6, name: 'Pat', solved: false, score: -10 }, { rank: 7, name: 'Lou', solved: false, score: -25 }, { rank: 8, name: 'Kim', solved: false, score: -40 },
   { rank: 9, name: 'Sue', solved: false, score: -40 }, { rank: 10, name: 'Marge', solved: false, score: -60 }, { rank: 11, name: 'Dot', solved: false, score: -90 }, { rank: 12, name: 'Bea', solved: false, score: -150 } ];
+// A Shuffle top ten after app migration 0134: no-hint solves first, then
+// solves with hints, each marked "· N HINTS" (0135), long names cut to fit.
+const SHUFFLE_HINTED_TOP = ['June', 'Daryl', 'Priya', 'Samantha Okafor-Lindqvi', 'ElleBell', 'Tom', 'Bartholomew Featherston', 'Ana', 'Q', 'Wilhelmina Vanderbilt']
+  .map((name, i) => ({ rank: i + 1, name, solved: true, seconds: i === 9 ? 3723.4 : 100 + i * 37, greens: 3, hints: i < 3 ? 0 : i === 6 ? 10 : 1 + (i % 2) }));
 const samples = {
   'named': [at('/receipt/heart-eyes?cat=2026&line=3&pts=30&pat=FFF+2026+222+6666&jl=1&sp=1&chips=self-pick,jokerless,streak-4&i=ABCD2345&d=2026-10-22'), 'DayRay'],
   'called': [at('/receipt/pouch-fill?cat=2026&line=3&pts=30&pat=FFF+2026+222+6666&chips=concealed&d=2026-10-22'), null],
@@ -28,6 +32,7 @@ const samples = {
   'deal-win': [at('/receipt/pouch-fill?cat=2468&line=1&pts=25&pat=222+444+6666+8888&chips=concealed&dd=2026-10-12&tb=100&cl=0&fd=1&pc=97&rk=12&of=340&fr=2&fo=9&at=1414&i=ABCD2345&d=2026-10-12'), 'DayRay'],
   'deal-loss': [at('/receipt/purse-payout?cat=2026&line=3&pts=30&pat=FFF+2026+222+6666&away=2&dd=2026-10-12&tb=-60&cl=15&fd=0&pc=88&d=2026-10-12'), null],
   'shuffle-won': [at('/receipt/shuffle-won?sd=2026-10-24&h=3&n=3&hn=2&hp=150&m=1&c=1923&rk=12&of=340&fr=2&fo=9&at=1414&i=ABCD2345&d=2026-10-24'), 'ElleBell'],
+  'shuffle-top-hints': [topped(at('/receipt/shuffle-won?sd=2026-11-08&h=3&n=3&hn=0&hp=0&m=0&mp=0&c=1923&rk=2&of=40&at=1414&d=2026-11-08'), 'deal', 40, SHUFFLE_HINTED_TOP), 'ElleBell'],
   'shuffle-missed': [at('/receipt/shuffle-missed?sd=2026-10-24&h=1&n=3&hn=0&hp=0&m=4&c=1923&a=1&d=2026-10-24'), null],
   // A miss costs a life and no time (app 2026-11-09): the app's links carry mp=0.
   'shuffle-won-mp0': [at('/receipt/shuffle-won?sd=2026-11-09&h=3&n=3&hn=2&hp=150&m=1&mp=0&c=1923&rk=12&of=340&at=1414&d=2026-11-09'), 'ElleBell'],

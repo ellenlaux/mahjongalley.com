@@ -633,17 +633,35 @@ export function boardReceiptLines(b, name) {
   return lines;
 }
 
-/** A Shuffle solve that took hints says so on a small indented line under
- *  its row — "2 HINTS", the way a missed shuffle prints "2 LEFT ON THE
- *  RACKS" (the app's lib/receiptModel.ts boardRowHintMark; the app board's
- *  "· 2 hints"). Since app migration 0134 a solve with no hints ranks above
+/** A Shuffle solve that took hints says so after its name — " · 2 HINTS"
+ *  — the app's lib/receiptModel.ts boardRowHintMark, and the app board's
+ *  "· 2 hints". Since app migration 0134 a solve with no hints ranks above
  *  every solve with hints, so a faster time can sit lower; this says why.
- *  Its own line, not after the name: a long name plus the mark ran into the
- *  time. Nothing for a clean solve, a loss, the Read or the Daily Deal, or
- *  a row without hints (a database before 0135). */
+ *  Empty for a clean solve, a loss, the Read or the Daily Deal, or a row
+ *  without hints (a database before 0135). */
 export function boardRowHintMark(kind, row) {
   if (kind !== 'deal' || !row.solved || !(row.hints > 0)) return '';
-  return row.hints === 1 ? '1 HINT' : `${row.hints} HINTS`;
+  return ` · ${row.hints} ${row.hints === 1 ? 'HINT' : 'HINTS'}`;
+}
+
+/** How many characters the left of a board row may take on the card and
+ *  still clear the widest time ("1:02:03.4") — measured on the rendered
+ *  slip (Courier Prime 27px on a 680px line). */
+const BOARD_ROW_LEFT_CHARS = 32;
+
+/** A board row's left side: "#4  CAL · 2 HINTS". The mark stays on the
+ *  row — a line of its own under it pushed a long top ten off the square
+ *  card — so a name too long to sit beside it is cut to fit, with "…": a
+ *  long name plus the mark ran into the time. A row without a mark keeps
+ *  its whole (≤24-character) name, as before. The app's boardRowLabel. */
+export function boardRowLabel(kind, row) {
+  const head = `#${row.rank}`.padEnd(4);
+  const name = row.name.toUpperCase();
+  const mark = boardRowHintMark(kind, row);
+  if (!mark) return `${head}${name}`;
+  const room = BOARD_ROW_LEFT_CHARS - head.length - mark.length;
+  const fit = name.length <= room ? name : `${name.slice(0, Math.max(1, room - 1)).trimEnd()}…`;
+  return `${head}${fit}${mark}`;
 }
 
 /** The board receipt lists this many rows (the app's BOARD_RECEIPT_ROWS). */
@@ -656,11 +674,7 @@ const BOARD_RECEIPT_ROWS = 10;
  *  so the stamp's rank may belong to someone else by then. */
 function boardRowLines(kind, all, of) {
   const rows = all.slice(0, BOARD_RECEIPT_ROWS);
-  const lines = rows.flatMap((row) => {
-    const line = { l: `${`#${row.rank}`.padEnd(4)}${row.name.toUpperCase()}`, r: boardRowValue(kind, row) };
-    const mark = boardRowHintMark(kind, row);
-    return mark ? [line, { l: mark, r: '', indent: true, dim: true }] : [line];
-  });
+  const lines = rows.map((row) => ({ l: boardRowLabel(kind, row), r: boardRowValue(kind, row) }));
   if (of !== null && of > rows.length) lines.push({ l: `AND ${of - rows.length} MORE`, r: '', dim: true });
   return lines;
 }
