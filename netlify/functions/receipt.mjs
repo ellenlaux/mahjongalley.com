@@ -633,35 +633,45 @@ export function boardReceiptLines(b, name) {
   return lines;
 }
 
-/** A Shuffle solve that took hints says so after its name — " · 2 HINTS"
- *  — the app's lib/receiptModel.ts boardRowHintMark, and the app board's
- *  "· 2 hints". Since app migration 0134 a solve with no hints ranks above
- *  every solve with hints, so a faster time can sit lower; this says why.
- *  Empty for a clean solve, a loss, the Read or the Daily Deal, or a row
- *  without hints (a database before 0135). */
-export function boardRowHintMark(kind, row) {
-  if (kind !== 'deal' || !row.solved || !(row.hints > 0)) return '';
-  return ` · ${row.hints} ${row.hints === 1 ? 'HINT' : 'HINTS'}`;
+/** A Shuffle solve's hints, for the slip's HINTS column: the count on a
+ *  solve that took hints, null on every other row — a clean solve, a loss,
+ *  the Read, the Daily Deal, a row without hints (a database before app
+ *  migration 0135). Since app migration 0134 a solve with no hints ranks
+ *  above every solve with hints, so a faster time can sit lower; the
+ *  column says why. The app's lib/receiptModel.ts boardRowHints. */
+export function boardRowHints(kind, row) {
+  if (kind !== 'deal' || !row.solved || !(row.hints > 0)) return null;
+  return row.hints;
 }
 
-/** How many characters the left of a board row may take on the card and
- *  still clear the widest time ("1:02:03.4") — measured on the rendered
- *  slip (Courier Prime 27px on a 680px line). */
-const BOARD_ROW_LEFT_CHARS = 32;
+/** True when the shown rows need the HINTS column (Ellen 2026-11-09: in a
+ *  column, and the word said once, in its heading). */
+export function boardHasHintColumn(kind, rows) {
+  return rows.some((row) => boardRowHints(kind, row) !== null);
+}
 
-/** A board row's left side: "#4  CAL · 2 HINTS". The mark stays on the
- *  row — a line of its own under it pushed a long top ten off the square
- *  card — so a name too long to sit beside it is cut to fit, with "…": a
- *  long name plus the mark ran into the time. A row without a mark keeps
- *  its whole (≤24-character) name, as before. The app's boardRowLabel. */
-export function boardRowLabel(kind, row) {
-  const head = `#${row.rank}`.padEnd(4);
-  const name = row.name.toUpperCase();
-  const mark = boardRowHintMark(kind, row);
-  if (!mark) return `${head}${name}`;
-  const room = BOARD_ROW_LEFT_CHARS - head.length - mark.length;
-  const fit = name.length <= room ? name : `${name.slice(0, Math.max(1, room - 1)).trimEnd()}…`;
-  return `${head}${fit}${mark}`;
+/** Satori and HTML both fold a run of plain spaces into one, so the column
+ *  is padded with non-breaking ones. */
+const NB = '\u00a0';
+/** Between a count and its time. */
+const HINT_GAP = 3;
+
+/** The column lives on the RIGHT, beside the time — the app's
+ *  boardRowRight. The right side never wraps and is right-aligned, so with
+ *  every time padded to the widest one shown, every count lands in one
+ *  column on the card, on the narrow page and in the app's slip, however
+ *  long a name is. Names are never cut. */
+export function boardRowRight(kind, row, valueWidth) {
+  const value = boardRowValue(kind, row);
+  const hints = boardRowHints(kind, row);
+  return hints === null ? value : `${hints}${NB.repeat(HINT_GAP)}${value.padStart(valueWidth, NB)}`;
+}
+
+/** The heading over the counts, its last letter over each count's last
+ *  digit. Plain ink, not dim: the page spaces out a dim line's letters,
+ *  which would pull it off its column. */
+export function boardHintsHeading(valueWidth) {
+  return `HINTS${NB.repeat(HINT_GAP + valueWidth)}`;
 }
 
 /** The board receipt lists this many rows (the app's BOARD_RECEIPT_ROWS). */
@@ -674,7 +684,14 @@ const BOARD_RECEIPT_ROWS = 10;
  *  so the stamp's rank may belong to someone else by then. */
 function boardRowLines(kind, all, of) {
   const rows = all.slice(0, BOARD_RECEIPT_ROWS);
-  const lines = rows.map((row) => ({ l: boardRowLabel(kind, row), r: boardRowValue(kind, row) }));
+  // A Shuffle top ten with a solve that took hints gets a HINTS column
+  // beside the times: the word once, in its heading, then the counts.
+  const hintColumn = boardHasHintColumn(kind, rows);
+  const valueWidth = hintColumn ? Math.max(...rows.map((row) => boardRowValue(kind, row).length)) : 0;
+  const lines = hintColumn ? [{ l: '', r: boardHintsHeading(valueWidth) }] : [];
+  for (const row of rows) {
+    lines.push({ l: `${`#${row.rank}`.padEnd(4)}${row.name.toUpperCase()}`, r: hintColumn ? boardRowRight(kind, row, valueWidth) : boardRowValue(kind, row) });
+  }
   if (of !== null && of > rows.length) lines.push({ l: `AND ${of - rows.length} MORE`, r: '', dim: true });
   return lines;
 }
