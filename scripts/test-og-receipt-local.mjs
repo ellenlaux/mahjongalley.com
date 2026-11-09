@@ -29,6 +29,9 @@ const samples = {
   'deal-loss': [at('/receipt/purse-payout?cat=2026&line=3&pts=30&pat=FFF+2026+222+6666&away=2&dd=2026-10-12&tb=-60&cl=15&fd=0&pc=88&d=2026-10-12'), null],
   'shuffle-won': [at('/receipt/shuffle-won?sd=2026-10-24&h=3&n=3&hn=2&hp=150&m=1&c=1923&rk=12&of=340&fr=2&fo=9&at=1414&i=ABCD2345&d=2026-10-24'), 'ElleBell'],
   'shuffle-missed': [at('/receipt/shuffle-missed?sd=2026-10-24&h=1&n=3&hn=0&hp=0&m=4&c=1923&a=1&d=2026-10-24'), null],
+  // A miss costs a life and no time (app 2026-11-09): the app's links carry mp=0.
+  'shuffle-won-mp0': [at('/receipt/shuffle-won?sd=2026-11-09&h=3&n=3&hn=2&hp=150&m=1&mp=0&c=1923&rk=12&of=340&at=1414&d=2026-11-09'), 'ElleBell'],
+  'shuffle-missed-mp0': [at('/receipt/shuffle-missed?sd=2026-11-09&h=1&n=3&hn=0&hp=0&m=4&mp=0&c=1923&d=2026-11-09'), null],
   'shuffle-late': [at('/receipt/shuffle-won?sd=2026-10-09&h=3&n=3&hn=0&hp=0&m=1&c=2214&a=1&wb=2&wf=4&d=2026-10-13'), 'ElleBell'],
   'read-won': [at('/receipt/read-won?rd=2026-10-25&rf=8&rt=8&rh=150&rn=0&rc=0&rb=41&rl=139&rk=12&of=340&fr=2&fo=9&at=1414&i=ABCD2345&d=2026-10-25'), 'ElleBell'],
   'read-time-up': [at('/receipt/read-time-up?rd=2026-10-25&rf=3&rt=30&rh=60&rn=1&rc=10&rb=0&rl=143&d=2026-10-25'), null],
