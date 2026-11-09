@@ -633,6 +633,44 @@ export function boardReceiptLines(b, name) {
   return lines;
 }
 
+/** A Shuffle solve's hints, for the slip's HINTS column: the count on a
+ *  solve that took hints, null on every other row — a clean solve, a loss,
+ *  the Read, the Daily Deal, a row without hints (a database before app
+ *  migration 0135). Since app migration 0134 a solve with no hints ranks
+ *  above every solve with hints, so a faster time can sit lower; the
+ *  column says why. The app's lib/receiptModel.ts boardRowHints. */
+export function boardRowHints(kind, row) {
+  if (kind !== 'deal' || !row.solved || !(row.hints > 0)) return null;
+  return row.hints;
+}
+
+/** True when the shown rows need the "*" column and its footnote (Ellen
+ *  2026-11-09: a column, the word said once, no heading over the list). */
+export function boardHasHintColumn(kind, rows) {
+  return rows.some((row) => boardRowHints(kind, row) !== null);
+}
+
+/** Satori and HTML both fold a run of plain spaces into one, so the column
+ *  is padded with non-breaking ones. */
+const NB = '\u00a0';
+
+/** A hinted row's mark, and the one line under the list that says what it
+ *  means — the way a till marks a line "*" and prints "* TAXABLE" once.
+ *  The app's BOARD_HINT_MARK / BOARD_HINTS_FOOTNOTE. */
+const BOARD_HINT_MARK = '*';
+const BOARD_HINTS_FOOTNOTE = '* SOLVED WITH HINTS';
+
+/** The mark follows the time — "3:31.0 *" — the app's boardRowRight. The
+ *  right side never wraps and is right-aligned, so when the top ten has a
+ *  mark every row's value ends in two characters (" *", or two blanks),
+ *  and every time and every "*" lands in one column on the card, on the
+ *  narrow page and in the app's slip, however long a name is. Names are
+ *  never cut. */
+export function boardRowRight(kind, row) {
+  const value = boardRowValue(kind, row);
+  return boardRowHints(kind, row) === null ? `${value}${NB}${NB}` : `${value}${NB}${BOARD_HINT_MARK}`;
+}
+
 /** The board receipt lists this many rows (the app's BOARD_RECEIPT_ROWS). */
 const BOARD_RECEIPT_ROWS = 10;
 
@@ -643,8 +681,15 @@ const BOARD_RECEIPT_ROWS = 10;
  *  so the stamp's rank may belong to someone else by then. */
 function boardRowLines(kind, all, of) {
   const rows = all.slice(0, BOARD_RECEIPT_ROWS);
-  const lines = rows.map((row) => ({ l: `${`#${row.rank}`.padEnd(4)}${row.name.toUpperCase()}`, r: boardRowValue(kind, row) }));
+  // A Shuffle top ten with a solve that took hints: a "*" after those
+  // times, in a column, and what it means said once, under the list.
+  const hintColumn = boardHasHintColumn(kind, rows);
+  const lines = [];
+  for (const row of rows) {
+    lines.push({ l: `${`#${row.rank}`.padEnd(4)}${row.name.toUpperCase()}`, r: hintColumn ? boardRowRight(kind, row) : boardRowValue(kind, row) });
+  }
   if (of !== null && of > rows.length) lines.push({ l: `AND ${of - rows.length} MORE`, r: '', dim: true });
+  if (hintColumn) lines.push({ l: BOARD_HINTS_FOOTNOTE, r: '', dim: true });
   return lines;
 }
 
