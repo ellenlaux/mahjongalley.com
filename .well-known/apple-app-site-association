@@ -10,7 +10,7 @@
           { "/": "/join/*", "comment": "table invite codes" },
           { "/": "/invite/*", "comment": "friend referral codes" },
           { "/": "/daily-deal/*", "comment": "a Daily Deal, by date" },
-          { "/": "/code/*", "comment": "promo codes — the app redeems on open" }
+          { "/": "/code/*", "comment": "old promo-code links — the app opens Home" }
         ]
       }
     ]

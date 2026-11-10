@@ -55,6 +55,9 @@ const el = (type, style, children) => ({ type, props: { style, ...(children !== 
  *   Tap through to claim it, or enter the code in the Shop ⟶
  * Not the table/friend frame on purpose — the gift gets its own card.
  */
+// Unused since 2026-11-10: nothing routes to a promo-code card any more
+// (App Store 3.1.1). Kept so the archived page (branch
+// archive/promo-code-page) can come back without redrawing it.
 export async function renderCodeCardPng({ code }) {
   const para = (text, extra = {}) =>
     el('div', { fontSize: 34, fontWeight: 400, color: CODE_INK, lineHeight: 1.3, display: 'flex', ...extra }, text);
