@@ -224,6 +224,8 @@ export async function withTopTen(r) {
 /** A promo / teacher code (app migration 0113): true when an ACTIVE code
  *  exists. The peek returns only yes/no (0121) — never the owner or the
  *  count — so a crawler can card a real code and nothing else. */
+// Unused since 2026-11-10 (the promo-code page came down; see
+// archive/promo-code-page). Kept for when it returns.
 export async function fetchCodeExists(code) {
   const ok = await rpc('peek_redeem_code', { p_code: code.toUpperCase() });
   return ok === true;

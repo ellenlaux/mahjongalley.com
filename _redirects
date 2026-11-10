@@ -37,11 +37,14 @@
 # out of the app's printer — as a 9:16 video to post (Reels, TikTok, Stories).
 /og/receipt-print/*  /.netlify/functions/og-receipt-print  200
 #
-# /code/CODE is a PROMO CODE (a teacher's; app migration 0113) — the page
-# shows the code and where to enter it; code-preview injects the gift's
-# card ("A rare joker is waiting") for real codes. /og/code/CODE.png
-# renders that card. It IS in the app-links file: with the app installed
-# the link opens the app's /code route, which redeems on open; this page
-# is for everyone else (and its "Open it" link carries the code by scheme).
-/code/*        /.netlify/functions/code-preview     200
-/og/code/*     /.netlify/functions/og-code          200
+# /code/CODE was a PROMO CODE link. Promo codes came out of the app for
+# App Store Guideline 3.1.1 (app #622), so since 2026-11-10 every /code/
+# link shows the home page: Mahjong Alley and Get the app, no code and
+# nothing to unlock. With the app installed, the link still opens it (the
+# app-links file keeps /code/*), and the app lands on Home. An old link
+# preview's card image falls back to the brand card.
+# The promo page, its preview function and its card are saved on branch
+# archive/promo-code-page (tag archive/promo-code-page-2026-11-10), for
+# when codes come back as Apple's In-App Purchase offer codes.
+/code/*        /index.html                          200
+/og/code/*     /assets/og-card.png                  302
