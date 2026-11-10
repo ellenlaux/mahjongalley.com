@@ -476,9 +476,16 @@ export function receiptLines(r, name) {
   if (r.outcome === 'read') return r.read ? readReceiptLines(r.read, r.moment, name, r.top) : ['---', { c: headline(r), big: true }, '---', { c: 'THANK YOU · PLAY AGAIN SOON' }];
   const pts = r.points ? `${r.points} PTS` : null;
   const lines = ['---'];
-  if (r.date) lines.push({ l: 'DATE', r: receiptDate(r.date) });
+  const t = r.table;
+  // A Daily Deal leads with its day, the way the Shuffle and the Read do,
+  // in DATE's place: one date on the slip (Ellen 2026-11-09). The day it
+  // was played prints only when it was another day.
+  if (t) {
+    lines.push({ l: 'DAILY DEAL', r: receiptDate(t.date) });
+    if (r.date && r.date !== t.date) lines.push({ l: 'PLAYED', r: receiptDate(r.date) });
+  } else if (r.date) lines.push({ l: 'DATE', r: receiptDate(r.date) });
   if (name) lines.push({ l: 'PLAYER', r: name.toUpperCase() });
-  if (r.date || name) lines.push('---');
+  if (t || r.date || name) lines.push('---');
   lines.push({ c: headline(r), big: true });
 
   let total = pts;
@@ -524,11 +531,9 @@ export function receiptLines(r, name) {
 
   // A ranked Daily Deal: the day's score, itemized under the game's own
   // lines, and the TOTAL is the score, signed. Mirrors the app's
-  // lib/receiptLines.ts.
-  const t = r.table;
+  // lib/receiptLines.ts. Its day heads the slip.
   if (t) {
     lines.push('---');
-    lines.push({ l: 'DAILY DEAL', r: receiptDate(t.date) });
     lines.push({ l: 'TABLE', r: signedPoints(t.table) });
     if (r.outcome !== 'win') {
       const away = t.tilesAway !== null ? t.tilesAway : r.away;
