@@ -198,7 +198,21 @@ export default async (req) => {
     const png = await renderReceiptCardPng(r, peek?.displayName ?? null);
     return new Response(png, {
       status: 200,
-      headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=86400' },
+      headers: {
+        'content-type': 'image/png',
+        'cache-control': 'public, max-age=86400',
+        // The still card is what Messages previews. Without `durable` each
+        // edge node kept its own copy, so the app's warm-up (it fetches
+        // this card as the slip prints) and the preview that followed
+        // landed on different nodes and every fetch rebuilt it (~3 s;
+        // measured 2026-11-09: three fetches in a row, three misses). With
+        // `durable` the first build is shared by every node: the warm-up
+        // pays for it once and the text's preview finds it ready. Same
+        // freshness as before (a day; a top ten says "AS OF"). The card
+        // videos have done this since they shipped.
+        'netlify-cdn-cache-control': 'public, max-age=86400, durable',
+        'netlify-vary': 'query',
+      },
     });
   } catch {
     return fallback();

@@ -77,7 +77,16 @@ export default async (req) => {
   const asPage = (html) =>
     new Response(html, {
       status: 200,
-      headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=300' },
+      headers: {
+        'content-type': 'text/html; charset=utf-8',
+        'cache-control': 'public, max-age=300',
+        // Shared by every edge node (see og-receipt): the page Messages
+        // reads first is built once per link, not once per node. Same five
+        // minutes as before, so a video that finishes later is advertised
+        // on the next build.
+        'netlify-cdn-cache-control': 'public, max-age=300, durable',
+        'netlify-vary': 'query',
+      },
     });
 
   // The seats of a Social Play hand, named from the finished game; a

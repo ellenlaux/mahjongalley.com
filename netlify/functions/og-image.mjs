@@ -51,6 +51,10 @@ export default async (req) => {
         // Short-lived: a table can close. Crawlers cache on their side
         // anyway; this keeps repeat fetches honest without hammering.
         'cache-control': 'public, max-age=300',
+        // Shared by every edge node (see og-receipt), so a card built for
+        // one preview is ready for the next. The same five minutes: a
+        // table's seats are never staler than they were.
+        'netlify-cdn-cache-control': 'public, max-age=300, durable',
       },
     });
   } catch {
