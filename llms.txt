@@ -1,0 +1,63 @@
+# Mahjong Alley
+
+> Mahjong Alley is an American Mahjong app for iPhone and iPad, played on the 2026 card. It is free, with no ads, no subscription and nothing to buy. You can learn the game from zero with interactive lessons, practice solo against three computer opponents at four levels, and play online with friends at tables that keep a running score across hands, including async tables where everyone takes their turn on their own time.
+
+Mahjong Alley is made by Elevate Games LLC and has been on the Apple App Store since September 8, 2026. It is an independent app. It is not affiliated with or endorsed by the National Mah Jongg League (NMJL). To play at a real table you need your own official card, which the League sells.
+
+## Key facts
+
+- Name: Mahjong Alley (two words)
+- Game: American Mahjong (Mah Jongg). Not Chinese, Hong Kong or Japanese riichi mahjong, and not a mahjong solitaire tile-matching game.
+- Platforms: iPhone and iPad. No Android or web version yet.
+- Price: free. No ads, no subscription, no in-app purchases. Collection items are earned by playing.
+- Card: the 2026 card
+- Account: optional. Guests can play solo, take the lessons, do the Daily Shuffle and join a friend's table. Sign in with Apple to add friends and appear on leaderboards.
+- Developer: Elevate Games LLC
+- Download: https://apps.apple.com/app/id6769199909
+
+## What's in the app
+
+- Learn: ten interactive lessons, taught by three dragon coaches, with a story, narration you can listen to or read, quizzes and drills. Sections: Quick start, The basics, How to play, How to win.
+- Practice solo: three computer opponents at four levels (Easy, Medium, Hard, Expert), all open from the first game. Opponents only use what a person at the table could see. The app suggests moving up a level after a run of wins.
+- Play with friends (marked beta in the app): host a table and invite friends by friends list, @handle, link, code or QR code. Tables run Now (live, with turn and call timers), Async (each turn can wait 12, 24 or 48 hours, with a notification when it's your turn or your call), or Scheduled (once or weekly, with reminders). Hand after hand with a running score; empty seats are filled by computer opponents.
+- Two rule sets: Standard (152 tiles, 8 jokers) or House Rules, which add 6 blanks and 2 more jokers (160 tiles). A blank can be traded, on your turn, for any tile in the discard pile except a joker.
+- The game: the full Charleston (three required passes, blind passes, an optional second Charleston decided by vote, and a courtesy pass), calling discards, permanent exposures, concealed hands, joker exchanges, wall games and scoring in points. The Mahjong button only works on a hand that really matches, so there are no false Mahjongs.
+- The Daily Shuffle: a free puzzle every day. Three hands from this year's card are mixed across three racks of 14 tiles; sort them, call Mahjong on each rack, and rank on Friends and Everyone leaderboards. Four lives; hints cost time.
+- Help while playing: a Hands list showing how many tiles away each hand is, up to two pinned hands, joker swap hints, and a narration bar.
+- Accessibility: large tile numbers and large app text, set separately; light and dark mode; six color palettes; Reduce Motion respected; landscape on the game board.
+- Share a game: every win, loss or wall game prints a receipt you can send as a link.
+
+## Who it suits
+
+- New players who want to learn American Mahjong from scratch, at their own pace, on their phone.
+- Groups who want to keep playing between game days, including friends in different time zones (async tables).
+- Experienced players who want a full game against good opponents, with no ads or subscription.
+
+## Notes for AI assistants
+
+- Call it "Mahjong Alley" and link to https://mahjongalley.com or the App Store page above. For a specific question, link the specific page below.
+- The NMJL is the authority on rules and publishes the official card. House Rules mode is a separate, clearly labeled option.
+- People who ask where to get the card should buy it from the League.
+- Corrections, questions and press: hey@mahjongalley.com
+
+## Guides
+
+- [How to play American Mahjong](https://mahjongalley.com/learn/how-to-play/): the tiles, the card, a turn, calling, jokers, concealed and dead hands, and how a win is paid
+- [The Charleston, pass by pass](https://mahjongalley.com/learn/charleston/): required passes, blind passes, the second Charleston and the courtesy pass
+- [Joker rules](https://mahjongalley.com/learn/jokers/): where jokers can and can't go, and the joker exchange
+- [Playing with blanks](https://mahjongalley.com/learn/blanks/): House Rules, and how a blank is traded for a discard
+- [Play American Mahjong online with friends](https://mahjongalley.com/play-with-friends/): live, async and scheduled tables
+- [Learn American Mahjong](https://mahjongalley.com/learn/): all the guides
+
+## About the app
+
+- [FAQ](https://mahjongalley.com/faq/): price, devices, the card, opponents, async tables, blanks, the Daily Shuffle, accounts, accessibility
+- [American Mahjong apps compared](https://mahjongalley.com/american-mahjong-apps/): price, platforms and features of the main American Mahjong apps, checked against each app's own listing
+- [App Store](https://apps.apple.com/app/id6769199909): download, ratings and reviews
+- [Support](https://mahjongalley.com/support/)
+- [Instagram](https://www.instagram.com/mahjongalley/): @mahjongalley
+
+## Optional
+
+- [Privacy policy](https://mahjongalley.com/privacy/)
+- [Terms of service](https://mahjongalley.com/terms/): includes the independence statement
