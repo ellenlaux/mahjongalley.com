@@ -1,0 +1,15 @@
+# mahjongalley.com
+#
+# Every public page is open to every crawler: search engines, and the AI
+# assistants that answer "what's a good American Mahjong app?" (GPTBot,
+# OAI-SearchBot, ClaudeBot, PerplexityBot, Google-Extended, Applebot and
+# the rest). That is on purpose. Being read is the point.
+#
+# /og/* stays open too: link-preview crawlers (Twitterbot, Slack, etc.)
+# respect robots.txt, and a block there would strip the cards off shared
+# table, friend and receipt links.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://mahjongalley.com/sitemap.xml

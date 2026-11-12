@@ -8,8 +8,9 @@
        installed. The id matches APP_STORE_ID in the app repo
        (src/config/appStore.ts); keep the two in sync if the listing moves. -->
   <meta name="apple-itunes-app" content="app-id=6769199909" />
-  <title>Mahjong Alley</title>
-  <meta name="description" content="A serious game for serious players. Learn, practice, and play American Mahjong — solo or with friends." />
+  <title>Mahjong Alley: American Mahjong for iPhone and iPad</title>
+  <meta name="description" content="Learn, practice, and play American Mahjong on iPhone and iPad. Lessons from zero, solo games against three computer opponents at four levels, and online tables with friends. Free, with no ads and no subscription." />
+  <link rel="canonical" href="https://mahjongalley.com/" />
   <meta property="og:title" content="Mahjong Alley" />
   <meta property="og:description" content="Let's mahj." />
   <!-- og:image is what makes iMessage/WhatsApp render a rich card at all —
@@ -27,6 +28,61 @@
   <link rel="icon" type="image/png" sizes="180x180" href="/assets/favicon-180.png" />
   <link rel="apple-touch-icon" href="/assets/favicon-180.png" />
   <link rel="preload" href="/assets/fonts/TAYBarro.otf" as="font" type="font/otf" crossorigin />
+  <link rel="stylesheet" href="/assets/site.css?v=3" />
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://mahjongalley.com/#org",
+      "name": "Elevate Games LLC",
+      "url": "https://mahjongalley.com/",
+      "brand": {
+        "@type": "Brand",
+        "name": "Mahjong Alley"
+      },
+      "sameAs": [
+        "https://www.instagram.com/mahjongalley/"
+      ],
+      "email": "hey@mahjongalley.com"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://mahjongalley.com/#site",
+      "name": "Mahjong Alley",
+      "url": "https://mahjongalley.com/",
+      "publisher": {
+        "@id": "https://mahjongalley.com/#org"
+      }
+    },
+    {
+      "@type": "MobileApplication",
+      "@id": "https://mahjongalley.com/#app",
+      "name": "Mahjong Alley",
+      "alternateName": "Mahjong Alley American Mahjong",
+      "operatingSystem": "iOS, iPadOS",
+      "applicationCategory": "GameApplication",
+      "applicationSubCategory": "Board game",
+      "genre": "American Mahjong",
+      "url": "https://mahjongalley.com/",
+      "installUrl": "https://apps.apple.com/app/id6769199909",
+      "downloadUrl": "https://apps.apple.com/app/id6769199909",
+      "image": "https://mahjongalley.com/assets/og-card.png",
+      "description": "American Mahjong for iPhone and iPad. Learn with interactive lessons, practice against three computer opponents at four levels, and play online with friends. Free, with no ads and no subscription.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "publisher": {
+        "@id": "https://mahjongalley.com/#org"
+      },
+      "datePublished": "2026-09-08"
+    }
+  ]
+}
+  </script>
   <style>
     @font-face {
       font-family: 'TAY Barro';
@@ -70,12 +126,29 @@
       font-family: 'Inter', -apple-system, sans-serif;
       background: var(--cream);
       color: var(--navy);
+    }
+    /* The hero fills the first screen, centred, as the whole page used to;
+       the facts start below the fold. */
+    .hero {
       min-height: 100vh;
+      min-height: 100svh;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 24px;
+      padding: 24px 16px;
     }
+    .more-link {
+      display: inline-block;
+      margin-top: 18px;
+      color: var(--dim) !important;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 12px;
+    }
+    .home-facts { text-align: left; padding-top: 8px; font-size: 16px; line-height: 1.6; }
+    .home-facts h2:first-child { margin-top: 8px; }
     .card {
       width: 100%;
       max-width: 420px;
@@ -154,6 +227,7 @@
   </style>
 </head>
 <body>
+  <section class="hero">
   <main class="card">
     <img class="tile-img" src="/assets/tile-wordmark.svg?v=3" alt="" aria-hidden="true" />
     <h1 class="sr-only">Mahjong Alley</h1>
@@ -182,6 +256,84 @@
       <a href="https://www.instagram.com/mahjongalley/">@mahjongalley</a>
     </p>
   </main>
+  <a class="more-link" href="#about">What's inside ↓</a>
+  </section>
+
+  <div class="article wrap home-facts" id="about">
+    <h2>American Mahjong, the way it's played at the table</h2>
+    <p>Mahjong Alley is American Mahjong for iPhone and iPad, played on the 2026 card. You get all 152 tiles, a real Charleston, jokers, calling and exposures, and scoring. Play by standard rules, or switch on House Rules for blanks. It's free, with no ads and no subscription.</p>
+
+    <div class="grid">
+      <a class="tile-card" href="/learn/">
+        <h3>Learn from zero</h3>
+        <p>Interactive lessons with characters, a story, narration you can listen to or read, and quizzes along the way.</p>
+        <span class="more">Start with the guides →</span>
+      </a>
+      <a class="tile-card" href="/learn/how-to-play/">
+        <h3>Practice solo</h3>
+        <p>Three computer opponents at four levels, from your first hand to opponents who read the table and defend.</p>
+        <span class="more">How a game goes →</span>
+      </a>
+      <a class="tile-card" href="/play-with-friends/">
+        <h3>Play with friends</h3>
+        <p>Host a table and play hand after hand with a running score. Live, on your own time, or at a set time.</p>
+        <span class="more">How tables work →</span>
+      </a>
+      <a class="tile-card" href="/faq/#daily-shuffle">
+        <h3>The Daily Shuffle</h3>
+        <p>A free puzzle every day: three hands from this year's card, shuffled across three racks. Sort them out and see where you rank.</p>
+        <span class="more">How it works →</span>
+      </a>
+    </div>
+
+    <h2>Questions people ask</h2>
+    <div class="faq">
+      <details>
+        <summary>Is Mahjong Alley free?</summary>
+        <p>Yes. There are no ads, no subscription and nothing to buy.</p>
+      </details>
+      <details>
+        <summary>Is it American Mahjong or Chinese mahjong?</summary>
+        <p>American Mahjong, with the Charleston, jokers and a yearly card of hands. It isn't Chinese, Hong Kong or Japanese mahjong, and it isn't a tile-matching solitaire game.</p>
+      </details>
+      <details>
+        <summary>Can I play with friends who live somewhere else?</summary>
+        <p>Yes. Host a table, send the link or the code, and play online. Tables can be live, or async so everyone takes their turn when it suits them. <a href="/play-with-friends/">How tables work</a>.</p>
+      </details>
+      <details>
+        <summary>Is there an Android version?</summary>
+        <p>Not yet. Mahjong Alley is on iPhone and iPad.</p>
+      </details>
+    </div>
+    <p><a href="/faq/">More questions and answers →</a></p>
+
+    <h2>Guides</h2>
+    <ul>
+      <li><a href="/learn/how-to-play/">How to play American Mahjong</a></li>
+      <li><a href="/learn/charleston/">The Charleston, pass by pass</a></li>
+      <li><a href="/learn/jokers/">Joker rules in American Mahjong</a></li>
+      <li><a href="/learn/blanks/">House Rules: playing with blanks</a></li>
+      <li><a href="/play-with-friends/">Playing American Mahjong online with friends</a></li>
+      <li><a href="/american-mahjong-apps/">American Mahjong apps compared</a></li>
+    </ul>
+  </div>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <nav class="links" aria-label="Site">
+        <a href="/">Home</a>
+        <a href="/learn/">Learn</a>
+        <a href="/play-with-friends/">Play with friends</a>
+        <a href="/faq/">FAQ</a>
+        <a href="/american-mahjong-apps/">Compare apps</a>
+        <a href="/support/">Support</a>
+        <a href="/privacy/">Privacy</a>
+        <a href="/terms/">Terms</a>
+        <a href="https://www.instagram.com/mahjongalley/">@mahjongalley</a>
+      </nav>
+      <p class="independence">Mahjong Alley is an independent app made by Elevate Games LLC. It is not affiliated with or endorsed by the National Mah Jongg League. To play at a real table you need your own official card, sold by the League.</p>
+    </div>
+  </footer>
 
   <script>
     // /join/ABC123 (6-char table code) or /invite/ABCD2345 (8-char friend
