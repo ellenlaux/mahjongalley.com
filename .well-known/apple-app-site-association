@@ -5,11 +5,15 @@
       {
         "appIDs": ["75U942X75Y.com.ellenlaux.mahjongalley"],
         "appID": "75U942X75Y.com.ellenlaux.mahjongalley",
-        "paths": ["/join/*", "/invite/*", "/daily-deal/*", "/code/*"],
+        "paths": ["/join/*", "/invite/*", "/daily-deal/*", "/receipt/shuffle-*", "/receipt/read-*", "/receipt/board", "/code/*"],
         "components": [
           { "/": "/join/*", "comment": "table invite codes" },
           { "/": "/invite/*", "comment": "friend referral codes" },
-          { "/": "/daily-deal/*", "comment": "a Daily Deal, by date" },
+          { "/": "/daily-deal/*", "comment": "a Daily Shuffle, by date" },
+          { "/": "/receipt/shuffle-*", "comment": "a Daily Shuffle receipt: the app opens that day's Shuffle" },
+          { "/": "/receipt/read-*", "comment": "a Daily Read receipt: the app opens that day's Read" },
+          { "/": "/receipt/board", "comment": "a day's top ten: the app opens the puzzle the board is for" },
+          { "/": "/receipt/*", "?": { "dd": "????-??-??" }, "comment": "a ranked Daily Deal receipt (dd = its day): the app opens that day's Daily Deal" },
           { "/": "/code/*", "comment": "old promo-code links — the app opens Home" }
         ]
       }
