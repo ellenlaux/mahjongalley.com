@@ -54,8 +54,12 @@ export const CATEGORIES = {
   'winds-dragons': 'Winds & Dragons',
 };
 
-/** Chip slug → label. A `streak-N` slug is handled separately. */
+/** Chip slug → label. A `streak-N` slug is handled separately.
+ *  `open-play`: a win played with no hints (the app's Open play; its
+ *  PLAY_MODES_SPEC decision 11 — "the receipt gets the tag too"). The app
+ *  sends it first, so it prints first: `1× OPEN PLAY`. */
 export const CHIPS = {
+  'open-play': 'Open play',
   'concealed': 'Concealed',
   'jokerless': 'Jokerless',
   'self-pick': 'Self-pick',

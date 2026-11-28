@@ -24,6 +24,8 @@ const SHUFFLE_HINTED_TOP = ['June', 'Daryl', 'Priya', 'Samantha Okafor-Lindqvi',
 const samples = {
   'named': [at('/receipt/heart-eyes?cat=2026&line=3&pts=30&pat=FFF+2026+222+6666&jl=1&sp=1&chips=self-pick,jokerless,streak-4&i=ABCD2345&d=2026-10-22'), 'DayRay'],
   'called': [at('/receipt/pouch-fill?cat=2026&line=3&pts=30&pat=FFF+2026+222+6666&chips=concealed&d=2026-10-22'), null],
+  // A win in Open play (the app's no-hints mode): its tag leads the chips.
+  'open-play': [at('/receipt/pouch-fill?cat=2026&line=3&pts=30&pat=FFF+2026+222+6666&chips=open-play,concealed&i=ABCD2345&d=2026-11-28'), 'ElleBell'],
   'guest': [at('/receipt/big-money?cat=consecutive-run&line=5&pts=75&pat=11+222+3333+44444&jl=1&chips=50-points&d=2026-10-22'), null],
   'smoked': [at('/receipt/smoked?cat=2026&line=3&pts=30&pat=FFF+2026+222+6666&away=5&d=2026-10-22'), 'DayRay'],
   'so-close': [at('/receipt/purse-payout?cat=quints&line=2&pts=40&pat=11111+2222+33333&away=1&d=2026-10-22'), null],
